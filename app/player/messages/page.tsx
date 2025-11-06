@@ -135,10 +135,9 @@ export default function PlayerMessagesPage() {
           <Sidebar
             title="TalentVerse"
             user={{
-              name: "Sophia Carter",
-              role: "Player",
-              avatar:
-                "https://lh3.googleusercontent.com/aida-public/AB6AXuD8UTAaW5b3J5bJ_37zfFc1ut556yYxVS9S1sL8v-G27rwdivV8u6gMXTmA2eb_GUm05loRuR96IVfC4rEU1SbsqHYkN032pjeblqZ2F0C1W9sy9vskE1xYxLQJ3g3FDvGlpfdfzTnF6iIYG0e8tcRTQfkt67zzV0k-Kvrq8PhWsRHBp7wVn0TMxkYm9OD_dk_kiNgqS18HC4bNVlExyptluVg_orAndeR_kpMcDInDoYqFfGxIUplP9uv9lO7Dmhbj_SK5ZUsqmUNe",
+              name: (session?.user?.name as string) || (session?.user?.email as string) || "Player",
+              role: (session?.user as any)?.role || "Player",
+              avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent((session?.user?.name as string) || (session?.user?.email as string) || "P")}&background=1172d4&color=fff`,
             }}
             items={sidebarItems}
           />
