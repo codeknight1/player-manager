@@ -50,7 +50,7 @@ export default function PlayerDashboard() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (session?.user?.id) {
+    if ((session?.user as any)?.id) {
       loadData();
     }
   }, [session]);
@@ -73,7 +73,19 @@ export default function PlayerDashboard() {
     }
   }
 
-  const profileData = profile?.profile || null;
+  const profileData = (() => {
+    const p = profile?.profile;
+    if (!p) return null;
+    if (typeof p === "string") {
+      try {
+        const parsed = JSON.parse(p);
+        if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) return parsed;
+      } catch {}
+      return null;
+    }
+    if (typeof p === "object" && !Array.isArray(p)) return p;
+    return null;
+  })();
   const userName = profile?.name || session?.user?.name || "Player";
   const userRole = (session?.user as any)?.role || "Player";
   const position = profileData?.position || "";
