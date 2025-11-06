@@ -1,0 +1,168 @@
+"use client";
+
+import Link from "next/link";
+import { motion } from "framer-motion";
+import { Button } from "@/components/ui/button";
+import { UserIcon, TrophyIcon, HandshakeIcon, EyeIcon } from "@/components/icons";
+
+const features = [
+  {
+    icon: <UserIcon size={32} />,
+    title: "Build Your Profile",
+    description: "Showcase your skills, stats, and achievements in a professional profile that scouts and clubs can discover.",
+  },
+  {
+    icon: <TrophyIcon size={32} />,
+    title: "Get Discovered",
+    description: "Increase your visibility to professional clubs, agents, and scouts actively looking for talent.",
+  },
+  {
+    icon: <HandshakeIcon size={32} />,
+    title: "Network & Connect",
+    description: "Connect with agents, clubs, and other players to expand your professional network.",
+  },
+  {
+    icon: <EyeIcon size={32} />,
+    title: "Track Opportunities",
+    description: "Monitor trial invitations, contract offers, and career opportunities all in one place.",
+  },
+];
+
+const benefits = [
+  "Professional profile that stands out to scouts",
+  "Direct messaging with agents and clubs",
+  "Exclusive tournament and trial invitations",
+  "Performance analytics and insights",
+  "Career guidance and mentorship",
+];
+
+export default function ForPlayersPage() {
+  return (
+    <div className="relative flex h-auto min-h-screen w-full flex-col bg-[#111a22] overflow-x-hidden">
+      <div className="layout-container flex h-full grow flex-col">
+        {/* Global Header is rendered in app/layout.tsx */}
+        <div className="flex flex-1 flex-col">
+          {/* Hero Section */}
+          <section className="px-40 py-20 flex flex-col items-center text-center">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+              className="max-w-4xl"
+            >
+              <h1 className="text-white text-5xl font-bold mb-6">Take Your Career to the Next Level</h1>
+              <p className="text-[#92adc9] text-xl mb-8 leading-relaxed">
+                Connect with professional clubs, agents, and scouts. Showcase your talent and unlock opportunities in the world of professional football.
+              </p>
+              <div className="flex gap-4 justify-center">
+                <Link href="/player/register">
+                  <Button size="lg">Get Started Free</Button>
+                </Link>
+                <Link href="/player/login">
+                  <Button variant="secondary" size="lg">Sign In</Button>
+                </Link>
+              </div>
+            </motion.div>
+          </section>
+
+          {/* Features Section */}
+          <section className="px-40 py-16 bg-[#192633]">
+            <div className="max-w-6xl mx-auto">
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5 }}
+                className="text-center mb-12"
+              >
+                <h2 className="text-white text-3xl font-bold mb-4">
+                  Everything You Need to Succeed
+                </h2>
+                <p className="text-[#92adc9] text-lg">
+                  Powerful tools designed specifically for aspiring and professional players
+                </p>
+              </motion.div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                {features.map((feature, idx) => (
+                  <motion.div
+                    key={idx}
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: idx * 0.1 }}
+                    className="flex gap-4 p-6 rounded-lg border border-[#324d67] hover:border-[#1172d4] transition-colors"
+                  >
+                    <div className="text-[#1172d4] flex-shrink-0">{feature.icon}</div>
+                    <div>
+                      <h3 className="text-white text-xl font-bold mb-2">
+                        {feature.title}
+                      </h3>
+                      <p className="text-[#92adc9] text-sm leading-relaxed">
+                        {feature.description}
+                      </p>
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+            </div>
+          </section>
+
+          {/* Benefits Section */}
+          <section className="px-40 py-16">
+            <div className="max-w-4xl mx-auto">
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5 }}
+                className="text-center mb-12"
+              >
+                <h2 className="text-white text-3xl font-bold mb-4">
+                  Why Choose TalentVerse?
+                </h2>
+              </motion.div>
+              <div className="flex flex-col gap-4">
+                {benefits.map((benefit, idx) => (
+                  <motion.div
+                    key={idx}
+                    initial={{ opacity: 0, x: -20 }}
+                    whileInView={{ opacity: 1, x: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: idx * 0.1 }}
+                    className="flex items-center gap-4 p-4 rounded-lg bg-[#192633] border border-[#324d67]"
+                  >
+                    <div className="text-[#0bda5b] text-xl">✓</div>
+                    <p className="text-white text-base">{benefit}</p>
+                  </motion.div>
+                ))}
+              </div>
+            </div>
+          </section>
+
+          {/* CTA Section */}
+          <section className="px-40 py-20 bg-gradient-to-r from-[#1172d4] to-[#0f62b9]">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5 }}
+              className="text-center max-w-3xl mx-auto"
+            >
+              <h2 className="text-white text-4xl font-bold mb-4">
+                Ready to Start Your Journey?
+              </h2>
+                <p className="text-white/90 text-lg mb-8">Join thousands of players using PPM to advance their careers</p>
+              <Link href="/player/register">
+                <Button size="lg" variant="secondary" className="min-w-[200px]">
+                  Create Your Profile Today
+                </Button>
+              </Link>
+            </motion.div>
+          </section>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+

@@ -1,0 +1,95 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id             String            @id @default(cuid())
+  email          String            @unique
+  name           String?
+  password       String?
+  profileData    String?           // JSON string for profile fields (stats, bio, uploads, etc.)
+  role           Role              @default(PLAYER)
+  isActive       Boolean           @default(true)
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
+  messagesFrom   Message[]          @relation("FromUser")
+  messagesTo     Message[]          @relation("ToUser")
+  applications   Application[]
+  notifications  Notification[]
+  verifications  Verification[]
+}
+
+model Message {
+  id        String   @id @default(cuid())
+  fromId    String
+  toId      String
+  content   String
+  createdAt DateTime @default(now())
+  from      User     @relation("FromUser", fields: [fromId], references: [id])
+  to        User     @relation("ToUser", fields: [toId], references: [id])
+}
+
+model Trial {
+  id        String   @id @default(cuid())
+  title     String
+  city      String
+  date      DateTime
+  createdAt DateTime @default(now())
+  apps      Application[]
+}
+
+model Application {
+  id        String   @id @default(cuid())
+  userId    String
+  trialId   String
+  status    AppStatus @default(PENDING)
+  createdAt DateTime  @default(now())
+  user      User      @relation(fields: [userId], references: [id])
+  trial     Trial     @relation(fields: [trialId], references: [id])
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  title     String
+  body      String
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id])
+}
+
+model Verification {
+  id           String             @id @default(cuid())
+  userId       String
+  documentType String
+  documentName String
+  status       VerificationStatus @default(PENDING)
+  createdAt    DateTime           @default(now())
+  reviewedAt   DateTime?
+  reviewedBy   String?
+  user         User               @relation(fields: [userId], references: [id])
+}
+
+enum Role {
+  PLAYER
+  AGENT
+  ACADEMY
+  ADMIN
+}
+
+enum AppStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+}
+
+enum VerificationStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
