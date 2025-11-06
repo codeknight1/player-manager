@@ -22,16 +22,15 @@ export async function GET(request: NextRequest) {
     }
 
     let profile: any = {};
-    if (user.profileData) {
-      try {
-        const parsed = JSON.parse(user.profileData);
-        if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
-          profile = parsed;
-        } else {
-          profile = {};
-        }
-      } catch {
-        profile = {};
+    const pd: any = (user as any).profileData;
+    if (pd) {
+      if (typeof pd === 'string') {
+        try {
+          const parsed = JSON.parse(pd);
+          if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) profile = parsed;
+        } catch {}
+      } else if (typeof pd === 'object' && !Array.isArray(pd)) {
+        profile = pd;
       }
     }
     
