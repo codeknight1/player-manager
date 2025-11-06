@@ -13,6 +13,7 @@ import {
   EyeIcon
 } from "@/components/icons";
 import { apiGet } from "@/app/lib/api";
+import { LogoutButton } from "@/components/auth/logout-button";
 
 const sidebarItems = [
   {
@@ -101,6 +102,9 @@ export default function PlayerDashboard() {
               <p className="text-white tracking-light text-[32px] font-bold leading-tight min-w-72">
                 Home
               </p>
+              <div className="flex items-center gap-3">
+                <LogoutButton />
+              </div>
             </div>
             <h3 className="text-white text-lg font-bold leading-tight tracking-[-0.015em] px-4 pb-2 pt-4">
               My Profile

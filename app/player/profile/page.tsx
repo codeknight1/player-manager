@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { apiGet, apiPost } from "@/app/lib/api";
 import { toast } from "sonner";
+import { LogoutButton } from "@/components/auth/logout-button";
 
 const sidebarItems = [
   {
@@ -357,6 +358,7 @@ export default function PlayerProfilePage() {
                 </div>
                 <span className="text-white text-sm font-medium">Strength {strength}%</span>
                 <Button onClick={openEditModal}>Edit Profile</Button>
+                <LogoutButton />
               </div>
             </div>
 

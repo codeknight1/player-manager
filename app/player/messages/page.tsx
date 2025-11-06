@@ -8,6 +8,7 @@ import { HouseIcon, UserIcon, UsersThreeIcon, ChatIcon, BellIcon } from "@/compo
 import { Button } from "@/components/ui/button";
 import { MagnifyingGlassIcon } from "@/components/icons";
 import { apiGet, apiPost } from "@/app/lib/api";
+import { LogoutButton } from "@/components/auth/logout-button";
 
 const sidebarItems = [
   {
@@ -150,6 +151,9 @@ export default function PlayerMessagesPage() {
                 <p className="text-[#92adc9] text-sm font-normal leading-normal">
                   Communicate with clubs, agents, and scouts
                 </p>
+              </div>
+              <div className="flex items-center gap-3">
+                <LogoutButton />
               </div>
             </div>
 

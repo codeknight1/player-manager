@@ -8,6 +8,7 @@ import { HouseIcon, UserIcon, UsersThreeIcon, ChatIcon, BellIcon } from "@/compo
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { apiGet } from "@/app/lib/api";
+import { LogoutButton } from "@/components/auth/logout-button";
 
 const sidebarItems = [
   {
@@ -79,6 +80,9 @@ export default function PlayerNetworkPage() {
                 <p className="text-[#92adc9] text-sm font-normal leading-normal">
                   Manage your connections with clubs, agents, and scouts
                 </p>
+              </div>
+              <div className="flex items-center gap-3">
+                <LogoutButton />
               </div>
             </div>
 
