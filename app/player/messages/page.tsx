@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { motion } from "framer-motion";
 import { Sidebar } from "@/components/layout/sidebar";
-import { HouseIcon, UserIcon, UsersThreeIcon, ChatIcon, BellIcon } from "@/components/icons";
+import { HouseIcon, UserIcon, UsersThreeIcon, ChatIcon, BellIcon, HandshakeIcon, TrophyIcon } from "@/components/icons";
 import { Button } from "@/components/ui/button";
 import { MagnifyingGlassIcon } from "@/components/icons";
 import { apiGet, apiPost } from "@/app/lib/api";
@@ -35,6 +35,21 @@ const sidebarItems = [
     label: "Notifications",
     href: "/notifications",
     icon: <BellIcon size={24} />,
+  },
+  {
+    label: "For Players",
+    href: "/for-players",
+    icon: <UserIcon size={24} />,
+  },
+  {
+    label: "For Clubs/Agents",
+    href: "/for-clubs",
+    icon: <HandshakeIcon size={24} />,
+  },
+  {
+    label: "For Partners",
+    href: "/for-partners",
+    icon: <TrophyIcon size={24} />,
   },
 ];
 
@@ -132,7 +147,7 @@ export default function PlayerMessagesPage() {
   return (
     <div className="relative flex h-auto min-h-screen w-full flex-col bg-[#111a22] overflow-x-hidden" style={{ fontFamily: 'Manrope, "Noto Sans", sans-serif' }}>
       <div className="layout-container flex h-full grow flex-col">
-        <div className="gap-1 px-6 flex flex-1 justify-center py-5">
+        <div className="flex flex-1 flex-col lg:flex-row gap-6 px-4 md:px-6 py-5">
           <Sidebar
             title="TalentVerse"
             user={{
@@ -142,9 +157,9 @@ export default function PlayerMessagesPage() {
             }}
             items={sidebarItems}
           />
-          <div className="layout-content-container flex flex-col max-w-[960px] flex-1 flex">
-            <div className="flex flex-wrap justify-between gap-3 p-4">
-              <div className="flex min-w-72 flex-col gap-3">
+          <div className="layout-content-container flex flex-col w-full max-w-[960px] flex-1">
+            <div className="flex flex-col gap-4 p-4 md:flex-row md:items-center md:justify-between">
+              <div className="flex flex-col gap-3">
                 <p className="text-white tracking-light text-[32px] font-bold leading-tight">
                   Messages
                 </p>
@@ -152,14 +167,14 @@ export default function PlayerMessagesPage() {
                   Communicate with clubs, agents, and scouts
                 </p>
               </div>
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-3 justify-end">
                 <LogoutButton />
               </div>
             </div>
 
-            <div className="flex flex-1 gap-4 p-4 min-h-0">
+            <div className="flex flex-1 flex-col lg:flex-row gap-4 p-4 min-h-0">
               {/* Conversations List */}
-              <div className="flex flex-col w-80 border border-[#324d67] rounded-lg overflow-hidden">
+              <div className="flex flex-col w-full lg:w-80 border border-[#324d67] rounded-lg overflow-hidden">
                 <div className="p-4 border-b border-[#324d67] bg-[#192633]">
                   <div className="flex items-center gap-2 mb-3">
                     <MagnifyingGlassIcon size={20} className="text-[#92adc9]" />

@@ -38,7 +38,7 @@ export function CollapsibleSidebar({
     setIsCollapsed(!isCollapsed);
   };
 
-  const sidebarWidth = isCollapsed ? "w-20" : "w-80";
+  const sidebarWidth = isCollapsed ? "w-16 sm:w-20" : "w-full sm:w-80";
 
   return (
     <div className={`layout-content-container flex flex-col ${sidebarWidth} transition-all duration-300`}>

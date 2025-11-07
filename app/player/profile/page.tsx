@@ -5,7 +5,7 @@ import { useSession } from "next-auth/react";
 import { motion } from "framer-motion";
 import { CollapsibleSidebar } from "@/components/layout/collapsible-sidebar";
 import { Modal } from "@/components/ui/modal";
-import { HouseIcon, UserIcon, UsersThreeIcon, ChatIcon, BellIcon, ShareIcon } from "@/components/icons";
+import { HouseIcon, UserIcon, UsersThreeIcon, ChatIcon, BellIcon, ShareIcon, HandshakeIcon, TrophyIcon } from "@/components/icons";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { apiGet, apiPost, apiPut, apiDelete } from "@/app/lib/api";
@@ -37,6 +37,21 @@ const sidebarItems = [
     label: "Notifications",
     href: "/notifications",
     icon: <BellIcon size={24} />,
+  },
+  {
+    label: "For Players",
+    href: "/for-players",
+    icon: <UserIcon size={24} />,
+  },
+  {
+    label: "For Clubs/Agents",
+    href: "/for-clubs",
+    icon: <HandshakeIcon size={24} />,
+  },
+  {
+    label: "For Partners",
+    href: "/for-partners",
+    icon: <TrophyIcon size={24} />,
   },
 ];
 
@@ -694,7 +709,7 @@ export default function PlayerProfilePage() {
   return (
     <div className="relative flex h-auto min-h-screen w-full flex-col bg-[#111a22] overflow-x-hidden" style={{ fontFamily: 'Manrope, "Noto Sans", sans-serif' }}>
       <div className="layout-container flex h-full grow flex-col">
-        <div className="gap-1 px-6 flex flex-1 justify-center py-5">
+        <div className="flex flex-1 flex-col lg:flex-row gap-6 px-4 md:px-6 py-5">
           <CollapsibleSidebar
             title="TalentVerse"
             user={{
@@ -704,9 +719,9 @@ export default function PlayerProfilePage() {
             }}
             items={sidebarItems}
           />
-          <div className="layout-content-container flex flex-col max-w-[960px] flex-1">
-            <div className="flex flex-wrap justify-between gap-3 p-4">
-              <div className="flex min-w-72 flex-col gap-3">
+          <div className="layout-content-container flex w-full flex-col max-w-[960px] flex-1">
+            <div className="flex flex-col gap-4 p-4 md:flex-row md:items-center md:justify-between">
+              <div className="flex flex-col gap-2">
                 <p className="text-white tracking-light text-[32px] font-bold leading-tight">
                   My Profile
                 </p>
@@ -714,20 +729,22 @@ export default function PlayerProfilePage() {
                   View your profile information
                 </p>
               </div>
-              <div className="flex items-center gap-3">
-                <div className="h-3 w-48 rounded bg-[#192633] overflow-hidden">
+              <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-end">
+                <div className="h-3 w-full md:w-48 rounded bg-[#192633] overflow-hidden">
                   <div className="h-full bg-[#1172d4]" style={{ width: `${strength}%` }} />
                 </div>
-                <span className="text-white text-sm font-medium">Strength {strength}%</span>
-                <Button
-                  onClick={shareProfile}
-                  className="flex items-center gap-2 rounded-full bg-[#23272b] px-4 py-2 text-white hover:bg-[#2f3338] focus:ring-0"
-                >
-                  <ShareIcon size={22} />
-                  <span className="text-sm font-medium">Share</span>
-                </Button>
-                <Button onClick={openEditModal}>Edit Profile</Button>
-                <LogoutButton />
+                <div className="flex flex-wrap items-center gap-3">
+                  <span className="text-white text-sm font-medium">Strength {strength}%</span>
+                  <Button
+                    onClick={shareProfile}
+                    className="flex items-center gap-2 rounded-full bg-[#23272b] px-4 py-2 text-white hover:bg-[#2f3338] focus:ring-0"
+                  >
+                    <ShareIcon size={22} />
+                    <span className="text-sm font-medium">Share</span>
+                  </Button>
+                  <Button onClick={openEditModal}>Edit Profile</Button>
+                  <LogoutButton />
+                </div>
               </div>
             </div>
 
@@ -850,7 +867,7 @@ export default function PlayerProfilePage() {
             {profile.uploads.length > 0 && (
               <div className="p-4">
                 <h3 className="text-white text-xl font-bold mb-4">Uploads ({profile.uploads.length})</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3">
                   {profile.uploads.map((u) => {
                     const previewSource = isImageSource(u.thumbnail || u.url || "") ? (u.thumbnail || u.url || "") : null;
                     const pdfAttached = isPdfSource(u.url);

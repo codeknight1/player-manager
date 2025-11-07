@@ -3,45 +3,68 @@
 import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { motion } from "framer-motion";
+import { useMemo } from "react";
 import { Sidebar } from "@/components/layout/sidebar";
-import { 
-  HouseIcon, 
-  UserIcon, 
-  UsersThreeIcon, 
-  ChatIcon, 
+import {
+  HouseIcon,
+  UserIcon,
+  UsersThreeIcon,
+  ChatIcon,
   BellIcon,
-  EyeIcon
+  EyeIcon,
+  HandshakeIcon,
+  TrophyIcon
 } from "@/components/icons";
 import { apiGet } from "@/app/lib/api";
 import { LogoutButton } from "@/components/auth/logout-button";
 
-const sidebarItems = [
-  {
-    label: "Home",
-    href: "/player/dashboard",
-    icon: <HouseIcon size={24} weight="fill" />,
-  },
-  {
-    label: "My Profile",
-    href: "/player/profile",
-    icon: <UserIcon size={24} />,
-  },
-  {
-    label: "Network",
-    href: "/player/network",
-    icon: <UsersThreeIcon size={24} />,
-  },
-  {
-    label: "Messages",
-    href: "/player/messages",
-    icon: <ChatIcon size={24} />,
-  },
-  {
-    label: "Notifications",
-    href: "/notifications",
-    icon: <BellIcon size={24} />,
-  },
-];
+function useSidebarItems() {
+  return useMemo(
+    () => [
+      {
+        label: "Home",
+        href: "/player/dashboard",
+        icon: <HouseIcon size={24} weight="fill" />,
+      },
+      {
+        label: "My Profile",
+        href: "/player/profile",
+        icon: <UserIcon size={24} />,
+      },
+      {
+        label: "Network",
+        href: "/player/network",
+        icon: <UsersThreeIcon size={24} />,
+      },
+      {
+        label: "Messages",
+        href: "/player/messages",
+        icon: <ChatIcon size={24} />,
+      },
+      {
+        label: "Notifications",
+        href: "/notifications",
+        icon: <BellIcon size={24} />,
+      },
+      {
+        label: "For Players",
+        href: "/for-players",
+        icon: <UserIcon size={24} />,
+      },
+      {
+        label: "For Clubs/Agents",
+        href: "/for-clubs",
+        icon: <HandshakeIcon size={24} />,
+      },
+      {
+        label: "For Partners",
+        href: "/for-partners",
+        icon: <TrophyIcon size={24} />,
+      },
+    ],
+    []
+  );
+}
 
 const emptyProfile = {
   firstName: "",
@@ -180,10 +203,12 @@ export default function PlayerDashboard() {
   const displayInfo = [position, age ? `Age ${age}` : "", nationality].filter(Boolean).join(" • ") || "Complete your profile";
   const avatarUrl = mappedProfile.avatar || profilePayload?.avatar || profilePayload?.profile?.avatar;
 
+  const sidebarItems = useSidebarItems();
+
   return (
     <div className="relative flex h-auto min-h-screen w-full flex-col bg-[#111a22] overflow-x-hidden">
       <div className="layout-container flex h-full grow flex-col">
-        <div className="gap-1 px-6 flex flex-1 justify-center py-5">
+        <div className="flex flex-1 flex-col lg:flex-row gap-6 px-4 md:px-6 py-5">
           <Sidebar
             title="TalentVerse"
             user={{
@@ -193,36 +218,34 @@ export default function PlayerDashboard() {
             }}
             items={sidebarItems}
           />
-          <div className="layout-content-container flex flex-col max-w-[960px] flex-1">
-            <div className="flex flex-wrap justify-between gap-3 p-4">
-              <p className="text-white tracking-light text-[32px] font-bold leading-tight min-w-72">
+          <div className="layout-content-container flex w-full flex-col flex-1 max-w-[960px]">
+            <div className="flex flex-col gap-4 p-4 md:flex-row md:items-center md:justify-between">
+              <p className="text-white tracking-light text-[32px] font-bold leading-tight">
                 Home
               </p>
-              <div className="flex items-center gap-3">
+              <div className="flex items-center justify-end">
                 <LogoutButton />
               </div>
             </div>
             <h3 className="text-white text-lg font-bold leading-tight tracking-[-0.015em] px-4 pb-2 pt-4">
               My Profile
             </h3>
-            <div className="flex p-4 @container">
-              <div className="flex w-full flex-col gap-4 @[520px]:flex-row @[520px]:justify-between @[520px]:items-center">
-                <div className="flex gap-4">
-                  <div
-                    className="bg-center bg-no-repeat aspect-square bg-cover rounded-full min-h-32 w-32"
-                    style={{
-                      backgroundImage: avatarUrl ? `url("${avatarUrl}")` : undefined,
-                      backgroundColor: avatarUrl ? undefined : "#233648",
-                    }}
-                  ></div>
-                  <div className="flex flex-col justify-center">
-                    <p className="text-white text-[22px] font-bold leading-tight tracking-[-0.015em]">
-                      {loading ? "Loading..." : displayName}
-                    </p>
-                    <p className="text-[#92adc9] text-base font-normal leading-normal">
-                      {loading ? "Loading profile..." : displayInfo}
-                    </p>
-                  </div>
+            <div className="flex flex-col gap-4 p-4 sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex gap-4 items-center">
+                <div
+                  className="bg-center bg-no-repeat bg-cover rounded-full h-28 w-28 sm:h-32 sm:w-32"
+                  style={{
+                    backgroundImage: avatarUrl ? `url("${avatarUrl}")` : undefined,
+                    backgroundColor: avatarUrl ? undefined : "#233648",
+                  }}
+                ></div>
+                <div className="flex flex-col justify-center">
+                  <p className="text-white text-[22px] font-bold leading-tight tracking-[-0.015em]">
+                    {loading ? "Loading..." : displayName}
+                  </p>
+                  <p className="text-[#92adc9] text-base font-normal leading-normal">
+                    {loading ? "Loading profile..." : displayInfo}
+                  </p>
                 </div>
               </div>
             </div>
@@ -261,12 +284,12 @@ export default function PlayerDashboard() {
             <h3 className="text-white text-lg font-bold leading-tight tracking-[-0.015em] px-4 pb-2 pt-4">
               Key Performance Widgets
             </h3>
-            <div className="flex flex-wrap gap-4 p-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4">
               <motion.div
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ delay: 0.2 }}
-                className="flex min-w-[158px] flex-1 flex-col gap-2 rounded-lg p-6 border border-[#324d67]"
+                className="flex flex-col gap-2 rounded-lg p-6 border border-[#324d67]"
               >
                 <p className="text-white text-base font-medium leading-normal">
                   Goals Scored
@@ -279,7 +302,7 @@ export default function PlayerDashboard() {
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ delay: 0.3 }}
-                className="flex min-w-[158px] flex-1 flex-col gap-2 rounded-lg p-6 border border-[#324d67]"
+                className="flex flex-col gap-2 rounded-lg p-6 border border-[#324d67]"
               >
                 <p className="text-white text-base font-medium leading-normal">
                   Assists
@@ -292,7 +315,7 @@ export default function PlayerDashboard() {
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ delay: 0.4 }}
-                className="flex min-w-[158px] flex-1 flex-col gap-2 rounded-lg p-6 border border-[#324d67]"
+                className="flex flex-col gap-2 rounded-lg p-6 border border-[#324d67]"
               >
                 <p className="text-white text-base font-medium leading-normal">
                   Matches Played
