@@ -132,3 +132,11 @@ export function ListChecksIcon({ size = 24 }: IconProps) {
   );
 }
 
+export function ShareIcon({ size = 24 }: IconProps) {
+  return (
+    <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} fill="currentColor" viewBox="0 0 256 256">
+      <path d="M200,176a24,24,0,0,0-18.18,8.34l-90-45a24,24,0,0,0,0-22.68l90-45A24,24,0,1,0,176,56a24.15,24.15,0,0,0,2.18.1l-90,45a24,24,0,1,0,0,53.8l90,45A24,24,0,1,0,200,176Z" />
+    </svg>
+  );
+}
+

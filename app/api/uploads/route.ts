@@ -33,29 +33,94 @@ export async function PUT(request: NextRequest) {
     }
 
     const now = new Date();
+    const payloads = uploads.map((raw: any) => {
+      const identifier = typeof raw.id === "string" && raw.id.trim().length > 0 ? raw.id.trim() : undefined;
+      const name = typeof raw.name === "string" ? raw.name : "";
+      const type = normalizeType(typeof raw.type === "string" ? raw.type : "");
+      const url = typeof raw.url === "string" && raw.url.trim().length > 0 ? raw.url : null;
+      const thumbnail = typeof raw.thumbnail === "string" && raw.thumbnail.trim().length > 0 ? raw.thumbnail : null;
+      const createdAt = raw.createdAt ? new Date(raw.createdAt) : now;
+      return {
+        id: identifier,
+        name,
+        type,
+        url,
+        thumbnail,
+        createdAt,
+      };
+    });
 
-    await prisma.$transaction([
-      prisma.upload.deleteMany({ where: { userId } }),
-      prisma.upload.createMany({
-        data: uploads.map((upload: any) => ({
-          id: upload.id ?? undefined,
-          userId,
-          name: upload.name ?? "",
-          type: normalizeType(upload.type ?? ""),
-          url: upload.url ?? null,
-          thumbnail: upload.thumbnail ?? null,
-          createdAt: upload.createdAt ? new Date(upload.createdAt) : now,
-        })),
-        skipDuplicates: true,
-      }),
-    ]);
+    console.log("[uploads] payload length", payloads.length);
+    console.log("[uploads] payload ids", payloads.map((item) => item.id));
+
+    await prisma.$transaction(async (tx) => {
+      const existing = await tx.upload.findMany({
+        where: { userId },
+        select: { id: true },
+      });
+
+      console.log("[uploads] existing count", existing.length);
+
+      const existingIds = new Set(existing.map((item) => item.id));
+      const seenIds = new Set<string>();
+
+      for (const entry of payloads) {
+        if (entry.id && seenIds.has(entry.id)) {
+          continue;
+        }
+
+        if (entry.id && existingIds.has(entry.id)) {
+          await tx.upload.update({
+            where: { id: entry.id },
+            data: {
+              name: entry.name,
+              type: entry.type,
+              url: entry.url,
+              thumbnail: entry.thumbnail,
+              createdAt: entry.createdAt,
+            },
+          });
+          existingIds.delete(entry.id);
+        } else {
+          const createData: any = {
+            userId,
+            name: entry.name,
+            type: entry.type,
+            url: entry.url,
+            thumbnail: entry.thumbnail,
+            createdAt: entry.createdAt,
+          };
+
+          if (entry.id) {
+            createData.id = entry.id;
+          }
+
+          await tx.upload.create({
+            data: createData,
+          });
+        }
+
+        if (entry.id) {
+          seenIds.add(entry.id);
+        }
+      }
+    });
 
     const saved = await prisma.upload.findMany({
       where: { userId },
       orderBy: { createdAt: "desc" },
     });
 
-    return NextResponse.json({ uploads: saved });
+    console.log("[uploads] saved count", saved.length);
+
+    return NextResponse.json({
+      uploads: saved,
+      meta: {
+        payloadLength: uploads.length,
+        payloadIds: uploads.map((upload: any) => upload.id ?? null),
+        savedCount: saved.length,
+      },
+    });
   } catch (error: any) {
     return NextResponse.json({ error: error.message || "Failed to save uploads" }, { status: 500 });
   }

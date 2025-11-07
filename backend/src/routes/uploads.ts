@@ -39,22 +39,64 @@ uploadsRouter.put('/', async (req, res) => {
 
   try {
     const now = new Date();
+    const payloads = uploads.map((raw: any) => {
+      const id = typeof raw.id === 'string' && raw.id.trim().length > 0 ? raw.id.trim() : undefined;
+      const name = typeof raw.name === 'string' ? raw.name : '';
+      const type = normalizeType(typeof raw.type === 'string' ? raw.type : '');
+      const url = typeof raw.url === 'string' && raw.url.trim().length > 0 ? raw.url : null;
+      const thumbnail = typeof raw.thumbnail === 'string' && raw.thumbnail.trim().length > 0 ? raw.thumbnail : null;
+      const createdAt = raw.createdAt ? new Date(raw.createdAt) : now;
+      return { id, name, type, url, thumbnail, createdAt };
+    });
 
-    await prisma.$transaction([
-      prisma.upload.deleteMany({ where: { userId } }),
-      prisma.upload.createMany({
-        data: uploads.map((upload: any) => ({
-          id: upload.id ?? undefined,
-          userId,
-          name: upload.name ?? '',
-          type: normalizeType(upload.type),
-          url: upload.url ?? null,
-          thumbnail: upload.thumbnail ?? null,
-          createdAt: upload.createdAt ? new Date(upload.createdAt) : now,
-        })),
-        skipDuplicates: true,
-      }),
-    ]);
+    await prisma.$transaction(async (tx) => {
+      const existing = await tx.upload.findMany({
+        where: { userId },
+        select: { id: true },
+      });
+
+      const existingIds = new Set(existing.map((item) => item.id));
+      const seenIds = new Set<string>();
+
+      for (const entry of payloads) {
+        if (entry.id && seenIds.has(entry.id)) {
+          continue;
+        }
+
+        if (entry.id && existingIds.has(entry.id)) {
+          await tx.upload.update({
+            where: { id: entry.id },
+            data: {
+              name: entry.name,
+              type: entry.type,
+              url: entry.url,
+              thumbnail: entry.thumbnail,
+              createdAt: entry.createdAt,
+            },
+          });
+          existingIds.delete(entry.id);
+        } else {
+          const data: any = {
+            userId,
+            name: entry.name,
+            type: entry.type,
+            url: entry.url,
+            thumbnail: entry.thumbnail,
+            createdAt: entry.createdAt,
+          };
+
+          if (entry.id) {
+            data.id = entry.id;
+          }
+
+          await tx.upload.create({ data });
+        }
+
+        if (entry.id) {
+          seenIds.add(entry.id);
+        }
+      }
+    });
 
     const saved = await prisma.upload.findMany({
       where: { userId },
