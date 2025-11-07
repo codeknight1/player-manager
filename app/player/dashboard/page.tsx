@@ -43,27 +43,122 @@ const sidebarItems = [
   },
 ];
 
+const emptyProfile = {
+  firstName: "",
+  lastName: "",
+  email: "",
+  age: 0,
+  position: "",
+  nationality: "",
+  phone: "",
+  bio: "",
+  avatar: "",
+  stats: { goals: 0, assists: 0, matches: 0 },
+  uploads: [] as Array<Record<string, any>>,
+};
+
+function mapProfilePayload(payload: any) {
+  if (!payload) return emptyProfile;
+
+  const profileSource = (() => {
+    if (payload?.profile && typeof payload.profile === "object" && !Array.isArray(payload.profile)) {
+      return payload.profile;
+    }
+    if (payload?.profile && typeof payload.profile === "string") {
+      try {
+        return JSON.parse(payload.profile);
+      } catch {
+        return {};
+      }
+    }
+    if (payload?.profileData && typeof payload.profileData === "string") {
+      try {
+        return JSON.parse(payload.profileData);
+      } catch {
+        return {};
+      }
+    }
+    if (payload?.profileData && typeof payload.profileData === "object") {
+      return payload.profileData;
+    }
+    return {};
+  })();
+
+  const name = payload?.name ?? "";
+  const nameParts = name.trim().split(" ");
+  const stats = typeof profileSource.stats === "object" && profileSource.stats !== null
+    ? {
+        goals: Number(profileSource.stats.goals) || 0,
+        assists: Number(profileSource.stats.assists) || 0,
+        matches: Number(profileSource.stats.matches) || 0,
+      }
+    : emptyProfile.stats;
+
+  const normalizeUploadType = (value: any) => {
+    const lower = (value ?? "").toString().toLowerCase();
+    if (lower === "video" || lower === "certificate" || lower === "achievement") {
+      return lower;
+    }
+    return "achievement";
+  };
+
+  const uploadsSource = (() => {
+    if (Array.isArray(payload?.uploads) && payload.uploads.length) {
+      return payload.uploads;
+    }
+    if (Array.isArray(profileSource.uploads)) {
+      return profileSource.uploads;
+    }
+    return [];
+  })();
+
+  const uploads = uploadsSource.map((upload: any) => ({
+    id: upload.id ?? Math.random().toString(36).slice(2, 9) + Date.now().toString(36),
+    name: upload.name ?? "",
+    type: normalizeUploadType(upload.type),
+    url: upload.url ?? "",
+    thumbnail: upload.thumbnail ?? "",
+    createdAt: upload.createdAt ?? new Date().toISOString(),
+  }));
+
+  return {
+    ...emptyProfile,
+    ...profileSource,
+    firstName: profileSource.firstName ?? nameParts[0] ?? "",
+    lastName: profileSource.lastName ?? nameParts.slice(1).join(" ") ?? "",
+    email: profileSource.email ?? payload?.email ?? "",
+    age: Number(profileSource.age) || 0,
+    stats,
+    uploads,
+  };
+}
+
 export default function PlayerDashboard() {
   const { data: session } = useSession();
-  const [profile, setProfile] = useState<any>(null);
+  const [profilePayload, setProfilePayload] = useState<any>(null);
   const [notifications, setNotifications] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if ((session?.user as any)?.id) {
-      loadData();
+    if (session === undefined) return;
+
+    const userId = (session?.user as any)?.id;
+    if (userId) {
+      loadData(userId);
+    } else {
+      setLoading(false);
     }
   }, [session]);
 
-  async function loadData() {
+  async function loadData(userId: string) {
     try {
       const [userData, notificationsData] = await Promise.all([
-        apiGet(`profile?userId=${(session?.user as any)?.id}`).catch(() => null),
-        apiGet(`notifications?userId=${(session?.user as any)?.id}`).catch(() => []),
+        apiGet(`profile?userId=${userId}`).catch(() => null),
+        apiGet(`notifications?userId=${userId}`).catch(() => []),
       ]);
       
       if (userData) {
-        setProfile(userData);
+        setProfilePayload(userData);
       }
       setNotifications(notificationsData || []);
     } catch (err) {
@@ -73,28 +168,17 @@ export default function PlayerDashboard() {
     }
   }
 
-  const profileData = (() => {
-    const p = profile?.profile;
-    if (!p) return null;
-    if (typeof p === "string") {
-      try {
-        const parsed = JSON.parse(p);
-        if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) return parsed;
-      } catch {}
-      return null;
-    }
-    if (typeof p === "object" && !Array.isArray(p)) return p;
-    return null;
-  })();
-  const userName = profile?.name || session?.user?.name || "Player";
+  const mappedProfile = mapProfilePayload(profilePayload);
+  const userName = profilePayload?.name || session?.user?.name || "Player";
   const userRole = (session?.user as any)?.role || "Player";
-  const position = profileData?.position || "";
-  const age = profileData?.age || 0;
-  const nationality = profileData?.nationality || "";
-  const stats = profileData?.stats || { goals: 0, assists: 0, matches: 0 };
+  const position = mappedProfile.position;
+  const age = mappedProfile.age;
+  const nationality = mappedProfile.nationality;
+  const stats = mappedProfile.stats;
 
-  const displayName = `${profileData?.firstName || ""} ${profileData?.lastName || ""}`.trim() || userName;
+  const displayName = `${mappedProfile.firstName} ${mappedProfile.lastName}`.trim() || userName;
   const displayInfo = [position, age ? `Age ${age}` : "", nationality].filter(Boolean).join(" • ") || "Complete your profile";
+  const avatarUrl = mappedProfile.avatar || profilePayload?.avatar || profilePayload?.profile?.avatar;
 
   return (
     <div className="relative flex h-auto min-h-screen w-full flex-col bg-[#111a22] overflow-x-hidden">
@@ -105,7 +189,7 @@ export default function PlayerDashboard() {
             user={{
               name: displayName,
               role: userRole,
-              avatar: profileData?.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(displayName || "Player")}&background=1172d4&color=fff`,
+              avatar: avatarUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(displayName || "Player")}&background=1172d4&color=fff`,
             }}
             items={sidebarItems}
           />
@@ -127,8 +211,8 @@ export default function PlayerDashboard() {
                   <div
                     className="bg-center bg-no-repeat aspect-square bg-cover rounded-full min-h-32 w-32"
                     style={{
-                      backgroundImage:
-                        'url("https://lh3.googleusercontent.com/aida-public/AB6AXuDOzLX2XLK4cGPgrG12yQVwDVzN55gdUdOl00ePXVw3Z5A1UgEbrsVzRIjir0ga836J12KdSr_nUgZLZq2aYElNOnhK6qc81PvZJ1yVee6HbqsjNUMasX0nyC7_bomdKpdp34g14nFi49rRj5HEHrxq4scnI88GXyGirxmU6Oy2P3Eu-AME1mlGv9tSQYzlDDYH6HofYPTbNCNKu_XW7UQ0BDD6lPV7PKm9kViX2Pic4sN1hODMjgEKGt1BnG1j9xMGOUv1TudJFIGq")',
+                      backgroundImage: avatarUrl ? `url("${avatarUrl}")` : undefined,
+                      backgroundColor: avatarUrl ? undefined : "#233648",
                     }}
                   ></div>
                   <div className="flex flex-col justify-center">

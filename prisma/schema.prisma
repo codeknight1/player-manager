@@ -3,7 +3,7 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
@@ -22,6 +22,7 @@ model User {
   applications   Application[]
   notifications  Notification[]
   verifications  Verification[]
+  uploads        Upload[]
 }
 
 model Message {
@@ -73,6 +74,23 @@ model Verification {
   reviewedAt   DateTime?
   reviewedBy   String?
   user         User               @relation(fields: [userId], references: [id])
+}
+
+model Upload {
+  id        String     @id @default(cuid())
+  userId    String
+  name      String
+  type      UploadType
+  url       String?
+  thumbnail String?
+  createdAt DateTime   @default(now())
+  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+enum UploadType {
+  VIDEO
+  CERTIFICATE
+  ACHIEVEMENT
 }
 
 enum Role {

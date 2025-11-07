@@ -1,14 +1,14 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, ChangeEvent } from "react";
 import { useSession } from "next-auth/react";
 import { motion } from "framer-motion";
 import { CollapsibleSidebar } from "@/components/layout/collapsible-sidebar";
 import { Modal } from "@/components/ui/modal";
-import { HouseIcon, UserIcon, UsersThreeIcon, ChatIcon, BellIcon } from "@/components/icons";
+import { HouseIcon, UserIcon, UsersThreeIcon, ChatIcon, BellIcon, ShareIcon } from "@/components/icons";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { apiGet, apiPost } from "@/app/lib/api";
+import { apiGet, apiPost, apiPut } from "@/app/lib/api";
 import { toast } from "sonner";
 import { LogoutButton } from "@/components/auth/logout-button";
 
@@ -81,59 +81,149 @@ export default function PlayerProfilePage() {
   const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [youtubeUrl, setYoutubeUrl] = useState("");
+  const [isShareModalOpen, setIsShareModalOpen] = useState(false);
+  const [shareLink, setShareLink] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const fileInputsRef = useRef<Record<string, HTMLInputElement | null>>({});
+  const newCertificateInputRef = useRef<HTMLInputElement>(null);
+  const newAchievementInputRef = useRef<HTMLInputElement>(null);
+  const imageExtensions = [".png", ".jpg", ".jpeg", ".gif", ".webp", ".svg"];
+
+  const isPdfSource = (value?: string) => {
+    if (!value) {
+      return false;
+    }
+    const normalized = value.toLowerCase().split("?")[0];
+    return normalized.startsWith("data:application/pdf") || normalized.endsWith(".pdf");
+  };
+
+  const isImageSource = (value?: string) => {
+    if (!value) {
+      return false;
+    }
+    const normalized = value.toLowerCase().split("?")[0];
+    if (normalized.startsWith("data:image")) {
+      return true;
+    }
+    return imageExtensions.some((ext) => normalized.endsWith(ext));
+  };
+
+  const readFileAsDataUrl = (file: File) =>
+    new Promise<string>((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => {
+        if (typeof reader.result === "string") {
+          resolve(reader.result);
+        } else {
+          reject(new Error("Failed to read file"));
+        }
+      };
+      reader.onerror = () => reject(new Error("Failed to read file"));
+      reader.readAsDataURL(file);
+    });
 
   useEffect(() => {
+    if (session === undefined) {
+      return;
+    }
+
     const userId = (session?.user as any)?.id;
     if (userId) {
-      loadProfile();
-    } else if (session === null) {
+      loadProfile(userId);
+    } else {
       setLoading(false);
     }
   }, [session]);
 
-  async function loadProfile() {
-    const userId = (session?.user as any)?.id;
-    if (!userId) {
-      toast.error("No user ID found. Please log in again.");
-      setLoading(false);
-      return;
-    }
+  function mapProfile(user: any) {
+    const profileSource = (() => {
+      if (user?.profile && typeof user.profile === "object" && !Array.isArray(user.profile)) {
+        return user.profile;
+      }
+      if (user?.profile && typeof user.profile === "string") {
+        try {
+          return JSON.parse(user.profile);
+        } catch {
+          return {};
+        }
+      }
+      if (user?.profileData && typeof user.profileData === "string") {
+        try {
+          return JSON.parse(user.profileData);
+        } catch {
+          return {};
+        }
+      }
+      if (user?.profileData && typeof user.profileData === "object") {
+        return user.profileData;
+      }
+      return {};
+    })();
 
+    const nameParts = (user?.name ?? "").trim().split(" ");
+    const firstName = profileSource.firstName ?? nameParts[0] ?? "";
+    const lastName = profileSource.lastName ?? nameParts.slice(1).join(" ") ?? "";
+
+    const stats = typeof profileSource.stats === "object" && profileSource.stats !== null
+      ? {
+          goals: Number(profileSource.stats.goals) || 0,
+          assists: Number(profileSource.stats.assists) || 0,
+          matches: Number(profileSource.stats.matches) || 0,
+        }
+      : { goals: 0, assists: 0, matches: 0 };
+
+    const normalizeUploadType = (value: any) => {
+      const lower = (value ?? "").toString().toLowerCase();
+      if (lower === "video" || lower === "certificate" || lower === "achievement") {
+        return lower as "video" | "certificate" | "achievement";
+      }
+      return "achievement";
+    };
+
+    const uploadsSource = (() => {
+      if (Array.isArray(user?.uploads) && user.uploads.length) {
+        return user.uploads;
+      }
+      if (Array.isArray(profileSource.uploads)) {
+        return profileSource.uploads;
+      }
+      return [];
+    })();
+
+    const uploads = uploadsSource.map((upload: any) => ({
+      id: upload.id ?? Math.random().toString(36).slice(2, 9) + Date.now().toString(36),
+      name: upload.name ?? "",
+      type: normalizeUploadType(upload.type),
+      url: upload.url ?? "",
+      thumbnail: upload.thumbnail ?? "",
+      createdAt: upload.createdAt ?? new Date().toISOString(),
+    }));
+
+    return {
+      firstName,
+      lastName,
+      email: user?.email ?? profileSource.email ?? "",
+      age: Number(profileSource.age) || 0,
+      position: profileSource.position ?? "",
+      nationality: profileSource.nationality ?? "",
+      phone: profileSource.phone ?? "",
+      bio: profileSource.bio ?? "",
+      avatar: profileSource.avatar ?? "",
+      stats,
+      uploads,
+    };
+  }
+
+  async function loadProfile(userId: string) {
     try {
       const user = await apiGet(`profile?userId=${userId}`);
       
       if (user && !user.error) {
-        let profileData: any = {};
-        if (user.profile !== null && user.profile !== undefined) {
-          if (typeof user.profile === 'object' && !Array.isArray(user.profile)) {
-            profileData = user.profile;
-          }
-        }
-        
-        const nameParts = user.name ? user.name.split(" ") : [];
-        const loadedProfile = {
-          firstName: profileData.firstName ?? nameParts[0] ?? "",
-          lastName: profileData.lastName ?? nameParts.slice(1).join(" ") ?? "",
-          email: user.email ?? profileData.email ?? "",
-          age: profileData.age !== undefined && profileData.age !== null ? (typeof profileData.age === 'number' ? profileData.age : parseInt(String(profileData.age))) : 0,
-          position: profileData.position ?? "",
-          nationality: profileData.nationality ?? "",
-          phone: profileData.phone ?? "",
-          bio: profileData.bio ?? "",
-          avatar: profileData.avatar ?? "",
-          stats: (profileData.stats && typeof profileData.stats === 'object' && !Array.isArray(profileData.stats)) ? {
-            goals: profileData.stats.goals ?? 0,
-            assists: profileData.stats.assists ?? 0,
-            matches: profileData.stats.matches ?? 0,
-          } : { goals: 0, assists: 0, matches: 0 },
-          uploads: Array.isArray(profileData.uploads) ? profileData.uploads : [],
-        };
-        
+        const loadedProfile = mapProfile(user);
         setProfile(loadedProfile);
         setEditProfile(loadedProfile);
         
-        if (!profileData || Object.keys(profileData).length === 0) {
+        if (!user.profile && !user.profileData) {
           toast.info("Profile is empty. Click 'Edit Profile' to add your information.");
         }
       } else if (user?.error) {
@@ -158,7 +248,7 @@ export default function PlayerProfilePage() {
     setEditProfile(profile);
   }
 
-  function handleImageUpload(e: React.ChangeEvent<HTMLInputElement>) {
+  function handleImageUpload(e: ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) {
       if (fileInputRef.current) {
@@ -210,14 +300,127 @@ export default function PlayerProfilePage() {
   }
 
   function addUpload(kind: "video" | "certificate" | "achievement") {
+    if (kind === "certificate") {
+      newCertificateInputRef.current?.click();
+      return;
+    }
+    if (kind === "achievement") {
+      newAchievementInputRef.current?.click();
+      return;
+    }
     const id = Math.random().toString(36).slice(2, 9) + Date.now().toString(36);
     const timestamp = new Date().toISOString();
     const name = `${kind.charAt(0).toUpperCase() + kind.slice(1)} - ${new Date(timestamp).toLocaleDateString()}`;
-    setEditProfile((p) => ({ 
-      ...p, 
-      uploads: [...p.uploads, { id, name, type: kind, createdAt: timestamp }] 
+    setEditProfile((p) => ({
+      ...p,
+      uploads: [{ id, name, type: kind, createdAt: timestamp, url: "", thumbnail: "" }, ...p.uploads],
     }));
-    toast.success(`${kind.charAt(0).toUpperCase() + kind.slice(1)} added.`);
+    if (kind === "video") {
+      toast.success("Video placeholder added.");
+      return;
+    }
+    toast.success("Upload added.");
+  }
+
+  function addAchievementPlaceholder() {
+    const id = Math.random().toString(36).slice(2, 9) + Date.now().toString(36);
+    const timestamp = new Date().toISOString();
+    setEditProfile((prev) => ({
+      ...prev,
+      uploads: [
+        {
+          id,
+          name: `Achievement - ${new Date(timestamp).toLocaleDateString()}`,
+          type: "achievement",
+          createdAt: timestamp,
+          url: "",
+          thumbnail: "",
+        },
+        ...prev.uploads,
+      ],
+    }));
+    toast.success("Achievement placeholder added.");
+  }
+
+  async function handleNewCertificateFiles(event: ChangeEvent<HTMLInputElement>) {
+    const files = Array.from(event.target.files ?? []);
+    event.target.value = "";
+    if (!files.length) {
+      return;
+    }
+    const invalidType = files.find((file) => file.type !== "application/pdf");
+    if (invalidType) {
+      toast.error("Certificates must be PDF files");
+      return;
+    }
+    const oversized = files.find((file) => file.size > 10 * 1024 * 1024);
+    if (oversized) {
+      toast.error("Certificate size must be less than 10MB");
+      return;
+    }
+    try {
+      const entries = await Promise.all(
+        files.map(async (file) => {
+          const createdAt = new Date().toISOString();
+          return {
+            id: `${Math.random().toString(36).slice(2, 9)}${Date.now().toString(36)}`,
+            name: file.name || `Certificate - ${new Date(createdAt).toLocaleDateString()}`,
+            type: "certificate" as const,
+            createdAt,
+            url: await readFileAsDataUrl(file),
+            thumbnail: "",
+          };
+        })
+      );
+      setEditProfile((prev) => ({
+        ...prev,
+        uploads: [...entries, ...prev.uploads],
+      }));
+      toast.success(entries.length > 1 ? "Certificates added." : "Certificate added.");
+    } catch (err: any) {
+      toast.error(err.message || "Unable to process certificates");
+    }
+  }
+
+  async function handleNewAchievementFiles(event: ChangeEvent<HTMLInputElement>) {
+    const files = Array.from(event.target.files ?? []);
+    event.target.value = "";
+    if (!files.length) {
+      return;
+    }
+    const invalidType = files.find((file) => !(file.type === "application/pdf" || file.type.startsWith("image/")));
+    if (invalidType) {
+      toast.error("Achievements accept PDFs or images only");
+      return;
+    }
+    const oversized = files.find((file) => file.size > 10 * 1024 * 1024);
+    if (oversized) {
+      toast.error("Files must be less than 10MB");
+      return;
+    }
+    try {
+      const entries = await Promise.all(
+        files.map(async (file) => {
+          const createdAt = new Date().toISOString();
+          const url = await readFileAsDataUrl(file);
+          return {
+            id: `${Math.random().toString(36).slice(2, 9)}${Date.now().toString(36)}`,
+            name: file.name || `Achievement - ${new Date(createdAt).toLocaleDateString()}`,
+            type: "achievement" as const,
+            createdAt,
+            url,
+            thumbnail: file.type.startsWith("image/") ? url : "",
+          };
+        })
+      );
+      setEditProfile((prev) => ({
+        ...prev,
+        uploads: [...entries, ...prev.uploads],
+      }));
+      toast.success(entries.length > 1 ? "Achievements added." : "Achievement added.");
+    } catch (err: any) {
+      toast.error(err.message || "Unable to process files");
+    }
   }
 
   function extractYouTubeId(url: string): string | null {
@@ -238,28 +441,129 @@ export default function PlayerProfilePage() {
   }
 
   function addYouTubeVideo() {
-    const id = extractYouTubeId(youtubeUrl.trim());
-    if (!id) {
-      toast.error("Invalid YouTube URL");
+    const entries = youtubeUrl
+      .split(/\s|,|\n/)
+      .map((item) => item.trim())
+      .filter(Boolean);
+    if (entries.length === 0) {
+      toast.error("Paste at least one YouTube link");
       return;
     }
-    const thumb = `https://i.ytimg.com/vi/${id}/hqdefault.jpg`;
-    const name = `YOUTUBE_${id}`;
+    const additions: typeof editProfile.uploads = [];
+    entries.forEach((entry) => {
+      const extracted = extractYouTubeId(entry);
+      if (!extracted) {
+        return;
+      }
+      const thumb = `https://i.ytimg.com/vi/${extracted}/hqdefault.jpg`;
+      const name = `YouTube ${extracted}`;
+      additions.push({
+        id: `${extracted}-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 7)}`,
+        name,
+        type: "video",
+        url: `https://www.youtube.com/watch?v=${extracted}`,
+        thumbnail: thumb,
+        createdAt: new Date().toISOString(),
+      });
+    });
+    if (!additions.length) {
+      toast.error("No valid YouTube links found");
+      return;
+    }
     setEditProfile((p) => ({
       ...p,
-      uploads: [
-        { id, name, type: "video", url: `https://www.youtube.com/watch?v=${id}`, thumbnail: thumb },
-        ...p.uploads,
-      ],
+      uploads: [...additions, ...p.uploads.filter((item) => item.type === "video")],
     }));
     setYoutubeUrl("");
-    toast.success("YouTube video added!");
+    toast.success(additions.length > 1 ? "YouTube videos added!" : "YouTube video added!");
+  }
+
+  function updateUpload(uploadId: string, data: Partial<{ name: string; url?: string; thumbnail?: string }>) {
+    setEditProfile((prev) => ({
+      ...prev,
+      uploads: prev.uploads.map((upload) =>
+        upload.id === uploadId
+          ? {
+              ...upload,
+              ...data,
+            }
+          : upload
+      ),
+    }));
+  }
+
+  function removeUpload(uploadId: string) {
+    delete fileInputsRef.current[uploadId];
+    setEditProfile((prev) => ({
+      ...prev,
+      uploads: prev.uploads.filter((upload) => upload.id !== uploadId),
+    }));
+  }
+
+  function handleUploadAsset(uploadId: string, type: "certificate" | "achievement", file: File) {
+    if (type === "certificate" && file.type !== "application/pdf") {
+      toast.error("Certificates must be PDF files");
+      return;
+    }
+    if (type === "achievement" && !(file.type === "application/pdf" || file.type.startsWith("image/"))) {
+      toast.error("Achievements support images or PDF files");
+      return;
+    }
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      const result = reader.result as string;
+      if (!result) {
+        toast.error("Failed to process file");
+        return;
+      }
+      setEditProfile((prev) => ({
+        ...prev,
+        uploads: prev.uploads.map((upload) => {
+          if (upload.id !== uploadId) {
+            return upload;
+          }
+          const next = { ...upload, url: result };
+          if (file.type.startsWith("image/")) {
+            next.thumbnail = result;
+          } else {
+            next.thumbnail = undefined;
+          }
+          if (!upload.name || upload.name.startsWith("Certificate") || upload.name.startsWith("Achievement")) {
+            next.name = file.name;
+          }
+          return next;
+        }),
+      }));
+      toast.success("File attached");
+    };
+    reader.onerror = () => {
+      toast.error("Failed to read file");
+    };
+    reader.readAsDataURL(file);
+  }
+
+  function handleFileInputChange(event: ChangeEvent<HTMLInputElement>, uploadId: string, type: "certificate" | "achievement") {
+    const file = event.target.files?.[0];
+    event.target.value = "";
+    if (!file) {
+      return;
+    }
+    handleUploadAsset(uploadId, type, file);
   }
 
   async function handleSave() {
     const userId = (session?.user as any)?.id;
     if (!userId) {
       toast.error("Please log in");
+      return;
+    }
+    console.log("Saving uploads", editProfile.uploads.map((upload) => ({ id: upload.id, type: upload.type, name: upload.name, hasUrl: Boolean(upload.url) })));
+
+    const hasInvalidCertificate = editProfile.uploads.some(
+      (upload) => upload.type === "certificate" && (!upload.url || !isPdfSource(upload.url))
+    );
+    if (hasInvalidCertificate) {
+      toast.error("Attach a PDF file or link for each certificate");
       return;
     }
     setSaving(true);
@@ -275,23 +579,53 @@ export default function PlayerProfilePage() {
         email: editProfile.email,
         avatar: editProfile.avatar,
         stats: editProfile.stats,
-        uploads: editProfile.uploads,
       };
-      
+      const uploadsPayload = editProfile.uploads.map((upload) => ({
+        id: upload.id,
+        name: upload.name,
+        type: upload.type,
+        url: upload.url ?? "",
+        thumbnail: upload.thumbnail ?? "",
+        createdAt: upload.createdAt ?? new Date().toISOString(),
+      }));
+
       await apiPost("profile", {
         userId: userId,
         name: `${editProfile.firstName} ${editProfile.lastName}`.trim() || session?.user?.name || "Player",
         profileData: profilePayload,
       });
       
+      await apiPut("uploads", {
+        userId,
+        uploads: uploadsPayload.map((upload) => ({
+          ...upload,
+          type: upload.type.toUpperCase(),
+        })),
+      });
+
+      await loadProfile(userId);
+      
       toast.success("Profile saved successfully!");
-      await loadProfile();
       closeEditModal();
     } catch (err: any) {
       toast.error(err.message || "Failed to save profile");
     } finally {
       setSaving(false);
     }
+  }
+
+  function shareProfile() {
+    const id = (session?.user as any)?.id;
+    if (!id) {
+      toast.error("Please log in");
+      return;
+    }
+    if (typeof window === "undefined") {
+      return;
+    }
+    const shareUrl = `${window.location.origin}/portfolio/${id}`;
+    setShareLink(shareUrl);
+    setIsShareModalOpen(true);
   }
 
   const strength = (() => {
@@ -329,6 +663,9 @@ export default function PlayerProfilePage() {
     );
   }
 
+  const featuredVideo = profile.uploads.find((u) => u.type === "video" && u.url);
+  const featuredVideoId = featuredVideo ? extractYouTubeId(featuredVideo.url ?? "") : null;
+
   return (
     <div className="relative flex h-auto min-h-screen w-full flex-col bg-[#111a22] overflow-x-hidden" style={{ fontFamily: 'Manrope, "Noto Sans", sans-serif' }}>
       <div className="layout-container flex h-full grow flex-col">
@@ -357,6 +694,9 @@ export default function PlayerProfilePage() {
                   <div className="h-full bg-[#1172d4]" style={{ width: `${strength}%` }} />
                 </div>
                 <span className="text-white text-sm font-medium">Strength {strength}%</span>
+                <Button variant="outline" onClick={shareProfile} className="h-10 w-10 px-0">
+                  <ShareIcon size={18} />
+                </Button>
                 <Button onClick={openEditModal}>Edit Profile</Button>
                 <LogoutButton />
               </div>
@@ -386,6 +726,20 @@ export default function PlayerProfilePage() {
                 )}
               </div>
             </motion.div>
+
+            {featuredVideoId && (
+              <div className="px-4">
+                <div className="aspect-video w-full overflow-hidden rounded-lg border border-[#324d67] bg-[#000]">
+                  <iframe
+                    src={`https://www.youtube.com/embed/${featuredVideoId}`}
+                    title="Featured video"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                    allowFullScreen
+                    className="h-full w-full"
+                  />
+                </div>
+              </div>
+            )}
 
             <div className="p-4">
               <h3 className="text-white text-xl font-bold mb-4">Statistics</h3>
@@ -468,33 +822,152 @@ export default function PlayerProfilePage() {
               <div className="p-4">
                 <h3 className="text-white text-xl font-bold mb-4">Uploads</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                  {profile.uploads.map((u) => (
-                    <div key={u.id} className="rounded border border-[#233648] p-3 bg-[#192633] flex items-center gap-3">
-                      {u.type === "video" && u.thumbnail ? (
-                        <a href={u.url} target="_blank" rel="noreferrer" className="block shrink-0">
-                          <div
-                            className="bg-center bg-no-repeat bg-cover rounded w-28 h-16"
-                            style={{ backgroundImage: `url('${u.thumbnail}')` }}
-                          />
-                        </a>
-                      ) : (
-                        <div className="rounded w-28 h-16 bg-[#111a22] border border-[#324d67] shrink-0" />
-                      )}
-                      <div className="flex-1 min-w-0">
-                        <p className="text-white text-sm font-medium truncate">{u.name}</p>
-                        <p className="text-[#92adc9] text-xs">{u.type}</p>
-                        {u.url && (
-                          <a href={u.url} target="_blank" rel="noreferrer" className="text-xs text-[#1172d4] underline">Open</a>
+                  {profile.uploads.map((u) => {
+                    const previewSource = isImageSource(u.thumbnail || u.url || "") ? (u.thumbnail || u.url || "") : null;
+                    const pdfAttached = isPdfSource(u.url);
+                    return (
+                      <div key={u.id} className="rounded border border-[#233648] p-3 bg-[#192633] flex items-center gap-3">
+                        {u.type === "video" && u.thumbnail ? (
+                          <a href={u.url} target="_blank" rel="noreferrer" className="block shrink-0">
+                            <div
+                              className="bg-center bg-no-repeat bg-cover rounded w-28 h-16"
+                              style={{ backgroundImage: `url('${u.thumbnail}')` }}
+                            />
+                          </a>
+                        ) : previewSource ? (
+                          <a
+                            href={u.url || previewSource}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="block shrink-0"
+                          >
+                            <div
+                              className="bg-center bg-no-repeat bg-cover rounded w-28 h-16"
+                              style={{ backgroundImage: `url('${previewSource}')` }}
+                            />
+                          </a>
+                        ) : (
+                          <div className="rounded w-28 h-16 bg-[#111a22] border border-[#324d67] shrink-0 flex items-center justify-center text-[10px] font-semibold uppercase text-[#92adc9]">
+                            {pdfAttached ? "PDF" : u.type}
+                          </div>
                         )}
+                        <div className="flex-1 min-w-0">
+                          <p className="text-white text-sm font-medium truncate">{u.name}</p>
+                          <p className="text-[#92adc9] text-xs">{u.type}</p>
+                          {u.url && (
+                            <a href={u.url} target="_blank" rel="noreferrer" className="text-xs text-[#1172d4] underline">Open</a>
+                          )}
+                        </div>
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </div>
             )}
           </div>
         </div>
       </div>
+
+      <input
+        ref={newCertificateInputRef}
+        type="file"
+        accept="application/pdf"
+        multiple
+        className="hidden"
+        onChange={handleNewCertificateFiles}
+      />
+      <input
+        ref={newAchievementInputRef}
+        type="file"
+        accept="application/pdf,image/*"
+        multiple
+        className="hidden"
+        onChange={handleNewAchievementFiles}
+      />
+
+      <Modal
+        isOpen={isShareModalOpen}
+        onClose={() => setIsShareModalOpen(false)}
+        title="Share Profile"
+        footer={
+          <div className="flex justify-end gap-3">
+            <Button variant="secondary" onClick={() => setIsShareModalOpen(false)}>
+              Close
+            </Button>
+          </div>
+        }
+      >
+        <div className="flex flex-col gap-4">
+          <div className="flex gap-3">
+            <Input
+              value={shareLink}
+              readOnly
+              className="h-12"
+            />
+            <Button
+              onClick={async () => {
+                if (!shareLink) {
+                  return;
+                }
+                try {
+                  if (navigator.clipboard && typeof navigator.clipboard.writeText === "function") {
+                    await navigator.clipboard.writeText(shareLink);
+                  } else {
+                    const input = document.createElement("input");
+                    input.value = shareLink;
+                    document.body.appendChild(input);
+                    input.select();
+                    document.execCommand("copy");
+                    document.body.removeChild(input);
+                  }
+                  toast.success("Link copied to clipboard");
+                } catch {
+                  toast.error("Unable to copy link");
+                }
+              }}
+            >
+              Copy Link
+            </Button>
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            {[
+              { key: "twitter", label: "Twitter" },
+              { key: "linkedin", label: "LinkedIn" },
+              { key: "facebook", label: "Facebook" },
+              { key: "whatsapp", label: "WhatsApp" },
+            ].map((platform) => (
+              <Button
+                key={platform.key}
+                variant="secondary"
+                onClick={() => {
+                  if (typeof window === "undefined" || !shareLink) {
+                    return;
+                  }
+                  const profileName = `${profile.firstName} ${profile.lastName}`.trim() || "Player profile";
+                  const text = `Check out ${profileName} on TalentVerse`;
+                  const encodedLink = encodeURIComponent(shareLink);
+                  const encodedText = encodeURIComponent(text);
+                  let targetUrl = "";
+                  if (platform.key === "twitter") {
+                    targetUrl = `https://twitter.com/intent/tweet?url=${encodedLink}&text=${encodedText}`;
+                  } else if (platform.key === "linkedin") {
+                    targetUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodedLink}`;
+                  } else if (platform.key === "facebook") {
+                    targetUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodedLink}`;
+                  } else if (platform.key === "whatsapp") {
+                    targetUrl = `https://api.whatsapp.com/send?text=${encodedText}%20${encodedLink}`;
+                  }
+                  if (targetUrl) {
+                    window.open(targetUrl, "_blank", "noopener,noreferrer");
+                  }
+                }}
+              >
+                {platform.label}
+              </Button>
+            ))}
+          </div>
+        </div>
+      </Modal>
 
       <Modal
         isOpen={isEditModalOpen}
@@ -681,8 +1154,9 @@ export default function PlayerProfilePage() {
             <div className="rounded-lg border border-[#324d67] p-4 bg-[#192633]">
               <div className="flex gap-3 mb-4 flex-wrap">
                 <Button variant="secondary" onClick={() => addUpload("video")}>Add Video</Button>
-                <Button variant="secondary" onClick={() => addUpload("certificate")}>Add Certificate</Button>
-                <Button variant="secondary" onClick={() => addUpload("achievement")}>Add Achievement</Button>
+                <Button variant="secondary" onClick={() => addUpload("certificate")}>Upload Certificates</Button>
+                <Button variant="secondary" onClick={() => addUpload("achievement")}>Upload Achievements</Button>
+                <Button variant="outline" onClick={addAchievementPlaceholder}>New Achievement Link</Button>
               </div>
               <div className="flex items-center gap-2 mb-4">
                 <input
@@ -697,34 +1171,139 @@ export default function PlayerProfilePage() {
                 {editProfile.uploads.length === 0 && (
                   <div className="rounded border border-[#233648] p-3 text-[#92adc9] text-sm">No uploads yet.</div>
                 )}
-                {editProfile.uploads.map((u) => (
-                  <div key={u.id} className="rounded border border-[#233648] p-3 flex items-center gap-3 bg-[#111a22]">
-                    {u.type === "video" && u.thumbnail ? (
-                      <a href={u.url} target="_blank" rel="noreferrer" className="block shrink-0">
-                        <div
-                          className="bg-center bg-no-repeat bg-cover rounded w-28 h-16"
-                          style={{ backgroundImage: `url('${u.thumbnail}')` }}
-                        />
-                      </a>
-                    ) : (
-                      <div className="rounded w-28 h-16 bg-[#111a22] border border-[#324d67] shrink-0" />
-                    )}
-                    <div className="flex-1 min-w-0">
-                      <p className="text-white text-sm font-medium truncate">{u.name}</p>
-                      <p className="text-[#92adc9] text-xs">{u.type}</p>
-                      {u.url && (
-                        <a href={u.url} target="_blank" rel="noreferrer" className="text-xs text-[#1172d4] underline">Open</a>
-                      )}
+                {editProfile.uploads.map((u) => {
+                  if (u.type === "video") {
+                    return (
+                      <div key={u.id} className="rounded border border-[#233648] p-3 flex items-center gap-3 bg-[#111a22]">
+                        {u.thumbnail ? (
+                          <a href={u.url} target="_blank" rel="noreferrer" className="block shrink-0">
+                            <div
+                              className="bg-center bg-no-repeat bg-cover rounded w-28 h-16"
+                              style={{ backgroundImage: `url('${u.thumbnail}')` }}
+                            />
+                          </a>
+                        ) : (
+                          <div className="rounded w-28 h-16 bg-[#111a22] border border-[#324d67] shrink-0" />
+                        )}
+                        <div className="flex-1 min-w-0">
+                          <p className="text-white text-sm font-medium truncate">{u.name}</p>
+                          <p className="text-[#92adc9] text-xs">{u.type}</p>
+                          {u.url && (
+                            <a href={u.url} target="_blank" rel="noreferrer" className="text-xs text-[#1172d4] underline">Open</a>
+                          )}
+                        </div>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => removeUpload(u.id)}
+                        >
+                          Remove
+                        </Button>
+                      </div>
+                    );
+                  }
+                  const previewSource = isImageSource(u.thumbnail || u.url || "") ? (u.thumbnail || u.url || "") : null;
+                  const pdfAttached = isPdfSource(u.url);
+                  const hasFile = Boolean(u.url);
+                  const createdDate = u.createdAt ? new Date(u.createdAt).toLocaleDateString() : null;
+                  return (
+                    <div key={u.id} className="rounded-2xl border border-[#233648] bg-[#111a22] p-5 shadow-lg shadow-[#0b1824]/20">
+                      <div className="flex flex-col gap-4">
+                        <div className="flex flex-wrap gap-4">
+                          {previewSource ? (
+                            <a
+                              href={u.url || previewSource}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="block shrink-0 overflow-hidden rounded-xl border border-[#324d67]"
+                              style={{ width: "112px", height: "72px" }}
+                            >
+                              <div
+                                className="h-full w-full bg-cover bg-center"
+                                style={{ backgroundImage: `url('${previewSource}')` }}
+                              />
+                            </a>
+                          ) : (
+                            <div className="flex h-[72px] w-[112px] shrink-0 items-center justify-center rounded-xl border border-dashed border-[#324d67] bg-[#0c141b] text-[11px] font-semibold uppercase tracking-wide text-[#92adc9]">
+                              {pdfAttached ? "PDF" : u.type}
+                            </div>
+                          )}
+                          <div className="flex min-w-0 flex-1 flex-col gap-3">
+                            <div className="flex flex-wrap items-center justify-between gap-3">
+                              <span className="rounded-full bg-[#1172d4]/10 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-[#56a7ff]">
+                                {u.type}
+                              </span>
+                              {createdDate && <span className="text-xs text-[#6d859f]">Added {createdDate}</span>}
+                            </div>
+                            <Input
+                              label="Title"
+                              value={u.name}
+                              onChange={(e) => updateUpload(u.id, { name: e.target.value })}
+                              className="h-12"
+                            />
+                            {u.type === "certificate" ? (
+                              <Input
+                                label="PDF link"
+                                type="url"
+                                value={u.url && !u.url.startsWith("data:") ? u.url : ""}
+                                onChange={(e) => updateUpload(u.id, { url: e.target.value, thumbnail: undefined })}
+                                className="h-12"
+                                placeholder="https://example.com/certificate.pdf"
+                              />
+                            ) : (
+                              <Input
+                                label="Link"
+                                type="url"
+                                value={u.url && !u.url.startsWith("data:") ? u.url : ""}
+                                onChange={(e) => updateUpload(u.id, { url: e.target.value, thumbnail: isImageSource(e.target.value) ? e.target.value : undefined })}
+                                className="h-12"
+                                placeholder="https://example.com/achievement"
+                              />
+                            )}
+                            {hasFile && (
+                              <div className="flex flex-wrap items-center gap-3 rounded-lg border border-[#233648] bg-[#0c141b] px-3 py-2 text-xs text-[#92adc9]">
+                                <span>{pdfAttached ? "PDF attached" : previewSource ? "Image attached" : "Link ready"}</span>
+                                {u.url && (
+                                  <Button
+                                    variant="secondary"
+                                    size="sm"
+                                    onClick={() => u.url && window.open(u.url, "_blank", "noopener,noreferrer")}
+                                    className="h-7 px-3 text-xs"
+                                  >
+                                    View
+                                  </Button>
+                                )}
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                        <div className="flex flex-wrap gap-3">
+                          <input
+                            ref={(el) => {
+                              fileInputsRef.current[u.id] = el;
+                            }}
+                            type="file"
+                            accept={u.type === "certificate" ? "application/pdf" : "application/pdf,image/*"}
+                            onChange={(event) => handleFileInputChange(event, u.id, u.type)}
+                            className="hidden"
+                          />
+                          <Button
+                            variant="secondary"
+                            onClick={() => fileInputsRef.current[u.id]?.click()}
+                          >
+                            {u.type === "certificate" ? "Upload PDF" : "Upload File"}
+                          </Button>
+                          <Button
+                            variant="outline"
+                            onClick={() => removeUpload(u.id)}
+                          >
+                            Remove
+                          </Button>
+                        </div>
+                      </div>
                     </div>
-                    <Button 
-                      variant="outline" 
-                      size="sm"
-                      onClick={() => setEditProfile((p) => ({ ...p, uploads: p.uploads.filter((x) => x.id !== u.id) }))}
-                    >
-                      Remove
-                    </Button>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
           </div>
