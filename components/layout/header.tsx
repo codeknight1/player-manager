@@ -1,4 +1,7 @@
+"use client";
+
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 interface HeaderProps {
   title?: string;
@@ -13,6 +16,8 @@ export function Header({
   navItems = [],
   rightAction
 }: HeaderProps) {
+  const pathname = usePathname();
+  const hideNav = pathname.startsWith("/player");
   return (
     <header className="flex items-center justify-between whitespace-nowrap border-b border-solid px-10 py-3" style={{ borderBottomColor: "var(--brand-orange)" }}>
       <div className="flex items-center gap-4 text-white">
@@ -31,8 +36,8 @@ export function Header({
         ) : null}
       </div>
       <div className="flex flex-1 justify-end gap-8">
-        {navItems.length > 0 && (
-          <div className="flex items-center gap-9">
+        {!hideNav && navItems.length > 0 && (
+          <div className="hidden md:flex items-center gap-9">
             {navItems.map((item) => (
               <Link
                 key={item.href}

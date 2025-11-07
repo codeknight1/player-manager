@@ -9,7 +9,26 @@ profileRouter.get('/', async (req, res) => {
     if (userId) {
       const user = await prisma.user.findUnique({ where: { id: userId } });
       if (!user) return res.status(404).json({ error: 'Not found' });
-      return res.json(user);
+
+      const uploads = await prisma.upload.findMany({
+        where: { userId },
+        orderBy: { createdAt: 'desc' },
+      });
+
+      let parsedProfile: any = null;
+      if (user.profileData) {
+        try {
+          parsedProfile = JSON.parse(user.profileData);
+        } catch (error) {
+          parsedProfile = null;
+        }
+      }
+
+      return res.json({
+        ...user,
+        profile: parsedProfile,
+        uploads,
+      });
     }
     const users = await prisma.user.findMany();
     return res.json(users);

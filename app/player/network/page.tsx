@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import { motion } from "framer-motion";
 import { Sidebar } from "@/components/layout/sidebar";
-import { HouseIcon, UserIcon, UsersThreeIcon, ChatIcon, BellIcon } from "@/components/icons";
+import { HouseIcon, UserIcon, UsersThreeIcon, ChatIcon, BellIcon, HandshakeIcon, TrophyIcon } from "@/components/icons";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { apiGet } from "@/app/lib/api";
@@ -36,6 +36,21 @@ const sidebarItems = [
     href: "/notifications",
     icon: <BellIcon size={24} />,
   },
+  {
+    label: "For Players",
+    href: "/for-players",
+    icon: <UserIcon size={24} />,
+  },
+  {
+    label: "For Clubs/Agents",
+    href: "/for-clubs",
+    icon: <HandshakeIcon size={24} />,
+  },
+  {
+    label: "For Partners",
+    href: "/for-partners",
+    icon: <TrophyIcon size={24} />,
+  },
 ];
 
 type Connection = { id: string; name: string | null; email: string };
@@ -61,7 +76,7 @@ export default function PlayerNetworkPage() {
   return (
     <div className="relative flex h-auto min-h-screen w-full flex-col bg-[#111a22] overflow-x-hidden" style={{ fontFamily: 'Manrope, "Noto Sans", sans-serif' }}>
       <div className="layout-container flex h-full grow flex-col">
-        <div className="gap-1 px-6 flex flex-1 justify-center py-5">
+        <div className="flex flex-1 flex-col lg:flex-row gap-6 px-4 md:px-6 py-5">
           <Sidebar
             title="TalentVerse"
             user={{
@@ -71,9 +86,9 @@ export default function PlayerNetworkPage() {
             }}
             items={sidebarItems}
           />
-          <div className="layout-content-container flex flex-col max-w-[960px] flex-1">
-            <div className="flex flex-wrap justify-between gap-3 p-4">
-              <div className="flex min-w-72 flex-col gap-3">
+          <div className="layout-content-container flex flex-col w-full max-w-[960px] flex-1">
+            <div className="flex flex-col gap-4 p-4 md:flex-row md:items-center md:justify-between">
+              <div className="flex flex-col gap-3">
                 <p className="text-white tracking-light text-[32px] font-bold leading-tight">
                   My Network
                 </p>
@@ -81,12 +96,12 @@ export default function PlayerNetworkPage() {
                   Manage your connections with clubs, agents, and scouts
                 </p>
               </div>
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-3 justify-end">
                 <LogoutButton />
               </div>
             </div>
 
-            <div className="flex flex-wrap gap-4 p-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4">
               {[
                 { label: "Total Connections", value: String(connections.length) },
               ].map((stat, idx) => (
@@ -95,7 +110,7 @@ export default function PlayerNetworkPage() {
                   initial={{ opacity: 0, scale: 0.9 }}
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ delay: idx * 0.1 }}
-                  className="flex min-w-[158px] flex-1 flex-col gap-2 rounded-lg p-6 border border-[#324d67]"
+                  className="flex flex-col gap-2 rounded-lg p-6 border border-[#324d67]"
                 >
                   <p className="text-white text-base font-medium leading-normal">
                     {stat.label}

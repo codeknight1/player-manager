@@ -60,3 +60,15 @@ export async function apiPut(endpoint: string, data: any) {
   }
 }
 
+export async function apiDelete(endpoint: string) {
+  try {
+    const res = await fetch(`${API_BASE}/api/${endpoint}`,
+    {
+      method: "DELETE",
+    });
+    return await handleResponse(res);
+  } catch (error) {
+    throw error;
+  }
+}
+
