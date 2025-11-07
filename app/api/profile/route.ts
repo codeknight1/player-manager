@@ -34,10 +34,9 @@ export async function GET(request: NextRequest) {
       }
     }
     
+    const { profileData, password, ...userWithoutSensitive } = user as any;
     const response = {
-      id: user.id,
-      email: user.email,
-      name: user.name,
+      ...userWithoutSensitive,
       profile: profile,
     };
     
@@ -62,18 +61,42 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    const updateData: any = {};
+    if (name !== undefined) {
+      updateData.name = name;
+    }
+    if (profileData !== undefined) {
+      updateData.profileData = JSON.stringify(profileData);
+    }
+
     const updated = await prisma.user.update({
       where: { id: userId },
-      data: {
-        name: name || undefined,
-        profileData: profileData ? JSON.stringify(profileData) : undefined,
-      },
+      data: updateData,
     });
 
-    return NextResponse.json(updated);
+    let profile: any = {};
+    const pd: any = (updated as any).profileData;
+    if (pd) {
+      if (typeof pd === 'string') {
+        try {
+          const parsed = JSON.parse(pd);
+          if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) profile = parsed;
+        } catch {}
+      } else if (typeof pd === 'object' && !Array.isArray(pd)) {
+        profile = pd;
+      }
+    }
+
+    const { profileData: _, password, ...userWithoutSensitive } = updated as any;
+    const response = {
+      ...userWithoutSensitive,
+      profile: profile,
+    };
+
+    return NextResponse.json(response);
   } catch (error: any) {
     return NextResponse.json(
-      { error: "Failed to update profile" },
+      { error: error.message || "Failed to update profile" },
       { status: 500 }
     );
   }

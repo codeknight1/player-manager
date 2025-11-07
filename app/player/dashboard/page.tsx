@@ -73,19 +73,7 @@ export default function PlayerDashboard() {
     }
   }
 
-  const profileData = (() => {
-    const p = profile?.profile;
-    if (!p) return null;
-    if (typeof p === "string") {
-      try {
-        const parsed = JSON.parse(p);
-        if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) return parsed;
-      } catch {}
-      return null;
-    }
-    if (typeof p === "object" && !Array.isArray(p)) return p;
-    return null;
-  })();
+  const profileData = profile?.profile ?? {};
   const userName = profile?.name || session?.user?.name || "Player";
   const userRole = (session?.user as any)?.role || "Player";
   const position = profileData?.position || "";

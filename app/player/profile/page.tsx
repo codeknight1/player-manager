@@ -278,14 +278,40 @@ export default function PlayerProfilePage() {
         uploads: editProfile.uploads,
       };
       
-      await apiPost("profile", {
+      const response = await apiPost("profile", {
         userId: userId,
         name: `${editProfile.firstName} ${editProfile.lastName}`.trim() || session?.user?.name || "Player",
         profileData: profilePayload,
       });
       
+      if (response && response.profile) {
+        const profileData = response.profile;
+        const nameParts = response.name ? response.name.split(" ") : [];
+        const loadedProfile = {
+          firstName: profileData.firstName ?? nameParts[0] ?? "",
+          lastName: profileData.lastName ?? nameParts.slice(1).join(" ") ?? "",
+          email: response.email ?? profileData.email ?? "",
+          age: profileData.age !== undefined && profileData.age !== null ? (typeof profileData.age === 'number' ? profileData.age : parseInt(String(profileData.age))) : 0,
+          position: profileData.position ?? "",
+          nationality: profileData.nationality ?? "",
+          phone: profileData.phone ?? "",
+          bio: profileData.bio ?? "",
+          avatar: profileData.avatar ?? "",
+          stats: (profileData.stats && typeof profileData.stats === 'object' && !Array.isArray(profileData.stats)) ? {
+            goals: profileData.stats.goals ?? 0,
+            assists: profileData.stats.assists ?? 0,
+            matches: profileData.stats.matches ?? 0,
+          } : { goals: 0, assists: 0, matches: 0 },
+          uploads: Array.isArray(profileData.uploads) ? profileData.uploads : [],
+        };
+        
+        setProfile(loadedProfile);
+        setEditProfile(loadedProfile);
+      } else {
+        await loadProfile();
+      }
+      
       toast.success("Profile saved successfully!");
-      await loadProfile();
       closeEditModal();
     } catch (err: any) {
       toast.error(err.message || "Failed to save profile");
