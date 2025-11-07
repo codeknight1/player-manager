@@ -8,7 +8,7 @@ import { Modal } from "@/components/ui/modal";
 import { HouseIcon, UserIcon, UsersThreeIcon, ChatIcon, BellIcon, ShareIcon } from "@/components/icons";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { apiGet, apiPost, apiPut } from "@/app/lib/api";
+import { apiGet, apiPost, apiPut, apiDelete } from "@/app/lib/api";
 import { toast } from "sonner";
 import { LogoutButton } from "@/components/auth/logout-button";
 
@@ -88,6 +88,31 @@ export default function PlayerProfilePage() {
   const newCertificateInputRef = useRef<HTMLInputElement>(null);
   const newAchievementInputRef = useRef<HTMLInputElement>(null);
   const imageExtensions = [".png", ".jpg", ".jpeg", ".gif", ".webp", ".svg"];
+
+  async function handleDeleteUpload(uploadId: string) {
+    const userId = (session?.user as any)?.id;
+    if (!userId) {
+      toast.error("Please log in");
+      return;
+    }
+    if (typeof window !== "undefined" && !window.confirm("Remove this upload?")) {
+      return;
+    }
+    try {
+      await apiDelete(`uploads?id=${uploadId}&userId=${userId}`);
+      setProfile((prev) => ({
+        ...prev,
+        uploads: prev.uploads.filter((upload) => upload.id !== uploadId),
+      }));
+      setEditProfile((prev) => ({
+        ...prev,
+        uploads: prev.uploads.filter((upload) => upload.id !== uploadId),
+      }));
+      toast.success("Upload removed");
+    } catch (err: any) {
+      toast.error(err.message || "Failed to remove upload");
+    }
+  }
 
   const isPdfSource = (value?: string) => {
     if (!value) {
@@ -694,8 +719,12 @@ export default function PlayerProfilePage() {
                   <div className="h-full bg-[#1172d4]" style={{ width: `${strength}%` }} />
                 </div>
                 <span className="text-white text-sm font-medium">Strength {strength}%</span>
-                <Button variant="outline" onClick={shareProfile} className="h-10 w-10 px-0">
-                  <ShareIcon size={18} />
+                <Button
+                  onClick={shareProfile}
+                  className="flex items-center gap-2 rounded-full bg-[#23272b] px-4 py-2 text-white hover:bg-[#2f3338] focus:ring-0"
+                >
+                  <ShareIcon size={22} />
+                  <span className="text-sm font-medium">Share</span>
                 </Button>
                 <Button onClick={openEditModal}>Edit Profile</Button>
                 <LogoutButton />
@@ -820,7 +849,7 @@ export default function PlayerProfilePage() {
 
             {profile.uploads.length > 0 && (
               <div className="p-4">
-                <h3 className="text-white text-xl font-bold mb-4">Uploads</h3>
+                <h3 className="text-white text-xl font-bold mb-4">Uploads ({profile.uploads.length})</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   {profile.uploads.map((u) => {
                     const previewSource = isImageSource(u.thumbnail || u.url || "") ? (u.thumbnail || u.url || "") : null;
@@ -853,11 +882,14 @@ export default function PlayerProfilePage() {
                         )}
                         <div className="flex-1 min-w-0">
                           <p className="text-white text-sm font-medium truncate">{u.name}</p>
-                          <p className="text-[#92adc9] text-xs">{u.type}</p>
+                          <p className="text-[#92adc9] text-xs capitalize">{u.type}</p>
                           {u.url && (
                             <a href={u.url} target="_blank" rel="noreferrer" className="text-xs text-[#1172d4] underline">Open</a>
                           )}
                         </div>
+                        <Button variant="ghost" size="sm" onClick={() => handleDeleteUpload(u.id)}>
+                          Delete
+                        </Button>
                       </div>
                     );
                   })}

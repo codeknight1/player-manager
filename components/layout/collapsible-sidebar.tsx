@@ -139,13 +139,13 @@ export function CollapsibleSidebar({
         
         <button
           onClick={toggleCollapse}
-          className="flex items-center justify-center w-10 h-10 rounded-lg bg-[#192633] hover:bg-[#233648] transition-colors text-white"
+          className="flex items-center justify-center w-12 h-12 rounded-full bg-[#192633] hover:bg-[#233648] transition-colors text-white border-0 focus:outline-none focus:ring-0"
           aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
-            width="20"
-            height="20"
+            width="28"
+            height="28"
             viewBox="0 0 24 24"
             fill="none"
             stroke="currentColor"
