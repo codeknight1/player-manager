@@ -84,56 +84,80 @@ export default function PlayerProfilePage() {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
+    if (session === undefined) {
+      return;
+    }
+
     const userId = (session?.user as any)?.id;
     if (userId) {
-      loadProfile();
-    } else if (session === null) {
+      loadProfile(userId);
+    } else {
       setLoading(false);
     }
   }, [session]);
 
-  async function loadProfile() {
-    const userId = (session?.user as any)?.id;
-    if (!userId) {
-      toast.error("No user ID found. Please log in again.");
-      setLoading(false);
-      return;
-    }
+  function mapProfile(user: any) {
+    const profileSource = (() => {
+      if (user?.profile && typeof user.profile === "object" && !Array.isArray(user.profile)) {
+        return user.profile;
+      }
+      if (user?.profile && typeof user.profile === "string") {
+        try {
+          return JSON.parse(user.profile);
+        } catch {
+          return {};
+        }
+      }
+      if (user?.profileData && typeof user.profileData === "string") {
+        try {
+          return JSON.parse(user.profileData);
+        } catch {
+          return {};
+        }
+      }
+      if (user?.profileData && typeof user.profileData === "object") {
+        return user.profileData;
+      }
+      return {};
+    })();
 
+    const nameParts = (user?.name ?? "").trim().split(" ");
+    const firstName = profileSource.firstName ?? nameParts[0] ?? "";
+    const lastName = profileSource.lastName ?? nameParts.slice(1).join(" ") ?? "";
+
+    const stats = typeof profileSource.stats === "object" && profileSource.stats !== null
+      ? {
+          goals: Number(profileSource.stats.goals) || 0,
+          assists: Number(profileSource.stats.assists) || 0,
+          matches: Number(profileSource.stats.matches) || 0,
+        }
+      : { goals: 0, assists: 0, matches: 0 };
+
+    return {
+      firstName,
+      lastName,
+      email: user?.email ?? profileSource.email ?? "",
+      age: Number(profileSource.age) || 0,
+      position: profileSource.position ?? "",
+      nationality: profileSource.nationality ?? "",
+      phone: profileSource.phone ?? "",
+      bio: profileSource.bio ?? "",
+      avatar: profileSource.avatar ?? "",
+      stats,
+      uploads: Array.isArray(profileSource.uploads) ? profileSource.uploads : [],
+    };
+  }
+
+  async function loadProfile(userId: string) {
     try {
       const user = await apiGet(`profile?userId=${userId}`);
       
       if (user && !user.error) {
-        let profileData: any = {};
-        if (user.profile !== null && user.profile !== undefined) {
-          if (typeof user.profile === 'object' && !Array.isArray(user.profile)) {
-            profileData = user.profile;
-          }
-        }
-        
-        const nameParts = user.name ? user.name.split(" ") : [];
-        const loadedProfile = {
-          firstName: profileData.firstName ?? nameParts[0] ?? "",
-          lastName: profileData.lastName ?? nameParts.slice(1).join(" ") ?? "",
-          email: user.email ?? profileData.email ?? "",
-          age: profileData.age !== undefined && profileData.age !== null ? (typeof profileData.age === 'number' ? profileData.age : parseInt(String(profileData.age))) : 0,
-          position: profileData.position ?? "",
-          nationality: profileData.nationality ?? "",
-          phone: profileData.phone ?? "",
-          bio: profileData.bio ?? "",
-          avatar: profileData.avatar ?? "",
-          stats: (profileData.stats && typeof profileData.stats === 'object' && !Array.isArray(profileData.stats)) ? {
-            goals: profileData.stats.goals ?? 0,
-            assists: profileData.stats.assists ?? 0,
-            matches: profileData.stats.matches ?? 0,
-          } : { goals: 0, assists: 0, matches: 0 },
-          uploads: Array.isArray(profileData.uploads) ? profileData.uploads : [],
-        };
-        
+        const loadedProfile = mapProfile(user);
         setProfile(loadedProfile);
         setEditProfile(loadedProfile);
         
-        if (!profileData || Object.keys(profileData).length === 0) {
+        if (!user.profile && !user.profileData) {
           toast.info("Profile is empty. Click 'Edit Profile' to add your information.");
         }
       } else if (user?.error) {
@@ -284,31 +308,12 @@ export default function PlayerProfilePage() {
         profileData: profilePayload,
       });
       
-      if (response && response.profile) {
-        const profileData = response.profile;
-        const nameParts = response.name ? response.name.split(" ") : [];
-        const loadedProfile = {
-          firstName: profileData.firstName ?? nameParts[0] ?? "",
-          lastName: profileData.lastName ?? nameParts.slice(1).join(" ") ?? "",
-          email: response.email ?? profileData.email ?? "",
-          age: profileData.age !== undefined && profileData.age !== null ? (typeof profileData.age === 'number' ? profileData.age : parseInt(String(profileData.age))) : 0,
-          position: profileData.position ?? "",
-          nationality: profileData.nationality ?? "",
-          phone: profileData.phone ?? "",
-          bio: profileData.bio ?? "",
-          avatar: profileData.avatar ?? "",
-          stats: (profileData.stats && typeof profileData.stats === 'object' && !Array.isArray(profileData.stats)) ? {
-            goals: profileData.stats.goals ?? 0,
-            assists: profileData.stats.assists ?? 0,
-            matches: profileData.stats.matches ?? 0,
-          } : { goals: 0, assists: 0, matches: 0 },
-          uploads: Array.isArray(profileData.uploads) ? profileData.uploads : [],
-        };
-        
-        setProfile(loadedProfile);
-        setEditProfile(loadedProfile);
+      if (response) {
+        const normalized = mapProfile(response);
+        setProfile(normalized);
+        setEditProfile(normalized);
       } else {
-        await loadProfile();
+        await loadProfile(userId);
       }
       
       toast.success("Profile saved successfully!");
