@@ -94,6 +94,33 @@ function mapProfilePayload(payload: any) {
       }
     : emptyProfile.stats;
 
+  const normalizeUploadType = (value: any) => {
+    const lower = (value ?? "").toString().toLowerCase();
+    if (lower === "video" || lower === "certificate" || lower === "achievement") {
+      return lower;
+    }
+    return "achievement";
+  };
+
+  const uploadsSource = (() => {
+    if (Array.isArray(payload?.uploads) && payload.uploads.length) {
+      return payload.uploads;
+    }
+    if (Array.isArray(profileSource.uploads)) {
+      return profileSource.uploads;
+    }
+    return [];
+  })();
+
+  const uploads = uploadsSource.map((upload: any) => ({
+    id: upload.id ?? Math.random().toString(36).slice(2, 9) + Date.now().toString(36),
+    name: upload.name ?? "",
+    type: normalizeUploadType(upload.type),
+    url: upload.url ?? "",
+    thumbnail: upload.thumbnail ?? "",
+    createdAt: upload.createdAt ?? new Date().toISOString(),
+  }));
+
   return {
     ...emptyProfile,
     ...profileSource,
@@ -102,7 +129,7 @@ function mapProfilePayload(payload: any) {
     email: profileSource.email ?? payload?.email ?? "",
     age: Number(profileSource.age) || 0,
     stats,
-    uploads: Array.isArray(profileSource.uploads) ? profileSource.uploads : emptyProfile.uploads,
+    uploads,
   };
 }
 

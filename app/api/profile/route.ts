@@ -84,12 +84,17 @@ export async function GET(request: NextRequest) {
     }
 
     const { profileData, password, ...userWithoutSensitive } = user as any;
+    const uploads = await prisma.upload.findMany({
+      where: { userId },
+      orderBy: { createdAt: "desc" },
+    });
     const response = {
       ...userWithoutSensitive,
       profile: parseProfile(profileData, {
         name: userWithoutSensitive.name,
         email: userWithoutSensitive.email,
       }),
+      uploads,
     };
     
     return NextResponse.json(response);
@@ -127,12 +132,17 @@ export async function POST(request: NextRequest) {
     });
 
     const { profileData: updatedProfile, password, ...userWithoutSensitive } = updated as any;
+    const uploads = await prisma.upload.findMany({
+      where: { userId },
+      orderBy: { createdAt: "desc" },
+    });
     const response = {
       ...userWithoutSensitive,
       profile: parseProfile(updatedProfile, {
         name: userWithoutSensitive.name,
         email: userWithoutSensitive.email,
       }),
+      uploads,
     };
 
     return NextResponse.json(response);

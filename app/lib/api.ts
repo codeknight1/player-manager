@@ -46,3 +46,17 @@ export async function apiPatch(endpoint: string, data: any) {
   }
 }
 
+export async function apiPut(endpoint: string, data: any) {
+  try {
+    const res = await fetch(`${API_BASE}/api/${endpoint}`,
+    {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data),
+    });
+    return await handleResponse(res);
+  } catch (error) {
+    throw error;
+  }
+}
+

@@ -8,7 +8,7 @@ import { Modal } from "@/components/ui/modal";
 import { HouseIcon, UserIcon, UsersThreeIcon, ChatIcon, BellIcon } from "@/components/icons";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { apiGet, apiPost } from "@/app/lib/api";
+import { apiGet, apiPost, apiPut } from "@/app/lib/api";
 import { toast } from "sonner";
 import { LogoutButton } from "@/components/auth/logout-button";
 
@@ -133,6 +133,33 @@ export default function PlayerProfilePage() {
         }
       : { goals: 0, assists: 0, matches: 0 };
 
+    const normalizeUploadType = (value: any) => {
+      const lower = (value ?? "").toString().toLowerCase();
+      if (lower === "video" || lower === "certificate" || lower === "achievement") {
+        return lower as "video" | "certificate" | "achievement";
+      }
+      return "achievement";
+    };
+
+    const uploadsSource = (() => {
+      if (Array.isArray(user?.uploads) && user.uploads.length) {
+        return user.uploads;
+      }
+      if (Array.isArray(profileSource.uploads)) {
+        return profileSource.uploads;
+      }
+      return [];
+    })();
+
+    const uploads = uploadsSource.map((upload: any) => ({
+      id: upload.id ?? Math.random().toString(36).slice(2, 9) + Date.now().toString(36),
+      name: upload.name ?? "",
+      type: normalizeUploadType(upload.type),
+      url: upload.url ?? "",
+      thumbnail: upload.thumbnail ?? "",
+      createdAt: upload.createdAt ?? new Date().toISOString(),
+    }));
+
     return {
       firstName,
       lastName,
@@ -144,7 +171,7 @@ export default function PlayerProfilePage() {
       bio: profileSource.bio ?? "",
       avatar: profileSource.avatar ?? "",
       stats,
-      uploads: Array.isArray(profileSource.uploads) ? profileSource.uploads : [],
+      uploads,
     };
   }
 
@@ -299,22 +326,31 @@ export default function PlayerProfilePage() {
         email: editProfile.email,
         avatar: editProfile.avatar,
         stats: editProfile.stats,
-        uploads: editProfile.uploads,
       };
-      
-      const response = await apiPost("profile", {
+      const uploadsPayload = editProfile.uploads.map((upload) => ({
+        id: upload.id,
+        name: upload.name,
+        type: upload.type,
+        url: upload.url ?? "",
+        thumbnail: upload.thumbnail ?? "",
+        createdAt: upload.createdAt ?? new Date().toISOString(),
+      }));
+
+      await apiPost("profile", {
         userId: userId,
         name: `${editProfile.firstName} ${editProfile.lastName}`.trim() || session?.user?.name || "Player",
         profileData: profilePayload,
       });
       
-      if (response) {
-        const normalized = mapProfile(response);
-        setProfile(normalized);
-        setEditProfile(normalized);
-      } else {
-        await loadProfile(userId);
-      }
+      await apiPut("uploads", {
+        userId,
+        uploads: uploadsPayload.map((upload) => ({
+          ...upload,
+          type: upload.type.toUpperCase(),
+        })),
+      });
+
+      await loadProfile(userId);
       
       toast.success("Profile saved successfully!");
       closeEditModal();

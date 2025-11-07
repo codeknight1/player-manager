@@ -9,7 +9,7 @@ import { trialsRouter } from './routes/trials';
 import { applicationsRouter } from './routes/applications';
 import { messagesRouter } from './routes/messages';
 import { notificationsRouter } from './routes/notifications';
-import { uploadRouter } from './routes/upload';
+import { uploadsRouter } from './routes/uploads';
 import { paymentsRouter } from './routes/payments';
 import { adminRouter } from './routes/admin';
 
@@ -26,7 +26,7 @@ app.use('/api/trials', trialsRouter);
 app.use('/api/applications', applicationsRouter);
 app.use('/api/messages', messagesRouter);
 app.use('/api/notifications', notificationsRouter);
-app.use('/api/upload', uploadRouter);
+app.use('/api/uploads', uploadsRouter);
 app.use('/api/payments', paymentsRouter);
 app.use('/api/admin', adminRouter);
 
