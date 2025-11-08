@@ -73,6 +73,8 @@ async function main() {
       title: "Elite Youth Cup",
       city: "London, UK",
       date: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days from now
+      fee: 50,
+      createdById: academy.id,
     },
   });
 
@@ -81,6 +83,8 @@ async function main() {
       title: "National Academy Showcase",
       city: "Manchester, UK",
       date: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000), // 14 days from now
+      fee: 75,
+      createdById: academy.id,
     },
   });
 
@@ -89,6 +93,28 @@ async function main() {
       title: "Future Stars Tournament",
       city: "Birmingham, UK",
       date: new Date(Date.now() + 21 * 24 * 60 * 60 * 1000), // 21 days from now
+      fee: 60,
+      createdById: academy.id,
+    },
+  });
+
+  await prisma.payment.create({
+    data: {
+      userId: player.id,
+      trialId: trial1.id,
+      amount: 50,
+      currency: "USD",
+      status: "PAID",
+    },
+  });
+
+  await prisma.payment.create({
+    data: {
+      userId: player.id,
+      trialId: trial2.id,
+      amount: 50,
+      currency: "USD",
+      status: "DUE",
     },
   });
 
@@ -154,7 +180,7 @@ async function main() {
     },
   });
 
-  console.log("✅ Seeded users, trials, applications, messages, and notifications!");
+  console.log("✅ Seeded users, trials, payments, applications, messages, and notifications!");
 }
 
 main()

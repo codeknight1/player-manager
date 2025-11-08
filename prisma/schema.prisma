@@ -23,6 +23,8 @@ model User {
   notifications  Notification[]
   verifications  Verification[]
   uploads        Upload[]
+  payments       Payment[]
+  trialsCreated  Trial[]           @relation("TrialCreator")
 }
 
 model Message {
@@ -40,8 +42,12 @@ model Trial {
   title     String
   city      String
   date      DateTime
+  fee       Float    @default(0)
+  createdById String?
   createdAt DateTime @default(now())
+  createdBy User?    @relation("TrialCreator", fields: [createdById], references: [id])
   apps      Application[]
+  payments  Payment[]
 }
 
 model Application {
@@ -52,6 +58,21 @@ model Application {
   createdAt DateTime  @default(now())
   user      User      @relation(fields: [userId], references: [id])
   trial     Trial     @relation(fields: [trialId], references: [id])
+}
+
+model Payment {
+  id        String   @id @default(cuid())
+  userId    String
+  trialId   String
+  amount    Float    @default(0)
+  currency  String   @default("USD")
+  status    String   @default("DUE")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  user      User     @relation(fields: [userId], references: [id])
+  trial     Trial    @relation(fields: [trialId], references: [id])
+
+  @@unique([userId, trialId])
 }
 
 model Notification {
