@@ -1,9 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useSession } from "next-auth/react";
 import { motion } from "framer-motion";
-import { useMemo } from "react";
 import { Sidebar } from "@/components/layout/sidebar";
 import {
   HouseIcon,
@@ -17,6 +16,13 @@ import {
 } from "@/components/icons";
 import { apiGet } from "@/app/lib/api";
 import { LogoutButton } from "@/components/auth/logout-button";
+import { usePlayerApplications } from "@/app/hooks/usePlayerApplications";
+import {
+  applicationStatusStyles,
+  formatApplicationStatus,
+  formatApplicationDate,
+  getApplicationTimestamp,
+} from "@/app/player/applications/utils";
 
 function useSidebarItems() {
   return useMemo(
@@ -30,6 +36,11 @@ function useSidebarItems() {
         label: "My Profile",
         href: "/player/profile",
         icon: <UserIcon size={24} />,
+      },
+      {
+        label: "Trials",
+        href: "/explore-opportunities",
+        icon: <EyeIcon size={24} />,
       },
       {
         label: "Network",
@@ -158,20 +169,21 @@ function mapProfilePayload(payload: any) {
 
 export default function PlayerDashboard() {
   const { data: session } = useSession();
+  const userId = (session?.user as any)?.id;
   const [profilePayload, setProfilePayload] = useState<any>(null);
   const [notifications, setNotifications] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const { applications, loading: applicationsLoading } = usePlayerApplications(userId);
 
   useEffect(() => {
     if (session === undefined) return;
 
-    const userId = (session?.user as any)?.id;
     if (userId) {
       loadData(userId);
     } else {
       setLoading(false);
     }
-  }, [session]);
+  }, [session, userId]);
 
   async function loadData(userId: string) {
     try {
@@ -198,6 +210,15 @@ export default function PlayerDashboard() {
   const age = mappedProfile.age;
   const nationality = mappedProfile.nationality;
   const stats = mappedProfile.stats;
+  const applicationPreview = useMemo(() => {
+    const entries = [...applications];
+    entries.sort((a, b) => {
+      const bDate = getApplicationTimestamp(b.trial?.date ?? b.createdAt);
+      const aDate = getApplicationTimestamp(a.trial?.date ?? a.createdAt);
+      return bDate - aDate;
+    });
+    return entries.slice(0, 3);
+  }, [applications]);
 
   const displayName = `${mappedProfile.firstName} ${mappedProfile.lastName}`.trim() || userName;
   const displayInfo = [position, age ? `Age ${age}` : "", nationality].filter(Boolean).join(" • ") || "Complete your profile";
@@ -281,6 +302,55 @@ export default function PlayerDashboard() {
                 </motion.div>
               ))
             )}
+            <h3 className="text-white text-lg font-bold leading-tight tracking-[-0.015em] px-4 pb-2 pt-4">
+              Applications
+            </h3>
+            <div className="px-4 pb-2">
+              {applicationsLoading ? (
+                <div className="text-[#92adc9]">Loading applications...</div>
+              ) : applicationPreview.length === 0 ? (
+                <div className="text-[#92adc9]">
+                  No applications yet.
+                </div>
+              ) : (
+                <div className="flex flex-col gap-3">
+                  {applicationPreview.map((application) => {
+                    const trialTitle = application.trial?.title || "Unknown Trial";
+                    const city = application.trial?.city || "Unspecified city";
+                    const trialDate = application.trial?.date ?? application.createdAt;
+                    const statusKey = (application.status || "").toLowerCase();
+                    const badgeClass = applicationStatusStyles[statusKey] ?? applicationStatusStyles.default;
+                    const formattedDate = formatApplicationDate(trialDate);
+                    const hostName = application.trial?.createdBy?.name;
+                    return (
+                      <div
+                        key={application.id}
+                        className="flex flex-col gap-2 rounded-lg border border-[#324d67] bg-[#192633] p-4"
+                      >
+                        <div className="flex items-center justify-between gap-3">
+                          <p className="text-white text-base font-semibold leading-tight line-clamp-1">
+                            {trialTitle}
+                          </p>
+                          <span className={`px-2 py-1 rounded text-xs font-medium ${badgeClass}`}>
+                            {formatApplicationStatus(application.status)}
+                          </span>
+                        </div>
+                        <div className="flex flex-wrap items-center gap-3 text-sm text-[#92adc9]">
+                          <span>{city}</span>
+                          {hostName && <span>• Hosted by {hostName}</span>}
+                          {formattedDate && <span>• {formattedDate}</span>}
+                        </div>
+                      </div>
+                    );
+                  })}
+                  {applications.length > applicationPreview.length && (
+                    <div className="text-[#92adc9] text-sm">
+                      Showing {applicationPreview.length} of {applications.length} applications.
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
             <h3 className="text-white text-lg font-bold leading-tight tracking-[-0.015em] px-4 pb-2 pt-4">
               Key Performance Widgets
             </h3>
