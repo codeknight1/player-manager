@@ -45,7 +45,7 @@ export function CollapsibleSidebar({
   return (
     <div className={`layout-content-container flex flex-col ${sidebarWidth} transition-all duration-300`}>
       <div className="flex h-full min-h-[700px] flex-col justify-between bg-[#111a22] p-4">
-        <div className="flex flex-col gap-3">
+        <div className="flex flex-col gap-4">
           <button
             onClick={toggleCollapse}
             className="flex items-center justify-center rounded-xl border border-[#233648] bg-[#192633] p-2 text-white hover:border-[#1172d4] hover:bg-[#1f2c3a] transition-colors"
@@ -80,63 +80,78 @@ export function CollapsibleSidebar({
                     : { backgroundColor: "#192633" }
                 }
               />
-              <div className="flex flex-col overflow-hidden">
-                <h1 className="text-white text-base font-medium leading-normal truncate">
-                  {user.name}
-                </h1>
-                <p className="text-[#92adc9] text-sm font-normal leading-normal truncate">
-                  {user.role}
-                </p>
-              </div>
+              <AnimatePresence>
+                {!isCollapsed && (
+                  <motion.div
+                    initial={{ opacity: 0, width: 0 }}
+                    animate={{ opacity: 1, width: "auto" }}
+                    exit={{ opacity: 0, width: 0 }}
+                    transition={{ duration: 0.2 }}
+                    className="flex flex-col overflow-hidden"
+                  >
+                    <h1 className="text-white text-base font-medium leading-normal truncate">
+                      {user.name}
+                    </h1>
+                    <p className="text-[#92adc9] text-sm font-normal leading-normal truncate">
+                      {user.role}
+                    </p>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </motion.div>
           )}
-
+          
           {title && !isCollapsed && (
-            <div className="flex flex-col overflow-hidden">
-              <h1 className="text-white text-base font-medium leading-normal">
-                {title}
-              </h1>
-              {subtitle && (
-                <p className="text-[#92adc9] text-sm font-normal leading-normal">
-                  {subtitle}
-                </p>
-              )}
-            </div>
+            <AnimatePresence>
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: "auto" }}
+                exit={{ opacity: 0, height: 0 }}
+                transition={{ duration: 0.2 }}
+                className="flex flex-col overflow-hidden"
+              >
+                <h1 className="text-white text-base font-medium leading-normal">
+                  {title}
+                </h1>
+                {subtitle && (
+                  <p className="text-[#92adc9] text-sm font-normal leading-normal">
+                    {subtitle}
+                  </p>
+                )}
+              </motion.div>
+            </AnimatePresence>
           )}
           
-          <div className="flex flex-col gap-1.5">
-            {!isCollapsed && items.map((item) => {
-              const isActive = pathname === item.href;
-              return (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className={clsx(
-                    "flex items-center gap-2 px-3 py-2 rounded-lg transition-colors",
-                    isActive
-                      ? "bg-[#233648]"
-                      : "hover:bg-[#192633]"
-                  )}
-                  title={isCollapsed ? item.label : undefined}
-                >
-                  <div className="text-white shrink-0">{item.icon}</div>
-                  <AnimatePresence>
-                    {!isCollapsed && (
-                      <motion.p
-                        initial={{ opacity: 0, width: 0 }}
-                        animate={{ opacity: 1, width: "auto" }}
-                        exit={{ opacity: 0, width: 0 }}
-                        transition={{ duration: 0.2 }}
-                        className="text-white text-sm font-medium leading-normal truncate"
-                      >
-                        {item.label}
-                      </motion.p>
+          {!isCollapsed && (
+            <div className="flex flex-col gap-2">
+              {items.map((item) => {
+                const isActive = pathname === item.href;
+                return (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className={clsx(
+                      "flex items-center gap-3 px-3 py-2 rounded-lg transition-colors",
+                      isActive
+                        ? "bg-[#233648]"
+                        : "hover:bg-[#192633]"
                     )}
-                  </AnimatePresence>
-                </Link>
-              );
-            })}
-          </div>
+                  >
+                    <div className="text-white shrink-0">{item.icon}</div>
+                    <motion.p
+                      initial={{ opacity: 0, width: 0 }}
+                      animate={{ opacity: 1, width: "auto" }}
+                      exit={{ opacity: 0, width: 0 }}
+                      transition={{ duration: 0.2 }}
+                      className="text-white text-sm font-medium leading-normal truncate"
+                    >
+                      {item.label}
+                    </motion.p>
+                  </Link>
+                );
+              })}
+            </div>
+          )}
         </div>
         
         {showToggle && (

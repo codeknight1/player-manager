@@ -5,6 +5,10 @@ const prisma = new PrismaClient();
 
 async function main() {
   const demoPassword = await hash("demo123", 10);
+  const playerPassword = await hash("demo123", 10);
+  const agentPassword = await hash("demo123", 10);
+  const academyPassword = await hash("demo123", 10);
+  const adminPassword = await hash("12345678@admin", 10);
 
   // Clear existing data
   await prisma.message.deleteMany();
@@ -17,7 +21,7 @@ async function main() {
     data: {
       email: "player@demo.com",
       name: "Sophia Carter",
-      password: demoPassword,
+      password: adminPassword,
       role: "PLAYER",
       profileData: JSON.stringify({
         firstName: "Sophia",
@@ -35,7 +39,7 @@ async function main() {
     data: {
       email: "agent@demo.com",
       name: "Elite Football Agency",
-      password: demoPassword,
+      password: playerPassword,
       role: "AGENT",
     },
   });
@@ -44,8 +48,17 @@ async function main() {
     data: {
       email: "academy@demo.com",
       name: "Riverdale Academy",
-      password: demoPassword,
+      password: agentPassword,
       role: "ACADEMY",
+    },
+  });
+
+  await prisma.user.create({
+    data: {
+      email: "uthmanabdurrahman98@gmail.com",
+      name: "Platform Admin",
+      password: adminPassword,
+      role: "ADMIN",
     },
   });
 
@@ -54,7 +67,7 @@ async function main() {
     data: {
       email: "player2@demo.com",
       name: "Alex Johnson",
-      password: demoPassword,
+      password: academyPassword,
       role: "PLAYER",
       profileData: JSON.stringify({
         firstName: "Alex",

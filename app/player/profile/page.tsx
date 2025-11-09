@@ -742,8 +742,8 @@ export default function PlayerProfilePage() {
             showToggle={false}
           />
           <div className="layout-content-container flex w-full flex-col max-w-[960px] flex-1">
-            <div className="flex flex-col gap-2 px-3 pt-2 pb-4 md:flex-row md:items-center md:justify-between md:px-4 md:pt-3">
-              <div className="flex flex-col gap-2">
+            <div className="flex flex-col gap-1 px-3 pt-0 pb-2 md:flex-row md:items-center md:justify-between md:px-4 md:pt-2">
+              <div className="flex flex-col gap-1">
                 <p className="text-white tracking-light text-[32px] font-bold leading-tight">
                   My Profile
                 </p>
@@ -773,7 +773,7 @@ export default function PlayerProfilePage() {
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              className="flex items-center gap-6 px-4 py-6 md:px-6 rounded-lg border border-[#324d67] bg-[#192633] mx-3 mt-2 mb-4 md:mx-4"
+              className="flex items-center gap-6 px-4 py-3 md:px-6 rounded-lg border border-[#324d67] bg-[#192633] mx-3 mb-4 md:mx-4"
             >
               <div
                 className="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-32 border-2 border-[#324d67] shrink-0"
