@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { supabaseServerClient } from "@/app/lib/supabaseServer";
 import { prisma } from "@/app/lib/prisma";
 
 function normalizeType(type: string): "VIDEO" | "CERTIFICATE" | "ACHIEVEMENT" {
@@ -15,11 +16,22 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: "userId is required" }, { status: 400 });
   }
 
+  if (supabaseServerClient) {
+    const { data, error } = await supabaseServerClient
+      .from("Upload")
+      .select("*")
+      .eq("userId", userId)
+      .order("createdAt", { ascending: false });
+    if (error) {
+      return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+    return NextResponse.json({ uploads: data ?? [] });
+  }
+
   const uploads = await prisma.upload.findMany({
     where: { userId },
     orderBy: { createdAt: "desc" },
   });
-
   return NextResponse.json({ uploads });
 }
 
@@ -53,22 +65,58 @@ export async function PUT(request: NextRequest) {
     console.log("[uploads] payload length", payloads.length);
     console.log("[uploads] payload ids", payloads.map((item) => item.id));
 
+    const upsertPayload = payloads.map((entry) => {
+      const base = {
+        userId,
+        name: entry.name,
+        type: entry.type,
+        url: entry.url,
+        thumbnail: entry.thumbnail,
+        createdAt: entry.createdAt.toISOString(),
+      };
+      if (entry.id) {
+        return { ...base, id: entry.id };
+      }
+      return base;
+    });
+
+    if (supabaseServerClient) {
+      const { error: upsertError } = await supabaseServerClient
+        .from("Upload")
+        .upsert(upsertPayload, { onConflict: "id" });
+      if (upsertError) {
+        throw upsertError;
+      }
+      const { data: saved, error: fetchError } = await supabaseServerClient
+        .from("Upload")
+        .select("*")
+        .eq("userId", userId)
+        .order("createdAt", { ascending: false });
+      if (fetchError) {
+        throw fetchError;
+      }
+      console.log("[uploads] saved count", saved?.length ?? 0);
+      return NextResponse.json({
+        uploads: saved ?? [],
+        meta: {
+          payloadLength: uploads.length,
+          payloadIds: uploads.map((upload: any) => upload.id ?? null),
+          savedCount: saved?.length ?? 0,
+        },
+      });
+    }
+
     await prisma.$transaction(async (tx) => {
       const existing = await tx.upload.findMany({
         where: { userId },
         select: { id: true },
       });
-
-      console.log("[uploads] existing count", existing.length);
-
       const existingIds = new Set(existing.map((item) => item.id));
       const seenIds = new Set<string>();
-
       for (const entry of payloads) {
         if (entry.id && seenIds.has(entry.id)) {
           continue;
         }
-
         if (entry.id && existingIds.has(entry.id)) {
           await tx.upload.update({
             where: { id: entry.id },
@@ -82,27 +130,29 @@ export async function PUT(request: NextRequest) {
           });
           existingIds.delete(entry.id);
         } else {
-          const createData: any = {
-            userId,
-            name: entry.name,
-            type: entry.type,
-            url: entry.url,
-            thumbnail: entry.thumbnail,
-            createdAt: entry.createdAt,
-          };
-
-          if (entry.id) {
-            createData.id = entry.id;
-          }
-
           await tx.upload.create({
-            data: createData,
+            data: {
+              ...(entry.id ? { id: entry.id } : {}),
+              userId,
+              name: entry.name,
+              type: entry.type,
+              url: entry.url,
+              thumbnail: entry.thumbnail,
+              createdAt: entry.createdAt,
+            },
           });
         }
-
         if (entry.id) {
           seenIds.add(entry.id);
         }
+      }
+      if (existingIds.size > 0) {
+        await tx.upload.deleteMany({
+          where: {
+            userId,
+            id: { in: Array.from(existingIds) },
+          },
+        });
       }
     });
 
@@ -110,8 +160,6 @@ export async function PUT(request: NextRequest) {
       where: { userId },
       orderBy: { createdAt: "desc" },
     });
-
-    console.log("[uploads] saved count", saved.length);
 
     return NextResponse.json({
       uploads: saved,
@@ -135,13 +183,27 @@ export async function DELETE(request: NextRequest) {
       return NextResponse.json({ error: "id and userId are required" }, { status: 400 });
     }
 
-    await prisma.upload.deleteMany({ where: { id, userId } });
+    if (supabaseServerClient) {
+      const { error } = await supabaseServerClient.from("Upload").delete().match({ id, userId });
+      if (error) {
+        throw error;
+      }
+      const { data, error: fetchError } = await supabaseServerClient
+        .from("Upload")
+        .select("*")
+        .eq("userId", userId)
+        .order("createdAt", { ascending: false });
+      if (fetchError) {
+        throw fetchError;
+      }
+      return NextResponse.json({ uploads: data ?? [] });
+    }
 
+    await prisma.upload.deleteMany({ where: { id, userId } });
     const uploads = await prisma.upload.findMany({
       where: { userId },
       orderBy: { createdAt: "desc" },
     });
-
     return NextResponse.json({ uploads });
   } catch (error: any) {
     return NextResponse.json({ error: error.message || "Failed to delete upload" }, { status: 500 });

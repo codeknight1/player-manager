@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { supabaseServerClient } from "@/app/lib/supabaseServer";
 import { prisma } from "@/app/lib/prisma";
 import bcrypt from "bcryptjs";
 
@@ -14,9 +15,33 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const user = await prisma.user.findUnique({
-      where: { email },
-    });
+    const normalizedEmail = (email as string).trim().toLowerCase();
+    let user:
+      | {
+          id: string;
+          email: string;
+          password: string | null;
+          name: string | null;
+          role: string;
+          isActive: boolean;
+        }
+      | null = null;
+    if (supabaseServerClient) {
+      const { data, error } = await supabaseServerClient
+        .from("User")
+        .select("id,email,password,name,role,isActive")
+        .eq("email", normalizedEmail)
+        .maybeSingle();
+      if (error && error.code !== "PGRST116") {
+        throw error;
+      }
+      user = data ?? null;
+    } else {
+      user = await prisma.user.findUnique({
+        where: { email: normalizedEmail },
+        select: { id: true, email: true, password: true, name: true, role: true, isActive: true },
+      });
+    }
 
     if (!user || !user.password) {
       return NextResponse.json(
@@ -48,6 +73,7 @@ export async function POST(request: NextRequest) {
       role: user.role,
     });
   } catch (error: any) {
+    console.error("[auth/login] error", error);
     return NextResponse.json(
       { error: "Failed to authenticate" },
       { status: 500 }

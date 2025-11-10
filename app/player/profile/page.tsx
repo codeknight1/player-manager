@@ -1,23 +1,16 @@
 "use client";
 
-import { useState, useEffect, useRef, ChangeEvent, useMemo } from "react";
+import { useState, useEffect, useRef, ChangeEvent } from "react";
 import { useSession } from "next-auth/react";
 import { motion } from "framer-motion";
 import { CollapsibleSidebar } from "@/components/layout/collapsible-sidebar";
 import { Modal } from "@/components/ui/modal";
-import { HouseIcon, UserIcon, UsersThreeIcon, ChatIcon, BellIcon, ShareIcon, HandshakeIcon, TrophyIcon, EyeIcon } from "@/components/icons";
+import { HouseIcon, UserIcon, UsersThreeIcon, ChatIcon, BellIcon, ShareIcon, HandshakeIcon, TrophyIcon } from "@/components/icons";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { apiGet, apiPost, apiPut, apiDelete } from "@/app/lib/api";
 import { toast } from "sonner";
 import { LogoutButton } from "@/components/auth/logout-button";
-import { usePlayerApplications } from "@/app/hooks/usePlayerApplications";
-import {
-  applicationStatusStyles,
-  formatApplicationStatus,
-  formatApplicationDate,
-  getApplicationTimestamp,
-} from "@/app/player/applications/utils";
 
 const sidebarItems = [
   {
@@ -29,11 +22,6 @@ const sidebarItems = [
     label: "My Profile",
     href: "/player/profile",
     icon: <UserIcon size={24} />,
-  },
-  {
-    label: "Trials",
-    href: "/explore-opportunities",
-    icon: <EyeIcon size={24} />,
   },
   {
     label: "Network",
@@ -69,7 +57,6 @@ const sidebarItems = [
 
 export default function PlayerProfilePage() {
   const { data: session } = useSession();
-  const userId = (session?.user as any)?.id;
   const [profile, setProfile] = useState({
     firstName: "",
     lastName: "",
@@ -116,16 +103,6 @@ export default function PlayerProfilePage() {
   const newCertificateInputRef = useRef<HTMLInputElement>(null);
   const newAchievementInputRef = useRef<HTMLInputElement>(null);
   const imageExtensions = [".png", ".jpg", ".jpeg", ".gif", ".webp", ".svg"];
-  const { applications, loading: applicationsLoading } = usePlayerApplications(userId);
-  const sortedApplications = useMemo(() => {
-    const entries = [...applications];
-    entries.sort((a, b) => {
-      const bDate = getApplicationTimestamp(b.trial?.date ?? b.createdAt);
-      const aDate = getApplicationTimestamp(a.trial?.date ?? a.createdAt);
-      return bDate - aDate;
-    });
-    return entries;
-  }, [applications]);
 
   async function handleDeleteUpload(uploadId: string) {
     const userId = (session?.user as any)?.id;
@@ -190,12 +167,13 @@ export default function PlayerProfilePage() {
       return;
     }
 
+    const userId = (session?.user as any)?.id;
     if (userId) {
       loadProfile(userId);
     } else {
       setLoading(false);
     }
-  }, [session, userId]);
+  }, [session]);
 
   function mapProfile(user: any) {
     const profileSource = (() => {
@@ -711,6 +689,7 @@ export default function PlayerProfilePage() {
     );
   }
 
+  const userId = (session?.user as any)?.id;
   if (!userId) {
     return (
       <div className="relative flex h-auto min-h-screen w-full flex-col bg-[#111a22] overflow-x-hidden">
@@ -730,7 +709,7 @@ export default function PlayerProfilePage() {
   return (
     <div className="relative flex h-auto min-h-screen w-full flex-col bg-[#111a22] overflow-x-hidden" style={{ fontFamily: 'Manrope, "Noto Sans", sans-serif' }}>
       <div className="layout-container flex h-full grow flex-col">
-        <div className="flex flex-1 flex-col lg:flex-row gap-6 px-3 md:px-4 py-4 md:py-5">
+        <div className="flex flex-1 flex-col lg:flex-row gap-6 px-4 md:px-6 py-5">
           <CollapsibleSidebar
             title="TalentVerse"
             user={{
@@ -742,8 +721,8 @@ export default function PlayerProfilePage() {
             showToggle={false}
           />
           <div className="layout-content-container flex w-full flex-col max-w-[960px] flex-1">
-            <div className="flex flex-col gap-1 px-3 pt-0 pb-2 md:flex-row md:items-center md:justify-between md:px-4 md:pt-2">
-              <div className="flex flex-col gap-1">
+            <div className="flex flex-col gap-4 p-4 md:flex-row md:items-center md:justify-between">
+              <div className="flex flex-col gap-2">
                 <p className="text-white tracking-light text-[32px] font-bold leading-tight">
                   My Profile
                 </p>
@@ -773,7 +752,7 @@ export default function PlayerProfilePage() {
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              className="flex items-center gap-6 px-4 py-3 md:px-6 rounded-lg border border-[#324d67] bg-[#192633] mx-3 mb-4 md:mx-4"
+              className="flex items-center gap-6 p-6 rounded-lg border border-[#324d67] bg-[#192633] m-4"
             >
               <div
                 className="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-32 border-2 border-[#324d67] shrink-0"
@@ -884,54 +863,6 @@ export default function PlayerProfilePage() {
                   </div>
                 )}
               </div>
-            </div>
-
-            <div className="p-4">
-              <h3 className="text-white text-xl font-bold mb-4">Trial Applications</h3>
-              {applicationsLoading ? (
-                <div className="rounded-lg border border-[#324d67] bg-[#192633] p-4 text-[#92adc9]">
-                  Loading applications...
-                </div>
-              ) : sortedApplications.length === 0 ? (
-                <div className="rounded-lg border border-[#324d67] bg-[#192633] p-4 text-[#92adc9] text-sm">
-                  No applications yet.
-                </div>
-              ) : (
-                <div className="flex flex-col gap-3">
-                  {sortedApplications.map((application) => {
-                    const trialTitle = application.trial?.title || "Unknown Trial";
-                    const subtitleParts = [application.trial?.city || "Unspecified city"];
-                    if (application.trial?.createdBy?.name) {
-                      subtitleParts.push(`Hosted by ${application.trial.createdBy.name}`);
-                    }
-                    const trialDate = formatApplicationDate(application.trial?.date ?? application.createdAt);
-                    if (trialDate) {
-                      subtitleParts.push(trialDate);
-                    }
-                    const statusKey = (application.status || "").toLowerCase();
-                    const badgeClass = applicationStatusStyles[statusKey] ?? applicationStatusStyles.default;
-                    const appliedDate = formatApplicationDate(application.createdAt);
-                    return (
-                      <div key={application.id} className="rounded-lg border border-[#324d67] bg-[#192633] p-4 flex flex-col gap-2">
-                        <div className="flex flex-wrap items-center justify-between gap-3">
-                          <div className="flex flex-col gap-1">
-                            <span className="text-white text-base font-semibold leading-tight">{trialTitle}</span>
-                            <span className="text-[#92adc9] text-sm">{subtitleParts.join(" • ")}</span>
-                          </div>
-                          <span className={`px-3 py-1 rounded-full text-xs font-semibold ${badgeClass}`}>
-                            {formatApplicationStatus(application.status)}
-                          </span>
-                        </div>
-                        {appliedDate && (
-                          <span className="text-[#6d859f] text-xs">
-                            Applied {appliedDate}
-                          </span>
-                        )}
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
             </div>
 
             {profile.uploads.length > 0 && (
