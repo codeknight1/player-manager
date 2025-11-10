@@ -1,10 +1,11 @@
 import { PrismaClient } from "@prisma/client";
 import { hash } from "bcryptjs";
 
-const prisma = new PrismaClient();
+const prisma = new PrismaClient();   
 
 async function main() {
   const demoPassword = await hash("demo123", 10);
+  const adminPassword = await hash("12345678@admin", 10);
 
   // Clear existing data
   await prisma.message.deleteMany();
@@ -46,6 +47,15 @@ async function main() {
       name: "Riverdale Academy",
       password: demoPassword,
       role: "ACADEMY",
+    },
+  });
+
+  await prisma.user.create({
+    data: {
+      email: "uthmanabdurrahman98@gmail.com",
+      name: "Platform Admin",
+      password: adminPassword,
+      role: "ADMIN",
     },
   });
 

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -18,27 +19,35 @@ export default function PlayerRegister() {
     password: "",
     confirmPassword: "",
   });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const router = useRouter();
 
   const totalSteps = 1;
   const progress = (step / totalSteps) * 100;
 
   const handleNext = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (isSubmitting) return;
     if (formData.password !== formData.confirmPassword) {
       toast.error("Passwords do not match");
       return;
     }
     try {
+      setIsSubmitting(true);
+      const firstName = formData.firstName.trim();
+      const lastName = formData.lastName.trim();
       await apiPost("auth/register", {
-        email: formData.email,
+        email: formData.email.trim(),
         password: formData.password,
-        name: `${formData.firstName} ${formData.lastName}`.trim(),
+        name: `${firstName} ${lastName}`.trim(),
         role: "PLAYER",
       });
       toast.success("Registration successful. Please log in.");
-      window.location.href = "/player/login";
+      router.push("/player/login");
     } catch (err: any) {
       toast.error(err?.message || "Registration failed");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -185,7 +194,7 @@ export default function PlayerRegister() {
                   />
                 </>
               )}
-              <Button type="submit" size="lg" className="w-full pt-2 mt-2">
+              <Button type="submit" size="lg" className="w-full pt-2 mt-2" disabled={isSubmitting}>
                 {step === totalSteps ? "Create Account" : "Next"}
               </Button>
             </form>

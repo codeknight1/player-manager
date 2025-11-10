@@ -13,20 +13,29 @@ import { toast } from "sonner";
 export default function PlayerLogin() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const result = await signIn("credentials", {
-      email,
-      password,
-      redirect: false,
-    });
-    if (result?.error) {
-      toast.error("Invalid credentials");
-    } else {
-      toast.success("Login successful!");
+    if (isSubmitting) return;
+    setIsSubmitting(true);
+    try {
+      const result = await signIn("credentials", {
+        email,
+        password,
+        redirect: false,
+      });
+      if (result?.error) {
+        toast.error(result.error);
+        return;
+      }
+      toast.success("Login successful");
       router.push("/player/dashboard");
+    } catch (error: any) {
+      toast.error(error?.message || "Login failed");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -119,7 +128,7 @@ export default function PlayerLogin() {
                   Forgot Password?
                 </Link>
               </div>
-              <Button type="submit" size="lg" className="w-full pt-2">
+              <Button type="submit" size="lg" className="w-full pt-2" disabled={isSubmitting}>
                 Log In
               </Button>
             </form>

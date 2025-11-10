@@ -8,23 +8,23 @@ datasource db {
 }
 
 model User {
-  id             String            @id @default(cuid())
-  email          String            @unique
-  name           String?
-  password       String?
-  profileData    String?
-  role           Role              @default(PLAYER)
-  isActive       Boolean           @default(true)
-  createdAt      DateTime          @default(now())
-  updatedAt      DateTime          @updatedAt
-  messagesFrom   Message[]         @relation("FromUser")
-  messagesTo     Message[]         @relation("ToUser")
-  applications   Application[]
-  notifications  Notification[]
-  verifications  Verification[]
-  uploads        Upload[]
-  payments       Payment[]
-  trialsCreated  Trial[]           @relation("TrialCreator")
+  id            String         @id @default(cuid())
+  email         String         @unique
+  name          String?
+  password      String?
+  profileData   String?
+  role          Role           @default(PLAYER)
+  isActive      Boolean        @default(true)
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  applications  Application[]
+  messagesFrom  Message[]      @relation("FromUser")
+  messagesTo    Message[]      @relation("ToUser")
+  notifications Notification[]
+  payments      Payment[]
+  trialsCreated Trial[]        @relation("TrialCreator")
+  uploads       Upload[]
+  verifications Verification[]
 }
 
 model Message {
@@ -38,39 +38,41 @@ model Message {
 }
 
 model Trial {
-  id        String   @id @default(cuid())
-  title     String
-  city      String
-  date      DateTime
-  fee       Float    @default(0)
+  id          String        @id @default(cuid())
+  title       String
+  city        String
+  date        DateTime
+  createdAt   DateTime      @default(now())
+  fee         Float         @default(0) @db.Real
   createdById String?
-  createdAt DateTime @default(now())
-  createdBy User?    @relation("TrialCreator", fields: [createdById], references: [id])
-  apps      Application[]
-  payments  Payment[]
+  apps        Application[]
+  payments    Payment[]
+  createdBy   User?         @relation("TrialCreator", fields: [createdById], references: [id])
+
+  @@index([createdById])
 }
 
 model Application {
-  id        String   @id @default(cuid())
+  id        String    @id @default(cuid())
   userId    String
   trialId   String
   status    AppStatus @default(PENDING)
   createdAt DateTime  @default(now())
-  user      User      @relation(fields: [userId], references: [id])
   trial     Trial     @relation(fields: [trialId], references: [id])
+  user      User      @relation(fields: [userId], references: [id])
 }
 
 model Payment {
   id        String   @id @default(cuid())
   userId    String
   trialId   String
-  amount    Float    @default(0)
+  amount    Float    @default(0) @db.Real
   currency  String   @default("USD")
   status    String   @default("DUE")
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  user      User     @relation(fields: [userId], references: [id])
-  trial     Trial    @relation(fields: [trialId], references: [id])
+  createdAt DateTime @default(now()) @db.Timestamp(6)
+  updatedAt DateTime @default(now()) @updatedAt @db.Timestamp(6)
+  trial     Trial    @relation(fields: [trialId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId, trialId])
 }

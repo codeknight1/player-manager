@@ -48,21 +48,21 @@ export function CollapsibleSidebar({
         <div className="flex flex-col gap-3">
           <button
             onClick={toggleCollapse}
-            className="flex items-center justify-center rounded-xl border border-[#233648] bg-[#192633] p-2 text-white hover:border-[#1172d4] hover:bg-[#1f2c3a] transition-colors"
+            className="flex items-center justify-center rounded-xl border border-[#233648] bg-[#192633] p-3 text-white hover:border-[#1172d4] hover:bg-[#1f2c3a] transition-colors"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
-              width="20"
-              height="20"
+              width="24"
+              height="24"
               viewBox="0 0 24 24"
               fill="none"
               stroke="currentColor"
-              strokeWidth="1.6"
+              strokeWidth="1.4"
               strokeLinecap="round"
               strokeLinejoin="round"
             >
-              <rect x="4" y="6" width="16" height="12" rx="4" />
-              <line x1="12" y1="6" x2="12" y2="18" />
+              <rect x="3.5" y="4.5" width="17" height="15" rx="5" />
+              <line x1="12" y1="6.5" x2="12" y2="17" />
             </svg>
           </button>
 
@@ -104,7 +104,7 @@ export function CollapsibleSidebar({
             </div>
           )}
           
-          <div className="flex flex-col gap-1.5">
+          <div className="flex flex-col gap-2">
             {!isCollapsed && items.map((item) => {
               const isActive = pathname === item.href;
               return (
@@ -112,7 +112,7 @@ export function CollapsibleSidebar({
                   key={item.href}
                   href={item.href}
                   className={clsx(
-                    "flex items-center gap-2 px-3 py-2 rounded-lg transition-colors",
+                    "flex items-center gap-3 px-3 py-2 rounded-lg transition-colors",
                     isActive
                       ? "bg-[#233648]"
                       : "hover:bg-[#192633]"
