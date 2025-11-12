@@ -1,4 +1,4 @@
-import { supabaseServerClient } from "@/app/lib/supabaseServer";
+import { prisma } from "@/app/lib/prisma";
 import { parseProfile } from "@/app/lib/profile-utils";
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
@@ -56,59 +56,47 @@ function normalizeUploadType(value: any) {
 }
 
 async function getPortfolioData(userId: string): Promise<PortfolioData | null> {
-  const { data: user, error: userError } = await supabaseServerClient
-    .from("User")
-    .select("id,name,email,profileData")
-    .eq("id", userId)
-    .maybeSingle();
+  try {
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { id: true, name: true, email: true, profileData: true },
+    });
 
-  if (userError && userError.code !== "PGRST116") {
-    throw userError;
-  }
+    if (!user) {
+      return null;
+    }
 
-  if (!user) {
+    const uploads = await prisma.upload.findMany({
+      where: { userId },
+      orderBy: { createdAt: "desc" },
+    }).catch(() => []);
+
+    const parsed = parseProfile(user.profileData ?? null, {
+      name: user.name,
+      email: user.email,
+    });
+
+    const normalizedUploads = uploads.map((upload) => ({
+      id: upload.id,
+      name: upload.name ?? "",
+      type: normalizeUploadType(upload.type),
+      url: upload.url ?? "",
+      thumbnail: upload.thumbnail ?? "",
+      createdAt: upload.createdAt.toISOString(),
+    }));
+
+    return {
+      name: user.name,
+      email: user.email,
+      profile: {
+        ...parsed,
+        uploads: normalizedUploads.length > 0 ? normalizedUploads : (parsed.uploads || []),
+      },
+    };
+  } catch (error) {
+    console.error("[portfolio] Error fetching portfolio data:", error);
     return null;
   }
-
-  const { data: uploads, error: uploadsError } = await supabaseServerClient
-    .from("Upload")
-    .select("*")
-    .eq("userId", userId)
-    .order("createdAt", { ascending: false });
-
-  if (uploadsError) {
-    throw uploadsError;
-  }
-
-  const parsed = parseProfile(user.profileData ?? null, {
-    name: user.name,
-    email: user.email,
-  });
-
-  const normalizedUploads = (uploads ?? []).map((upload) => ({
-    id: upload.id,
-    name: upload.name ?? "",
-    type: normalizeUploadType(upload.type),
-    url: upload.url ?? "",
-    thumbnail: upload.thumbnail ?? "",
-    createdAt: (() => {
-      const value = upload.createdAt;
-      if (!value) {
-        return new Date().toISOString();
-      }
-      const date = new Date(value as any);
-      return Number.isNaN(date.getTime()) ? new Date().toISOString() : date.toISOString();
-    })(),
-  }));
-
-  return {
-    name: user.name,
-    email: user.email,
-    profile: {
-      ...parsed,
-      uploads: normalizedUploads.length ? normalizedUploads : parsed.uploads,
-    },
-  };
 }
 
 function extractYouTubeId(url: string) {

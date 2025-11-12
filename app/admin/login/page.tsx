@@ -20,18 +20,17 @@ export default function AdminLogin() {
       email,
       password,
       redirect: false,
+      callbackUrl: "/admin/dashboard",
     });
     if (result?.error) {
       toast.error("Invalid credentials");
     } else {
-      const session = await fetch("/api/auth/session").then(r => r.json());
-      if (session?.user?.role === "ADMIN") {
+      if (result?.url) {
         toast.success("Login successful!");
-        router.push("/admin/dashboard");
-      } else {
-        toast.error("Access denied. Admin only.");
-        await signIn("signout");
+        router.push(result.url);
+        return;
       }
+      toast.error("Unexpected response. Please try again.");
     }
   };
 
@@ -81,6 +80,8 @@ export default function AdminLogin() {
     </div>
   );
 }
+
+
 
 
 
