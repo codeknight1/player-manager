@@ -175,7 +175,8 @@ export default function TournamentsPage() {
   }
 
   async function registerTeam(id: number) {
-    if (!registerName.trim() || !session?.user?.id) {
+    const userId = (session?.user as any)?.id;
+    if (!registerName.trim() || !userId) {
       toast.error("Enter team name");
       return;
     }
