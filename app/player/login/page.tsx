@@ -44,7 +44,7 @@ export default function PlayerLogin() {
       <div className="flex flex-1 flex-col md:flex-row">
         <div className="hidden md:flex md:w-1/2 relative overflow-hidden bg-[#111a22]">
           <Image
-            src="/professional-footballer-in-action-portrait-stadium.jpg"
+            src="/p.jpg"
             alt="Professional footballer in action"
             fill
             className="object-cover"

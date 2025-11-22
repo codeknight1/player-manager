@@ -1,10 +1,9 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { Toaster } from "sonner";
-import { Header } from "@/components/layout/header";
+import { ConditionalHeader } from "@/components/layout/conditional-header";
 import { Providers } from "@/components/providers";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
-import Image from "next/image";
 
 export const metadata: Metadata = {
   title: "PPM - Professional Player Management",
@@ -41,27 +40,9 @@ export default function RootLayout({
       <body className="antialiased">
         <Providers>
           <ErrorBoundary>
-            <div className="layout-container flex h-full min-h-screen flex-col bg-[#111a22]">
-              <Header
-                title=""
-                logo={
-                  <Image src="/PPM LOGO.png" alt="PPM" width={120} height={28} priority />
-                }
-                navItems={[
-                  { label: "For Players", href: "/for-players" },
-                  { label: "For Clubs/Agents", href: "/for-clubs" },
-                  { label: "For Partners/Academies", href: "/for-partners" },
-                ]}
-                rightAction={
-                  <a
-                    href="/player/login"
-                    className="flex min-w-[84px] items-center justify-center rounded-lg h-10 px-4 bg-[#233648] text-white text-sm font-bold leading-normal tracking-[0.015em]"
-                  >
-                    Log In
-                  </a>
-                }
-              />
-              <main className="flex-1">
+            <div className="layout-container flex h-full min-h-screen flex-col">
+              <ConditionalHeader />
+              <main className="flex-1 bg-[#111a22]">
                 {children}
               </main>
             </div>

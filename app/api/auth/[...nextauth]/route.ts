@@ -15,7 +15,7 @@ function resolveAuthUrl() {
   return `${trimmed}/api/auth/login`;
 }
 
-export const authOptions: NextAuthOptions = {
+const authOptions: NextAuthOptions = {
   providers: [
     CredentialsProvider({
       name: "Credentials",
