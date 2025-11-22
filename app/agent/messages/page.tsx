@@ -113,11 +113,11 @@ export default function AgentMessagesPage() {
     const userId = (session?.user as any)?.id;
     if (!userId) return;
     try {
-      const all = await apiGet(`messages?userId=${(session.user as any).id}`);
+      const all = await apiGet(`messages?userId=${userId}`);
       const map = new Map<string, any>();
       all.forEach((msg: any) => {
-        const otherId = msg.fromId === (session.user as any).id ? msg.toId : msg.fromId;
-        const other = msg.fromId === (session.user as any).id ? msg.to : msg.from;
+        const otherId = msg.fromId === userId ? msg.toId : msg.fromId;
+        const other = msg.fromId === userId ? msg.to : msg.from;
         if (!map.has(otherId)) {
           map.set(otherId, {
             id: otherId,
@@ -141,13 +141,14 @@ export default function AgentMessagesPage() {
   }
 
   async function loadConversationMessages() {
-    if (!selectedConversation || !session?.user?.id) return;
+    const userId = (session?.user as any)?.id;
+    if (!selectedConversation || !userId) return;
     try {
-      const all = await apiGet(`messages?userId=${(session.user as any).id}`);
+      const all = await apiGet(`messages?userId=${userId}`);
       const filtered = all.filter(
         (msg: any) =>
-          (msg.fromId === selectedConversation && msg.toId === (session.user as any).id) ||
-          (msg.toId === selectedConversation && msg.fromId === (session.user as any).id)
+          (msg.fromId === selectedConversation && msg.toId === userId) ||
+          (msg.toId === selectedConversation && msg.fromId === userId)
       );
       setMessages(filtered.sort((a: any, b: any) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()));
     } catch (err) {
@@ -156,10 +157,11 @@ export default function AgentMessagesPage() {
   }
 
   async function handleSend() {
-    if (!message.trim() || !selectedConversation || !session?.user?.id) return;
+    const userId = (session?.user as any)?.id;
+    if (!message.trim() || !selectedConversation || !userId) return;
     try {
       await apiPost("messages", {
-        fromId: (session.user as any).id,
+        fromId: userId,
         toId: selectedConversation,
         content: message,
       });

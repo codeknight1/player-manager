@@ -156,7 +156,7 @@ export default function TournamentsPage() {
         city: draft.location.trim(),
         date: draft.date,
         fee: parseFloat(draft.fee) || 0,
-        createdById: session.user.id,
+        createdById: userId,
       };
       console.log("Creating tournament with payload:", payload);
       await apiPost("trials", payload);

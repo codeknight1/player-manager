@@ -76,7 +76,7 @@ async function getPortfolioData(userId: string): Promise<PortfolioData | null> {
       email: user.email,
     });
 
-    const normalizedUploads = uploads.map((upload) => ({
+    const normalizedUploads = uploads.map((upload: any) => ({
       id: upload.id,
       name: upload.name ?? "",
       type: normalizeUploadType(upload.type),
@@ -140,12 +140,12 @@ export default async function PortfolioPage({ params }: PortfolioPageProps) {
 
   const profile = data.profile;
   const uploads = Array.isArray(profile.uploads) ? profile.uploads : [];
-  const videos = uploads.filter((upload) => upload.type === "video" && upload.url);
+  const videos = uploads.filter((upload: any) => upload.type === "video" && upload.url);
   const featuredVideo = videos[0];
   const featuredVideoId = featuredVideo ? extractYouTubeId(featuredVideo.url ?? "") : null;
   const secondaryVideos = videos.slice(1);
-  const certificates = uploads.filter((upload) => upload.type === "certificate");
-  const achievements = uploads.filter((upload) => upload.type === "achievement");
+  const certificates = uploads.filter((upload: any) => upload.type === "certificate");
+  const achievements = uploads.filter((upload: any) => upload.type === "achievement");
 
   const statBlocks = [
     { label: "Goals", value: profile.stats.goals || 0 },
@@ -209,7 +209,7 @@ export default async function PortfolioPage({ params }: PortfolioPageProps) {
           <section>
             <h2 className="text-xl font-bold">More Videos</h2>
             <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2">
-              {secondaryVideos.map((video) => (
+              {secondaryVideos.map((video: any) => (
                 <article key={video.id} className="rounded-2xl border border-[#233648] bg-[#192633] p-4 shadow-lg shadow-[#0b1824]/20">
                   <div className="flex flex-col gap-3">
                     <a
@@ -250,7 +250,7 @@ export default async function PortfolioPage({ params }: PortfolioPageProps) {
         <section>
           <h2 className="text-xl font-bold">Statistics</h2>
           <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-3">
-            {statBlocks.map((stat) => (
+            {statBlocks.map((stat: any) => (
               <div key={stat.label} className="rounded-xl border border-[#233648] bg-[#192633] p-6">
                 <p className="text-sm text-[#92adc9]">{stat.label}</p>
                 <p className="mt-2 text-3xl font-bold">{stat.value}</p>
@@ -303,7 +303,7 @@ export default async function PortfolioPage({ params }: PortfolioPageProps) {
           <section>
             <h2 className="text-xl font-bold">Certificates</h2>
             <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2">
-              {certificates.map((certificate) => (
+              {certificates.map((certificate: any) => (
                 <article key={certificate.id} className="flex items-start gap-4 rounded-2xl border border-[#233648] bg-[#192633] p-5 shadow-lg shadow-[#0b1824]/20">
                   <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-xl border border-dashed border-[#324d67] bg-[#0c141b] text-xs font-semibold uppercase tracking-widest text-[#92adc9]">
                     PDF
@@ -337,7 +337,7 @@ export default async function PortfolioPage({ params }: PortfolioPageProps) {
           <section>
             <h2 className="text-xl font-bold">Achievements</h2>
             <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2">
-              {achievements.map((achievement) => {
+              {achievements.map((achievement: any) => {
                 const imagePreview = isImageSource(achievement.thumbnail || achievement.url || "") ? (achievement.thumbnail || achievement.url || "") : null;
                 const pdfAttached = isPdfSource(achievement.url);
                 return (

@@ -540,13 +540,17 @@ export default function PlayerProfilePage() {
     }));
   }
 
-  function handleUploadAsset(uploadId: string, type: "certificate" | "achievement", file: File) {
+  function handleUploadAsset(uploadId: string, type: "certificate" | "achievement" | "video", file: File) {
     if (type === "certificate" && file.type !== "application/pdf") {
       toast.error("Certificates must be PDF files");
       return;
     }
     if (type === "achievement" && !(file.type === "application/pdf" || file.type.startsWith("image/"))) {
       toast.error("Achievements support images or PDF files");
+      return;
+    }
+    if (type === "video" && !file.type.startsWith("video/")) {
+      toast.error("Videos must be video files");
       return;
     }
     const reader = new FileReader();
@@ -582,7 +586,7 @@ export default function PlayerProfilePage() {
     reader.readAsDataURL(file);
   }
 
-  function handleFileInputChange(event: ChangeEvent<HTMLInputElement>, uploadId: string, type: "certificate" | "achievement") {
+  function handleFileInputChange(event: ChangeEvent<HTMLInputElement>, uploadId: string, type: "certificate" | "achievement" | "video") {
     const file = event.target.files?.[0];
     event.target.value = "";
     if (!file) {
@@ -905,7 +909,7 @@ export default function PlayerProfilePage() {
                             <a href={u.url} target="_blank" rel="noreferrer" className="text-xs text-[#1172d4] underline">Open</a>
                           )}
                         </div>
-                        <Button variant="ghost" size="sm" onClick={() => handleDeleteUpload(u.id)}>
+                        <Button variant="outline" size="sm" onClick={() => handleDeleteUpload(u.id)}>
                           Delete
                         </Button>
                       </div>

@@ -1,6 +1,6 @@
 import React from "react";
 
-type IconProps = { size?: number; weight?: "regular" | "fill" };
+type IconProps = { size?: number; weight?: "regular" | "fill"; className?: string };
 
 export function HouseIcon({ size = 24 }: IconProps) {
   return (
@@ -92,9 +92,9 @@ export function CreditCardIcon({ size = 24 }: IconProps) {
   );
 }
 
-export function PaperclipIcon({ size = 24 }: IconProps) {
+export function PaperclipIcon({ size = 24, className }: IconProps) {
   return (
-    <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} fill="currentColor" viewBox="0 0 256 256">
+    <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} fill="currentColor" viewBox="0 0 256 256" className={className}>
       <path d="M200,88l-88,88a40,40,0,0,1-56.57-56.57l96-96A32,32,0,0,1,200,80L120,160a24,24,0,1,1-33.94-33.94L168,44" stroke="currentColor" strokeWidth="16" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
     </svg>
   );
