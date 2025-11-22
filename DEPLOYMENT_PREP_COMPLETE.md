@@ -26,13 +26,16 @@ git commit -m "Ready for deployment v1.0"
 git push origin main
 ```
 
-### 3. Set Up Database
+### 3. Database Setup ✅
 
-Choose one:
-- **Vercel Postgres** (easiest, auto-provisioned)
-- **Neon** (neon.tech - free tier)
-- **Supabase** (supabase.com - free tier)
-- **Railway PostgreSQL** (railway.app - free tier)
+**You're already using Xata!** Your database is configured and ready.
+
+**Connection String:**
+```
+postgresql://nrkp53:...@us-east-1.sql.xata.sh:5432/ppm:main?sslmode=require
+```
+
+See `XATA_SETUP.md` for full Xata configuration details.
 
 ### 4. Deploy to Platform
 
@@ -44,19 +47,37 @@ Choose one:
 
 ### 5. Required Environment Variables
 
-Set these in your deployment platform:
+Set these in your deployment platform (Vercel):
 
 ```env
-DATABASE_URL=postgresql://user:password@host:5432/dbname
-NEXTAUTH_SECRET=your-32-character-secret-here
+# Xata Database (you already have this)
+DATABASE_URL=postgresql://nrkp53:xau_9kZQqifpREevDbvUHoIw6D2G5GIAmDVh1@us-east-1.sql.xata.sh:5432/ppm:main?sslmode=require
+DIRECT_URL=postgresql://nrkp53:xau_9kZQqifpREevDbvUHoIw6D2G5GIAmDVh1@us-east-1.sql.xata.sh:5432/ppm:main?sslmode=require
+
+# NextAuth.js
+NEXTAUTH_SECRET=generate-a-new-32-character-secret
 NEXTAUTH_URL=https://your-domain.vercel.app
+
+# Xata API (optional)
+XATA_API_KEY=xau_9kZQqifpREevDbvUHoIw6D2G5GIAmDVh1
+XATA_REST_URL=https://Codeknight-s-workspace-nrkp53.us-east-1.xata.sh/db/ppm:main
+XATA_BRANCH=main
 ```
 
+**Note:** Generate a NEW `NEXTAUTH_SECRET` for production (don't use the default one).
+
 **Generate NEXTAUTH_SECRET:**
-```bash
+```powershell
 # Windows PowerShell
 -join ((48..57) + (65..90) + (97..122) | Get-Random -Count 32 | ForEach-Object {[char]$_})
 ```
+
+Or use OpenSSL:
+```bash
+openssl rand -base64 32
+```
+
+**⚠️ Important:** Generate a NEW secret for production, don't use the default one!
 
 ### 6. Run Database Migrations
 

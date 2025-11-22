@@ -40,7 +40,7 @@ export default function Home() {
           >
             <div className="relative h-64 w-full overflow-hidden">
               <Image
-                src="/1.jpg"
+                src="/p.jpg"
                 alt="Player"
                 fill
                 className="object-cover object-center"

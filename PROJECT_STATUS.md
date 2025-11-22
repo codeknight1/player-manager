@@ -9,10 +9,11 @@
 ## ✅ Completed Features
 
 ### 1. **Backend Infrastructure**
-- ✅ Prisma ORM with SQLite (production-ready for PostgreSQL)
-- ✅ NextAuth.js v5 authentication
+- ✅ Next.js API Routes (full-stack)
+- ✅ Prisma ORM with SQLite (dev) / PostgreSQL (production)
+- ✅ NextAuth.js v4 authentication
 - ✅ Role-based access control (RBAC)
-- ✅ API routes for all features
+- ✅ Complete API routes for all features
 - ✅ Database schema with relations
 - ✅ Comprehensive seed data
 

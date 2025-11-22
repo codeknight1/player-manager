@@ -30,9 +30,9 @@ A comprehensive platform connecting players, agents, clubs, and academies for ta
 ## 🛠️ Tech Stack
 
 - **Frontend:** Next.js 14 (App Router), React, TypeScript, Tailwind CSS
-- **Backend:** Next.js API Routes, Prisma ORM
-- **Database:** SQLite (dev) / PostgreSQL (production ready)
-- **Authentication:** NextAuth.js v5
+- **Backend:** Next.js API Routes (full-stack Next.js)
+- **Database:** Prisma ORM with SQLite (dev) / PostgreSQL (production)
+- **Authentication:** NextAuth.js v4
 - **Real-time:** Polling-based updates (ready for WebSocket upgrade)
 - **UI Components:** Custom components with Framer Motion animations
 - **Notifications:** Sonner toast notifications
@@ -107,13 +107,15 @@ All demo users have password: `demo123`
 ```
 ppm/
 ├── app/
-│   ├── api/              # API routes
+│   ├── api/              # Next.js API Routes
 │   │   ├── auth/         # NextAuth.js handlers
 │   │   ├── profile/      # User profiles
 │   │   ├── trials/       # Trials management
 │   │   ├── applications/ # Applications
 │   │   ├── messages/     # Messaging
-│   │   └── notifications/# Notifications
+│   │   ├── notifications/# Notifications
+│   │   ├── payments/     # Payments
+│   │   └── users/        # User management
 │   ├── player/           # Player pages
 │   ├── agent/            # Agent/Club pages
 │   ├── academy/          # Academy/Partner pages

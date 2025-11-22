@@ -22,8 +22,8 @@
 
 ### Tech Stack
 - **Frontend:** Next.js 14 (App Router), React 18, TypeScript, Tailwind CSS
-- **Backend:** Express.js (separate server) + Next.js API Routes
-- **Database:** Prisma ORM with PostgreSQL (SQLite for dev)
+- **Backend:** Next.js API Routes (full-stack Next.js)
+- **Database:** Prisma ORM with SQLite (dev) / PostgreSQL (production)
 - **Authentication:** NextAuth.js v4
 - **Real-time:** Polling-based (5s messages, 30s notifications)
 - **File Storage:** Supabase (configured but not fully integrated)
@@ -33,22 +33,25 @@
 ppm/
 ├── app/                    # Next.js App Router
 │   ├── api/               # Next.js API Routes
+│   │   ├── auth/          # NextAuth.js handlers
+│   │   ├── profile/       # User profiles
+│   │   ├── trials/        # Trials management
+│   │   ├── applications/  # Applications
+│   │   ├── messages/      # Messaging
+│   │   ├── notifications/ # Notifications
+│   │   ├── payments/      # Payments
+│   │   └── users/         # User management
 │   ├── player/            # Player dashboard pages
 │   ├── agent/             # Agent dashboard pages
 │   ├── academy/           # Academy dashboard pages
 │   ├── admin/             # Admin dashboard pages
 │   └── lib/               # Utilities (api.ts, prisma.ts)
-├── backend/               # Express.js backend server
-│   ├── src/
-│   │   ├── routes/        # Express route handlers
-│   │   └── services/      # Prisma, Supabase services
-│   └── prisma/
-│       └── schema.prisma  # Database schema
 ├── components/            # React components
 │   ├── layout/            # Sidebar, Header
 │   ├── ui/                # UI components
 │   └── auth/              # Auth components
-└── prisma/                # Prisma config (root level)
+└── prisma/                # Prisma schema & migrations
+    └── schema.prisma      # Database schema
 ```
 
 ---
@@ -210,11 +213,11 @@ Some routes exist in Next.js app directory but may be unused if Express backend 
 - `/app/api/uploads/route.ts` ✅
 - `/app/api/connections/route.ts` ⚠️
 
-**Missing Next.js Routes:**
-- `/app/api/trials/route.ts` ❌ (uses Express backend)
-- `/app/api/applications/route.ts` ❌ (uses Express backend)
-- `/app/api/users/route.ts` ❌ (uses Express backend)
-- `/app/api/payments/route.ts` ❌ (uses Express backend)
+**All Next.js Routes:**
+- `/app/api/trials/route.ts` ✅
+- `/app/api/applications/route.ts` ✅
+- `/app/api/users/route.ts` ✅
+- `/app/api/payments/route.ts` ✅
 
 ---
 
