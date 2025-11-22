@@ -31,7 +31,8 @@ export default function AcademyAnalyticsPage() {
   const [recentInterests, setRecentInterests] = useState<any[]>([]);
 
   useEffect(() => {
-    if (session?.user?.id) {
+    const userId = (session?.user as any)?.id;
+    if (userId) {
       loadAnalytics();
       const interval = setInterval(loadAnalytics, 30000);
       return () => clearInterval(interval);
