@@ -120,7 +120,8 @@ export default function PlayersPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (session?.user?.id) {
+    const userId = (session?.user as any)?.id;
+    if (userId) {
       loadPlayers();
     }
   }, [session]);
