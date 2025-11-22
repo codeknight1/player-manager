@@ -2,10 +2,10 @@ import { PrismaClient } from "@prisma/client";
 
 const globalForPrisma = globalThis as unknown as { prisma: PrismaClient | undefined };
 
-const databaseUrl = process.env.DATABASE_URL_POSTGRES || process.env.DATABASE_URL;
+const databaseUrl = process.env.DATABASE_URL;
 
 if (!databaseUrl) {
-  console.error("Missing DATABASE_URL_POSTGRES or DATABASE_URL environment variable");
+  console.error("Missing DATABASE_URL environment variable");
 }
 
 export const prisma = globalForPrisma.prisma ?? new PrismaClient({

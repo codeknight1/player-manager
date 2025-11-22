@@ -5,7 +5,6 @@ import bcrypt from "bcryptjs";
 
 export async function POST(request: NextRequest) {
   try {
-    console.log("DATABASE_URL_POSTGRES", process.env.DATABASE_URL_POSTGRES);
     const body = await request.json();
     const { email, password } = body;
 

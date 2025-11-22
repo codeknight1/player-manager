@@ -15,7 +15,7 @@ async function handleResponse(res: Response) {
   return data;
 }
 
-const API_BASE = (process.env.NEXT_PUBLIC_API_BASE || process.env.NEXTAUTH_URL || "").replace(/\/$/, "");
+const API_BASE = (process.env.NEXT_PUBLIC_API_BASE || "").replace(/\/$/, "");
 
 function buildUrl(endpoint: string) {
   const normalized = endpoint.startsWith("/") ? endpoint.slice(1) : endpoint;

@@ -7,6 +7,8 @@ import { Sidebar } from "@/components/layout/sidebar";
 import { HouseIcon, TrophyIcon, UserIcon, HandshakeIcon, UsersThreeIcon, ChartBarIcon, ShieldCheckIcon } from "@/components/icons";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { Modal } from "@/components/ui/modal";
+import { Input } from "@/components/ui/input";
 import { apiGet, apiPost } from "@/app/lib/api";
 import { toast } from "sonner";
 
@@ -96,9 +98,10 @@ export default function TournamentsPage() {
   const { data: session } = useSession();
   const [list, setList] = useState<Tour[]>([]);
   const [showCreate, setShowCreate] = useState(false);
-  const [draft, setDraft] = useState({ name: "", category: "U17 Boys", date: "", location: "", participants: "16" });
+  const [draft, setDraft] = useState({ name: "", category: "U17 Boys", date: "", location: "", participants: "16", fee: "0" });
   const [registerName, setRegisterName] = useState("");
   const [loading, setLoading] = useState(true);
+  const [creating, setCreating] = useState(false);
 
   useEffect(() => {
     if (session?.user?.id) {
@@ -132,18 +135,40 @@ export default function TournamentsPage() {
       toast.error("Please log in");
       return;
     }
+    if (!draft.name.trim()) {
+      toast.error("Tournament name is required");
+      return;
+    }
+    if (!draft.location.trim()) {
+      toast.error("Location is required");
+      return;
+    }
+    if (!draft.date) {
+      toast.error("Date is required");
+      return;
+    }
+    setCreating(true);
     try {
-      await apiPost("trials", {
-        title: draft.name || "New Tournament",
-        city: draft.location || "TBD",
-        date: draft.date || new Date().toISOString(),
-      });
-      toast.success("Tournament created!");
+      const payload = {
+        title: draft.name.trim(),
+        city: draft.location.trim(),
+        date: draft.date,
+        fee: parseFloat(draft.fee) || 0,
+        createdById: session.user.id,
+      };
+      console.log("Creating tournament with payload:", payload);
+      await apiPost("trials", payload);
+      toast.success("Tournament created successfully!");
       setShowCreate(false);
-      setDraft({ name: "", category: "U17 Boys", date: "", location: "", participants: "16" });
+      setDraft({ name: "", category: "U17 Boys", date: "", location: "", participants: "16", fee: "0" });
       loadTournaments();
     } catch (err: any) {
-      toast.error(err.message || "Failed to create tournament");
+      console.error("Error creating tournament:", err);
+      const errorMsg = err.message || err.error || "Failed to create tournament";
+      const details = err.details || err.code;
+      toast.error(details ? `${errorMsg}: ${details}` : errorMsg);
+    } finally {
+      setCreating(false);
     }
   }
 
@@ -279,26 +304,112 @@ export default function TournamentsPage() {
                   ))}
               </div>
             </div>
-            {showCreate && (
-              <div className="p-4">
-                <div className="rounded-lg border border-[#324d67] bg-[#192633] p-4 grid grid-cols-1 md:grid-cols-5 gap-3">
-                  <input className="bg-[#111a22] border border-[#324d67] rounded px-3 py-2 text-white" placeholder="Name" value={draft.name} onChange={(e) => setDraft({ ...draft, name: e.target.value })} />
-                  <select className="bg-[#111a22] border border-[#324d67] rounded px-3 py-2 text-white" value={draft.category} onChange={(e) => setDraft({ ...draft, category: e.target.value })}>
-                    <option>U15 Girls</option>
-                    <option>U16 Mixed</option>
-                    <option>U17 Boys</option>
-                    <option>U19 Boys</option>
-                  </select>
-                  <input type="date" className="bg-[#111a22] border border-[#324d67] rounded px-3 py-2 text-white" value={draft.date} onChange={(e) => setDraft({ ...draft, date: e.target.value })} />
-                  <input className="bg-[#111a22] border border-[#324d67] rounded px-3 py-2 text-white" placeholder="Location" value={draft.location} onChange={(e) => setDraft({ ...draft, location: e.target.value })} />
-                  <input type="number" className="bg-[#111a22] border border-[#324d67] rounded px-3 py-2 text-white" placeholder="Participants" value={draft.participants} onChange={(e) => setDraft({ ...draft, participants: e.target.value })} />
-                  <div className="col-span-full flex justify-end gap-2">
-                    <button className="h-10 px-4 rounded-lg border border-[#324d67] text-white" onClick={() => setShowCreate(false)}>Cancel</button>
-                    <button className="h-10 px-4 rounded-lg bg-[#1172d4] text-white" onClick={createTournament}>Create</button>
+            <Modal
+              isOpen={showCreate}
+              onClose={() => {
+                setShowCreate(false);
+                setDraft({ name: "", category: "U17 Boys", date: "", location: "", participants: "16", fee: "0" });
+              }}
+              title="Create New Tournament"
+              footer={
+                <div className="flex justify-end gap-3">
+                  <Button
+                    variant="secondary"
+                    onClick={() => {
+                      setShowCreate(false);
+                      setDraft({ name: "", category: "U17 Boys", date: "", location: "", participants: "16", fee: "0" });
+                    }}
+                    disabled={creating}
+                  >
+                    Cancel
+                  </Button>
+                  <Button onClick={createTournament} disabled={creating}>
+                    {creating ? "Creating..." : "Create Tournament"}
+                  </Button>
+                </div>
+              }
+            >
+              <div className="flex flex-col gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-[#92adc9] text-sm font-medium mb-2">
+                      Tournament Name *
+                    </label>
+                    <Input
+                      placeholder="Enter tournament name"
+                      value={draft.name}
+                      onChange={(e) => setDraft({ ...draft, name: e.target.value })}
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[#92adc9] text-sm font-medium mb-2">
+                      Category
+                    </label>
+                    <select
+                      className="w-full bg-[#111a22] border border-[#324d67] rounded-lg px-3 py-2 text-white focus:outline-none focus:border-[#1172d4]"
+                      value={draft.category}
+                      onChange={(e) => setDraft({ ...draft, category: e.target.value })}
+                    >
+                      <option>U15 Girls</option>
+                      <option>U16 Mixed</option>
+                      <option>U17 Boys</option>
+                      <option>U19 Boys</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-[#92adc9] text-sm font-medium mb-2">
+                      Date *
+                    </label>
+                    <Input
+                      type="date"
+                      value={draft.date}
+                      onChange={(e) => setDraft({ ...draft, date: e.target.value })}
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[#92adc9] text-sm font-medium mb-2">
+                      Location *
+                    </label>
+                    <Input
+                      placeholder="Enter location"
+                      value={draft.location}
+                      onChange={(e) => setDraft({ ...draft, location: e.target.value })}
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[#92adc9] text-sm font-medium mb-2">
+                      Entry Fee (USD)
+                    </label>
+                    <Input
+                      type="number"
+                      placeholder="0.00"
+                      value={draft.fee}
+                      onChange={(e) => setDraft({ ...draft, fee: e.target.value })}
+                      min="0"
+                      step="0.01"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[#92adc9] text-sm font-medium mb-2">
+                      Max Participants
+                    </label>
+                    <Input
+                      type="number"
+                      placeholder="16"
+                      value={draft.participants}
+                      onChange={(e) => setDraft({ ...draft, participants: e.target.value })}
+                      min="1"
+                    />
                   </div>
                 </div>
+                <p className="text-[#92adc9] text-xs mt-2">
+                  * Required fields
+                </p>
               </div>
-            )}
+            </Modal>
           </div>
         </div>
       </div>

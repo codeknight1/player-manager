@@ -13,9 +13,9 @@ npm install
 Create a file named `.env.local` in the root directory:
 
 ```env
+DATABASE_URL="file:./prisma/dev.db"
 NEXTAUTH_SECRET="change-this-to-any-random-32-character-string"
 NEXTAUTH_URL="http://localhost:3000"
-NEXT_PUBLIC_API_BASE="http://localhost:4000"
 ```
 
 **Quick secret generator:**
@@ -24,15 +24,11 @@ NEXT_PUBLIC_API_BASE="http://localhost:4000"
 -join ((48..57) + (65..90) + (97..122) | Get-Random -Count 32 | ForEach-Object {[char]$_})
 ```
 
-### 3. Start Backend (PostgreSQL + Express)
-```
-cd backend
-npm install
-$env:DATABASE_URL="postgresql://<user>:<password>@localhost:5432/ppm?schema=public"
+### 3. Initialize Database
+```bash
 npm run db:generate
 npm run db:push
 npm run db:seed
-npm run dev  # http://localhost:4000
 ```
 
 ### 4. Start Development Server
@@ -94,6 +90,7 @@ After seeding, you'll have:
 - Restart dev server after creating `.env.local`
 
 **Database errors?**
+- Run: `npm run db:generate` to generate Prisma client
 - Run: `npm run db:push` to sync schema
 - Run: `npm run db:seed` to populate data
 
