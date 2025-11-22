@@ -135,7 +135,7 @@ export default function PlayerLogin() {
 
             <div className="text-center">
               <p className="text-[#92adc9] text-sm">
-                Don't have an account?{" "}
+                Don&apos;t have an account?{" "}
                 <Link href="/player/register" className="text-[#1172d4] hover:underline font-semibold">
                   Sign Up
                 </Link>

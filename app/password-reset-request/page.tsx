@@ -29,7 +29,7 @@ export default function PasswordResetRequest() {
               Reset your password
             </h2>
             <p className="text-[#92adc9] text-sm font-normal leading-normal px-4 text-center pb-6">
-              Enter your email address and we'll send you a link to reset your password.
+              Enter your email address and we&apos;ll send you a link to reset your password.
             </p>
             <form onSubmit={handleSubmit} className="flex flex-col gap-4">
               <div className="flex max-w-[480px] flex-wrap items-end gap-4 px-4 py-3">

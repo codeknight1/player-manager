@@ -98,7 +98,7 @@ export default function AgentLogin() {
               href="/agent/register"
               className="text-[#92adc9] text-sm font-normal leading-normal pb-3 pt-1 px-4 text-center underline"
             >
-              Don't have an account? Sign Up
+              Don&apos;t have an account? Sign Up
             </Link>
           </motion.div>
         </div>
