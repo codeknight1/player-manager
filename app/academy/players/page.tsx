@@ -152,7 +152,8 @@ export default function PlayersPage() {
   }
 
   async function addPlayer() {
-    if (!session?.user?.id) {
+    const userId = (session?.user as any)?.id;
+    if (!userId) {
       toast.error("Please log in");
       return;
     }

@@ -20,7 +20,8 @@ export default function NotificationsPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!session?.user?.id) return;
+    const userId = (session?.user as any)?.id;
+    if (!userId) return;
     loadNotifications();
     const interval = setInterval(loadNotifications, 30000); // Poll every 30s
     return () => clearInterval(interval);
@@ -28,7 +29,9 @@ export default function NotificationsPage() {
 
   async function loadNotifications() {
     try {
-      const list = await apiGet(`notifications?userId=${(session?.user as any)?.id}`);
+      const userId = (session?.user as any)?.id;
+      if (!userId) return;
+      const list = await apiGet(`notifications?userId=${userId}`);
       setNotifications(list);
     } catch (err) {
       console.error(err);

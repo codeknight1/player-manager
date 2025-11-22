@@ -72,7 +72,8 @@ export default function PlayerMessagesPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!session?.user?.id) return;
+    const userId = (session?.user as any)?.id;
+    if (!userId) return;
     loadMessages();
     const interval = setInterval(loadMessages, 5000); // Poll every 5s
     return () => clearInterval(interval);
@@ -84,7 +85,8 @@ export default function PlayerMessagesPage() {
   }, [selectedConversation]);
 
   async function loadMessages() {
-    if (!session?.user?.id) return;
+    const userId = (session?.user as any)?.id;
+    if (!userId) return;
     try {
       const all = await apiGet(`messages?userId=${(session.user as any).id}`);
       const map = new Map<string, any>();

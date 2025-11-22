@@ -104,7 +104,8 @@ export default function TournamentsPage() {
   const [creating, setCreating] = useState(false);
 
   useEffect(() => {
-    if (session?.user?.id) {
+    const userId = (session?.user as any)?.id;
+    if (userId) {
       loadTournaments();
     }
   }, [session]);
@@ -131,7 +132,8 @@ export default function TournamentsPage() {
   }
 
   async function createTournament() {
-    if (!session?.user?.id) {
+    const userId = (session?.user as any)?.id;
+    if (!userId) {
       toast.error("Please log in");
       return;
     }
