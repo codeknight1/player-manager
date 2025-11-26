@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { getToken } from "next-auth/jwt";
 import { prisma } from "@/app/lib/prisma";
 
 export async function GET(request: NextRequest) {
@@ -32,6 +33,23 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
+    const token = await getToken({ req: request, secret: process.env.NEXTAUTH_SECRET });
+    
+    if (!token) {
+      return NextResponse.json(
+        { error: "Unauthorized" },
+        { status: 401 }
+      );
+    }
+
+    const role = (token as any)?.role;
+    if (role !== "ADMIN") {
+      return NextResponse.json(
+        { error: "Forbidden: Only super admins can create trials and tournaments" },
+        { status: 403 }
+      );
+    }
+
     const body = await request.json();
     const { title, city, date, fee, createdById } = body;
     

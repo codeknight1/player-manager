@@ -113,39 +113,63 @@ export async function PUT(request: NextRequest) {
       });
       const existingIds = new Set(existing.map((item) => item.id));
       const seenIds = new Set<string>();
+      
+      const toUpdate: typeof payloads = [];
+      const toCreate: typeof payloads = [];
+      
       for (const entry of payloads) {
         if (entry.id && seenIds.has(entry.id)) {
           continue;
         }
         if (entry.id && existingIds.has(entry.id)) {
-          await tx.upload.update({
-            where: { id: entry.id },
-            data: {
-              name: entry.name,
-              type: entry.type,
-              url: entry.url,
-              thumbnail: entry.thumbnail,
-              createdAt: entry.createdAt,
-            },
-          });
+          toUpdate.push(entry);
           existingIds.delete(entry.id);
         } else {
-          await tx.upload.create({
-            data: {
-              ...(entry.id ? { id: entry.id } : {}),
-              userId,
-              name: entry.name,
-              type: entry.type,
-              url: entry.url,
-              thumbnail: entry.thumbnail,
-              createdAt: entry.createdAt,
-            },
-          });
+          toCreate.push(entry);
         }
         if (entry.id) {
           seenIds.add(entry.id);
         }
       }
+      
+      // Batch create operations
+      if (toCreate.length > 0) {
+        await Promise.all(
+          toCreate.map((entry) =>
+            tx.upload.create({
+              data: {
+                ...(entry.id ? { id: entry.id } : {}),
+                userId,
+                name: entry.name,
+                type: entry.type,
+                url: entry.url,
+                thumbnail: entry.thumbnail,
+                createdAt: entry.createdAt,
+              },
+            })
+          )
+        );
+      }
+      
+      // Batch update operations
+      if (toUpdate.length > 0) {
+        await Promise.all(
+          toUpdate.map((entry) =>
+            tx.upload.update({
+              where: { id: entry.id! },
+              data: {
+                name: entry.name,
+                type: entry.type,
+                url: entry.url,
+                thumbnail: entry.thumbnail,
+                createdAt: entry.createdAt,
+              },
+            })
+          )
+        );
+      }
+      
+      // Delete remaining existing uploads that weren't in the payload
       if (existingIds.size > 0) {
         await tx.upload.deleteMany({
           where: {
@@ -154,6 +178,8 @@ export async function PUT(request: NextRequest) {
           },
         });
       }
+    }, {
+      timeout: 30000, // 30 seconds timeout
     });
 
     const saved = await prisma.upload.findMany({

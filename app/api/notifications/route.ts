@@ -35,6 +35,41 @@ export async function GET(request: NextRequest) {
   }
 }
 
+export async function PATCH(request: NextRequest) {
+  try {
+    const body = await request.json();
+    const { id, read } = body;
+
+    if (!id) {
+      return NextResponse.json({ error: "id is required" }, { status: 400 });
+    }
+
+    if (supabaseServerClient) {
+      const { data, error } = await supabaseServerClient
+        .from("Notification")
+        .update({ read: read === true })
+        .eq("id", id)
+        .select()
+        .maybeSingle();
+      if (error) {
+        throw error;
+      }
+      return NextResponse.json(data);
+    }
+
+    const notification = await prisma.notification.update({
+      where: { id },
+      data: { read: read === true },
+    });
+    return NextResponse.json(notification);
+  } catch (error: any) {
+    return NextResponse.json(
+      { error: error.message || "Failed to update notification" },
+      { status: 500 }
+    );
+  }
+}
+
 
 
 

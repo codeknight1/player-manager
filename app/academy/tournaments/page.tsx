@@ -102,6 +102,9 @@ export default function TournamentsPage() {
   const [registerName, setRegisterName] = useState("");
   const [loading, setLoading] = useState(true);
   const [creating, setCreating] = useState(false);
+  
+  const userRole = (session?.user as any)?.role;
+  const isAdmin = userRole === "ADMIN";
 
   useEffect(() => {
     const userId = (session?.user as any)?.id;
@@ -135,6 +138,10 @@ export default function TournamentsPage() {
     const userId = (session?.user as any)?.id;
     if (!userId) {
       toast.error("Please log in");
+      return;
+    }
+    if (!isAdmin) {
+      toast.error("Only super admins can create tournaments");
       return;
     }
     if (!draft.name.trim()) {
@@ -203,9 +210,11 @@ export default function TournamentsPage() {
                   Manage and track your tournament participation
                 </p>
               </div>
-              <Button size="lg" onClick={() => setShowCreate(true)}>
-                Create New Tournament
-              </Button>
+              {isAdmin && (
+                <Button size="lg" onClick={() => setShowCreate(true)}>
+                  Create New Tournament
+                </Button>
+              )}
             </div>
 
             <div className="flex flex-col gap-4 p-4">

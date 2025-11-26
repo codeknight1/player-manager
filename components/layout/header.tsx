@@ -2,6 +2,9 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useSession } from "next-auth/react";
+import { NotificationDropdown } from "@/components/notifications/notification-dropdown";
+import { MobileMenu } from "./mobile-menu";
 
 interface HeaderProps {
   title?: string;
@@ -10,6 +13,13 @@ interface HeaderProps {
   rightAction?: React.ReactNode;
 }
 
+const playerNavItems = [
+  { label: "Home", href: "/player/dashboard" },
+  { label: "My Profile", href: "/player/profile" },
+  { label: "Network", href: "/player/network" },
+  { label: "Messages", href: "/player/messages" },
+];
+
 export function Header({ 
   title = "TalentVerse",
   logo,
@@ -17,9 +27,16 @@ export function Header({
   rightAction
 }: HeaderProps) {
   const pathname = usePathname();
+  const { data: session } = useSession();
   const hideNav = pathname.startsWith("/player");
+  const isPlayerPage = pathname.startsWith("/player");
+  const isLoggedIn = !!session;
+  
+  const mobileNavItems = isPlayerPage && isLoggedIn ? playerNavItems : navItems;
+  const showMobileMenu = mobileNavItems.length > 0;
+
   return (
-    <header className="flex items-center justify-between whitespace-nowrap border-b border-solid px-10 py-3" style={{ borderBottomColor: "var(--brand-orange)" }}>
+    <header className="flex items-center justify-between whitespace-nowrap border-b border-solid px-4 sm:px-6 md:px-10 py-3" style={{ borderBottomColor: "var(--brand-orange)" }}>
       <div className="flex items-center gap-4 text-white">
         {logo || (
           <div className="size-4">
@@ -35,7 +52,7 @@ export function Header({
           </h2>
         ) : null}
       </div>
-      <div className="flex flex-1 justify-end gap-8">
+      <div className="flex flex-1 justify-end items-center gap-2 sm:gap-4">
         {!hideNav && navItems.length > 0 && (
           <div className="hidden md:flex items-center gap-9">
             {navItems.map((item) => (
@@ -49,6 +66,10 @@ export function Header({
             ))}
           </div>
         )}
+        <div className="flex items-center gap-1">
+          {showMobileMenu && <MobileMenu navItems={mobileNavItems} />}
+          <NotificationDropdown />
+        </div>
         {rightAction}
       </div>
     </header>

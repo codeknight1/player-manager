@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import { motion } from "framer-motion";
 import { Sidebar } from "@/components/layout/sidebar";
-import { HouseIcon, UserIcon, UsersThreeIcon, ChatIcon, BellIcon, HandshakeIcon, TrophyIcon } from "@/components/icons";
+import { HouseIcon, UserIcon, UsersThreeIcon, ChatIcon, BellIcon } from "@/components/icons";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { apiGet } from "@/app/lib/api";
@@ -30,26 +30,6 @@ const sidebarItems = [
     label: "Messages",
     href: "/player/messages",
     icon: <ChatIcon size={24} />,
-  },
-  {
-    label: "Notifications",
-    href: "/notifications",
-    icon: <BellIcon size={24} />,
-  },
-  {
-    label: "For Players",
-    href: "/for-players",
-    icon: <UserIcon size={24} />,
-  },
-  {
-    label: "For Clubs/Agents",
-    href: "/for-clubs",
-    icon: <HandshakeIcon size={24} />,
-  },
-  {
-    label: "For Partners",
-    href: "/for-partners",
-    icon: <TrophyIcon size={24} />,
   },
 ];
 

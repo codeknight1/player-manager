@@ -25,7 +25,7 @@ export function Sidebar({ title, subtitle, items, user }: SidebarProps) {
   const pathname = usePathname();
 
   return (
-    <div className="layout-content-container flex flex-col w-80">
+    <div className="layout-content-container hidden lg:flex flex-col w-80">
       <div className="flex h-full min-h-[700px] flex-col justify-between bg-[#111a22] p-4">
         <div className="flex flex-col gap-4">
           {user && (

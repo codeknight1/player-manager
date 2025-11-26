@@ -11,9 +11,7 @@ import {
   UsersThreeIcon,
   ChatIcon,
   BellIcon,
-  EyeIcon,
-  HandshakeIcon,
-  TrophyIcon
+  EyeIcon
 } from "@/components/icons";
 import { apiGet } from "@/app/lib/api";
 import { LogoutButton } from "@/components/auth/logout-button";
@@ -40,26 +38,6 @@ function useSidebarItems() {
         label: "Messages",
         href: "/player/messages",
         icon: <ChatIcon size={24} />,
-      },
-      {
-        label: "Notifications",
-        href: "/notifications",
-        icon: <BellIcon size={24} />,
-      },
-      {
-        label: "For Players",
-        href: "/for-players",
-        icon: <UserIcon size={24} />,
-      },
-      {
-        label: "For Clubs/Agents",
-        href: "/for-clubs",
-        icon: <HandshakeIcon size={24} />,
-      },
-      {
-        label: "For Partners",
-        href: "/for-partners",
-        icon: <TrophyIcon size={24} />,
       },
     ],
     []

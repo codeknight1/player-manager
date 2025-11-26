@@ -2,6 +2,7 @@ import { prisma } from "@/app/lib/prisma";
 import { parseProfile } from "@/app/lib/profile-utils";
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { PortfolioTabs } from "@/components/portfolio/portfolio-tabs";
 
 type PortfolioPageProps = {
   params: {
@@ -34,17 +35,6 @@ const isImageSource = (value?: string) => {
     return true;
   }
   return imageExtensions.some((ext) => normalized.endsWith(ext));
-};
-
-const formatDate = (value?: string) => {
-  if (!value) {
-    return null;
-  }
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) {
-    return null;
-  }
-  return date.toLocaleDateString();
 };
 
 function normalizeUploadType(value: any) {
@@ -118,6 +108,13 @@ function extractYouTubeId(url: string) {
   }
 }
 
+function formatDateOfBirth(age: number): string | null {
+  if (age <= 0) return null;
+  const currentYear = new Date().getFullYear();
+  const birthYear = currentYear - age;
+  return `January 1st, ${birthYear}`;
+}
+
 export async function generateMetadata({ params }: PortfolioPageProps): Promise<Metadata> {
   const data = await getPortfolioData(params.userId);
   if (!data) {
@@ -141,254 +138,292 @@ export default async function PortfolioPage({ params }: PortfolioPageProps) {
   const profile = data.profile;
   const uploads = Array.isArray(profile.uploads) ? profile.uploads : [];
   const videos = uploads.filter((upload: any) => upload.type === "video" && upload.url);
-  const featuredVideo = videos[0];
-  const featuredVideoId = featuredVideo ? extractYouTubeId(featuredVideo.url ?? "") : null;
-  const secondaryVideos = videos.slice(1);
+  const images = uploads.filter((upload: any) => {
+    const url = upload.thumbnail || upload.url || "";
+    return isImageSource(url) && upload.type !== "video";
+  });
   const certificates = uploads.filter((upload: any) => upload.type === "certificate");
   const achievements = uploads.filter((upload: any) => upload.type === "achievement");
 
-  const statBlocks = [
-    { label: "Goals", value: profile.stats.goals || 0 },
-    { label: "Assists", value: profile.stats.assists || 0 },
-    { label: "Matches", value: profile.stats.matches || 0 },
-  ];
+  const playerName = `${profile.firstName} ${profile.lastName}`.trim() || data.name || "Player";
+  const fullName = profile.lastName ? `${profile.firstName} ${profile.lastName}`.trim() : playerName;
 
   return (
     <div className="min-h-screen w-full bg-[#111a22] text-white" style={{ fontFamily: 'Manrope, "Noto Sans", sans-serif' }}>
-      <div className="mx-auto flex w-full max-w-5xl flex-col gap-8 px-4 py-10">
-        <header className="flex flex-col gap-6 rounded-xl border border-[#233648] bg-[#192633] p-6 md:flex-row md:items-center md:gap-10">
-          <div
-            className="bg-center bg-no-repeat bg-cover rounded-full border-2 border-[#324d67]"
+      <div className="mx-auto w-full max-w-7xl">
+        <div className="relative bg-gradient-to-b from-[#192633] to-[#111a22] pb-12 pt-8">
+          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div className="flex flex-col items-center gap-8 md:flex-row md:items-start md:gap-12">
+              <div className="relative shrink-0">
+                <div
+                  className="bg-center bg-no-repeat bg-cover rounded-2xl border-4 border-white/20 shadow-2xl"
             style={{
-              width: "120px",
-              height: "120px",
+                    width: "280px",
+                    height: "350px",
               backgroundImage: profile.avatar ? `url("${profile.avatar}")` : undefined,
-              backgroundColor: profile.avatar ? undefined : "#111a22",
-            }}
-          />
-          <div className="flex-1">
-            <h1 className="text-3xl font-bold leading-tight md:text-4xl">
-              {`${profile.firstName} ${profile.lastName}`.trim() || data.name || "Player"}
-            </h1>
-            <p className="mt-3 text-sm text-[#92adc9] md:text-base">
-              {[profile.position, profile.age > 0 ? `Age ${profile.age}` : null, profile.nationality]
-                .filter(Boolean)
-                .join(" • ") || "Complete profile details"}
-            </p>
-            {profile.bio && (
-              <p className="mt-4 text-sm text-[#92adc9] md:text-base">{profile.bio}</p>
-            )}
-          </div>
-        </header>
-
-        {featuredVideoId && (
-          <section className="rounded-2xl border border-[#233648] bg-[#0c141b] p-5 shadow-lg shadow-[#0b1824]/30">
-            <div className="flex flex-col gap-4">
-              <div className="aspect-video w-full overflow-hidden rounded-xl border border-[#324d67] bg-black">
-                <iframe
-                  src={`https://www.youtube.com/embed/${featuredVideoId}`}
-                  title="Featured video"
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                  allowFullScreen
-                  className="h-full w-full"
+                    backgroundColor: profile.avatar ? undefined : "#192633",
+                  }}
                 />
               </div>
-              <div className="flex flex-wrap items-center justify-between gap-3">
-                {featuredVideo?.name && (
-                  <p className="text-sm font-semibold text-white">{featuredVideo.name}</p>
+              <div className="flex-1 text-center md:text-left">
+                <h1 className="text-4xl font-bold leading-tight md:text-5xl lg:text-6xl mb-4">
+                  {playerName}
+                </h1>
+                {fullName !== playerName && (
+                  <h2 className="text-2xl font-semibold text-[#92adc9] mb-6 md:text-3xl">
+                    {fullName}
+                  </h2>
                 )}
-                {formatDate(featuredVideo?.createdAt) && (
-                  <span className="text-xs text-[#6d859f]">Added {formatDate(featuredVideo?.createdAt)}</span>
-                )}
+                <div className="flex flex-col items-center gap-3 md:flex-row md:items-center md:gap-6">
+                  {profile.position && (
+                    <div className="flex items-center gap-2">
+                      <span className="text-lg font-medium text-white">{profile.position}</span>
+                    </div>
+                  )}
+                  {profile.nationality && (
+                    <div className="flex items-center gap-2">
+                      <span className="text-lg text-[#92adc9]">{profile.nationality}</span>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
-          </section>
-        )}
+          </div>
+        </div>
 
-        {secondaryVideos.length > 0 && (
-          <section>
-            <h2 className="text-xl font-bold">More Videos</h2>
-            <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2">
-              {secondaryVideos.map((video: any) => (
-                <article key={video.id} className="rounded-2xl border border-[#233648] bg-[#192633] p-4 shadow-lg shadow-[#0b1824]/20">
-                  <div className="flex flex-col gap-3">
-                    <a
-                      href={video.url}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="aspect-video w-full overflow-hidden rounded-lg border border-[#324d67] bg-black"
-                    >
-                      {video.thumbnail ? (
-                        <div
-                          className="h-full w-full bg-cover bg-center"
-                          style={{ backgroundImage: `url('${video.thumbnail}')` }}
-                        />
-                      ) : (
-                        <div className="flex h-full w-full items-center justify-center text-xs uppercase tracking-widest text-[#92adc9]">
-                          Video
+        <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
+            <div className="lg:col-span-2">
+              <PortfolioTabs
+                profile={profile}
+                videos={videos}
+                images={images}
+                achievements={achievements}
+                certificates={certificates}
+              />
+            </div>
+
+            <div className="space-y-6">
+              <section className="rounded-xl border border-[#233648] bg-[#192633] overflow-hidden">
+                <div className="bg-[#233648] px-6 py-4 border-b border-[#324d67]">
+                  <h3 className="text-lg font-bold text-white">Player Profile</h3>
                         </div>
+                <div className="p-6">
+                  <table className="w-full">
+                    <tbody className="space-y-4">
+                      {profile.age > 0 && (
+                        <tr className="border-b border-[#233648]">
+                          <td className="py-3 text-sm font-medium text-[#92adc9]">Date of Birth</td>
+                          <td className="py-3 text-sm text-white text-right">{formatDateOfBirth(profile.age) || `Age ${profile.age}`}</td>
+                        </tr>
                       )}
-                    </a>
-                    <div className="flex flex-col gap-2">
-                      <p className="text-sm font-semibold text-white">{video.name || "Video"}</p>
-                      <a
-                        href={video.url}
+                      {profile.nationality && (
+                        <tr className="border-b border-[#233648]">
+                          <td className="py-3 text-sm font-medium text-[#92adc9]">Citizenship</td>
+                          <td className="py-3 text-sm text-white text-right">{profile.nationality}</td>
+                        </tr>
+                      )}
+                      {profile.position && (
+                        <tr className="border-b border-[#233648]">
+                          <td className="py-3 text-sm font-medium text-[#92adc9]">Position</td>
+                          <td className="py-3 text-sm text-white text-right">{profile.position}</td>
+                        </tr>
+                      )}
+                      {profile.email && (
+                        <tr className="border-b border-[#233648]">
+                          <td className="py-3 text-sm font-medium text-[#92adc9]">Email</td>
+                          <td className="py-3 text-sm text-white text-right break-all">{profile.email}</td>
+                        </tr>
+                      )}
+                      {profile.phone && (
+                        <tr className="border-b border-[#233648]">
+                          <td className="py-3 text-sm font-medium text-[#92adc9]">Phone</td>
+                          <td className="py-3 text-sm text-white text-right">{profile.phone}</td>
+                        </tr>
+                      )}
+                      {profile.transferMarketLink && (
+                        <tr className="border-b border-[#233648]">
+                          <td className="py-3 text-sm font-medium text-[#92adc9]">Transfer Market</td>
+                          <td className="py-3 text-sm text-right">
+                            <a
+                              href={profile.transferMarketLink}
                         target="_blank"
                         rel="noreferrer"
-                        className="text-xs font-semibold text-[#1172d4] underline"
-                      >
-                        Watch
-                      </a>
-                    </div>
-                  </div>
-                </article>
-              ))}
-            </div>
-          </section>
-        )}
-
-        <section>
-          <h2 className="text-xl font-bold">Statistics</h2>
-          <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-3">
-            {statBlocks.map((stat: any) => (
-              <div key={stat.label} className="rounded-xl border border-[#233648] bg-[#192633] p-6">
-                <p className="text-sm text-[#92adc9]">{stat.label}</p>
-                <p className="mt-2 text-3xl font-bold">{stat.value}</p>
-              </div>
-            ))}
+                              className="text-[#1172d4] hover:underline break-all"
+                            >
+                              View Profile
+                            </a>
+                          </td>
+                        </tr>
+                      )}
+                      {profile.placeOfBirth && (
+                        <tr className="border-b border-[#233648]">
+                          <td className="py-3 text-sm font-medium text-[#92adc9]">Place of Birth</td>
+                          <td className="py-3 text-sm text-white text-right">{profile.placeOfBirth}</td>
+                        </tr>
+                      )}
+                      {profile.height && (
+                        <tr className="border-b border-[#233648]">
+                          <td className="py-3 text-sm font-medium text-[#92adc9]">Height</td>
+                          <td className="py-3 text-sm text-white text-right">{profile.height}</td>
+                        </tr>
+                      )}
+                      {profile.weight && (
+                        <tr>
+                          <td className="py-3 text-sm font-medium text-[#92adc9]">Weight</td>
+                          <td className="py-3 text-sm text-white text-right">{profile.weight}</td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
           </div>
         </section>
 
-        <section>
-          <h2 className="text-xl font-bold">Profile Information</h2>
-          <div className="mt-4 grid grid-cols-1 gap-4 rounded-2xl border border-[#233648] bg-[#192633] p-6 md:grid-cols-2">
-            <div>
-              <p className="text-sm text-[#92adc9]">First Name</p>
-              <p className="mt-1 text-base text-white">{profile.firstName || "—"}</p>
+              <section className="rounded-xl border border-[#233648] bg-[#192633] overflow-hidden">
+                <div className="bg-[#233648] px-6 py-4 border-b border-[#324d67]">
+                  <h3 className="text-lg font-bold text-white">Career Information</h3>
             </div>
-            <div>
-              <p className="text-sm text-[#92adc9]">Last Name</p>
-              <p className="mt-1 text-base text-white">{profile.lastName || "—"}</p>
-            </div>
-            <div>
-              <p className="text-sm text-[#92adc9]">Age</p>
-              <p className="mt-1 text-base text-white">{profile.age > 0 ? profile.age : "—"}</p>
-            </div>
-            <div>
-              <p className="text-sm text-[#92adc9]">Position</p>
-              <p className="mt-1 text-base text-white">{profile.position || "—"}</p>
-            </div>
-            <div>
-              <p className="text-sm text-[#92adc9]">Nationality</p>
-              <p className="mt-1 text-base text-white">{profile.nationality || "—"}</p>
-            </div>
-            <div>
-              <p className="text-sm text-[#92adc9]">Email</p>
-              <p className="mt-1 text-base text-white">{profile.email || "—"}</p>
-            </div>
-            <div>
-              <p className="text-sm text-[#92adc9]">Phone</p>
-              <p className="mt-1 text-base text-white">{profile.phone || "—"}</p>
-            </div>
-            {profile.bio && (
-              <div className="md:col-span-2">
-                <p className="text-sm text-[#92adc9]">Bio</p>
-                <p className="mt-1 text-base text-white">{profile.bio}</p>
-              </div>
-            )}
+                <div className="p-6">
+                  <table className="w-full">
+                    <tbody>
+                      <tr className="border-b border-[#233648]">
+                        <td className="py-3 text-sm font-medium text-[#92adc9]">Matches</td>
+                        <td className="py-3 text-sm text-white text-right">{profile.stats.matches || 0} matches</td>
+                      </tr>
+                      <tr className="border-b border-[#233648]">
+                        <td className="py-3 text-sm font-medium text-[#92adc9]">Goals</td>
+                        <td className="py-3 text-sm text-white text-right">{profile.stats.goals || 0} goals</td>
+                      </tr>
+                      <tr className="border-b border-[#233648]">
+                        <td className="py-3 text-sm font-medium text-[#92adc9]">Assists</td>
+                        <td className="py-3 text-sm text-white text-right">{profile.stats.assists || 0} assists</td>
+                      </tr>
+                      {certificates.length > 0 && (
+                        <tr className="border-b border-[#233648]">
+                          <td className="py-3 text-sm font-medium text-[#92adc9]">Certificates</td>
+                          <td className="py-3 text-sm text-white text-right">{certificates.length}</td>
+                        </tr>
+                      )}
+                      {achievements.length > 0 && (
+                        <tr className="border-b border-[#233648]">
+                          <td className="py-3 text-sm font-medium text-[#92adc9]">Achievements</td>
+                          <td className="py-3 text-sm text-white text-right">{achievements.length}</td>
+                        </tr>
+                      )}
+                      {profile.discipline && (
+                        <tr className="border-b border-[#233648]">
+                          <td className="py-3 text-sm font-medium text-[#92adc9]">Discipline</td>
+                          <td className="py-3 text-sm text-white text-right">{profile.discipline}</td>
+                        </tr>
+                      )}
+                      {profile.spotKick && (
+                        <tr className="border-b border-[#233648]">
+                          <td className="py-3 text-sm font-medium text-[#92adc9]">Spot Kick</td>
+                          <td className="py-3 text-sm text-white text-right">{profile.spotKick}</td>
+                        </tr>
+                      )}
+                      {profile.clubDebut && (
+                        <tr className="border-b border-[#233648]">
+                          <td className="py-3 text-sm font-medium text-[#92adc9]">Club Debut</td>
+                          <td className="py-3 text-sm text-white text-right">{profile.clubDebut}</td>
+                        </tr>
+                      )}
+                      {profile.previousClub && (
+                        <tr className="border-b border-[#233648]">
+                          <td className="py-3 text-sm font-medium text-[#92adc9]">Previous Club</td>
+                          <td className="py-3 text-sm text-white text-right">{profile.previousClub}</td>
+                        </tr>
+                      )}
+                      {profile.presentClub && (
+                        <tr>
+                          <td className="py-3 text-sm font-medium text-[#92adc9]">Present Club</td>
+                          <td className="py-3 text-sm text-white text-right">{profile.presentClub}</td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
           </div>
         </section>
 
-        {certificates.length > 0 && (
-          <section>
-            <h2 className="text-xl font-bold">Certificates</h2>
-            <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2">
-              {certificates.map((certificate: any) => (
-                <article key={certificate.id} className="flex items-start gap-4 rounded-2xl border border-[#233648] bg-[#192633] p-5 shadow-lg shadow-[#0b1824]/20">
-                  <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-xl border border-dashed border-[#324d67] bg-[#0c141b] text-xs font-semibold uppercase tracking-widest text-[#92adc9]">
-                    PDF
+              {videos.length > 0 && (
+                <section className="rounded-xl border border-[#233648] bg-[#192633] overflow-hidden">
+                  <div className="bg-[#233648] px-6 py-4 border-b border-[#324d67]">
+                    <h3 className="text-lg font-bold text-white">Featured Video</h3>
                   </div>
-                  <div className="min-w-0 flex-1 space-y-2">
-                    <div className="flex flex-wrap items-center justify-between gap-3">
-                      <p className="truncate text-sm font-semibold text-white">{certificate.name || "Certificate"}</p>
-                      {formatDate(certificate.createdAt) && (
-                        <span className="text-xs text-[#6d859f]">{formatDate(certificate.createdAt)}</span>
-                      )}
+                  <div className="p-6">
+                    {(() => {
+                      const featuredVideo = videos[0];
+                      const videoId = featuredVideo ? extractYouTubeId(featuredVideo.url || "") : null;
+                      return (
+                        <div className="space-y-4">
+                          {videoId ? (
+                            <div className="aspect-video w-full overflow-hidden rounded-lg border border-[#233648] bg-black">
+                              <iframe
+                                src={`https://www.youtube.com/embed/${videoId}`}
+                                title={featuredVideo.name || "Featured video"}
+                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                                allowFullScreen
+                                className="h-full w-full"
+                              />
                     </div>
-                    <p className="text-xs uppercase tracking-wide text-[#92adc9]">Certificate</p>
-                    {certificate.url && (
+                          ) : (
                       <a
-                        href={certificate.url}
+                              href={featuredVideo.url}
                         target="_blank"
                         rel="noreferrer"
-                        className="inline-flex h-9 items-center justify-center rounded-lg border border-[#324d67] px-4 text-xs font-semibold text-[#56a7ff] transition hover:border-[#1172d4] hover:text-[#1172d4]"
-                      >
-                        View PDF
-                      </a>
-                    )}
-                  </div>
-                </article>
-              ))}
-            </div>
-          </section>
-        )}
-
-        {achievements.length > 0 && (
-          <section>
-            <h2 className="text-xl font-bold">Achievements</h2>
-            <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2">
-              {achievements.map((achievement: any) => {
-                const imagePreview = isImageSource(achievement.thumbnail || achievement.url || "") ? (achievement.thumbnail || achievement.url || "") : null;
-                const pdfAttached = isPdfSource(achievement.url);
-                return (
-                  <article key={achievement.id} className="flex flex-col gap-4 rounded-2xl border border-[#233648] bg-[#192633] p-5 shadow-lg shadow-[#0b1824]/20">
-                    <div className="flex flex-wrap gap-4">
-                      {imagePreview ? (
-                        <a
-                          href={achievement.url || imagePreview}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="block shrink-0 overflow-hidden rounded-xl border border-[#324d67]"
-                          style={{ width: "120px", height: "80px" }}
-                        >
+                              className="block aspect-video w-full overflow-hidden rounded-lg border border-[#233648] bg-[#0c141b] relative group"
+                            >
+                              {featuredVideo.thumbnail ? (
+                                <>
                           <div
                             className="h-full w-full bg-cover bg-center"
-                            style={{ backgroundImage: `url('${imagePreview}')` }}
-                          />
-                        </a>
-                      ) : (
-                        <div className="flex h-20 w-28 shrink-0 items-center justify-center rounded-xl border border-dashed border-[#324d67] bg-[#0c141b] text-[11px] font-semibold uppercase tracking-wide text-[#92adc9]">
-                          {pdfAttached ? "PDF" : "Link"}
+                                    style={{ backgroundImage: `url('${featuredVideo.thumbnail}')` }}
+                                  />
+                                  <div className="absolute inset-0 flex items-center justify-center bg-black/30 group-hover:bg-black/50 transition-colors">
+                                    <div className="w-16 h-16 rounded-full bg-[#1172d4] flex items-center justify-center">
+                                      <svg
+                                        className="w-8 h-8 text-white ml-1"
+                                        fill="currentColor"
+                                        viewBox="0 0 24 24"
+                                      >
+                                        <path d="M8 5v14l11-7z" />
+                                      </svg>
+                                    </div>
+                                  </div>
+                                </>
+                              ) : (
+                                <div className="flex h-full w-full items-center justify-center text-[#92adc9]">
+                                  <div className="w-16 h-16 rounded-full bg-[#1172d4] flex items-center justify-center">
+                                    <svg
+                                      className="w-8 h-8 text-white ml-1"
+                                      fill="currentColor"
+                                      viewBox="0 0 24 24"
+                                    >
+                                      <path d="M8 5v14l11-7z" />
+                                    </svg>
+                                  </div>
                         </div>
                       )}
-                      <div className="flex min-w-0 flex-1 flex-col gap-2">
-                        <div className="flex flex-wrap items-center justify-between gap-3">
-                          <p className="truncate text-sm font-semibold text-white">{achievement.name || "Achievement"}</p>
-                          {formatDate(achievement.createdAt) && (
-                            <span className="text-xs text-[#6d859f]">{formatDate(achievement.createdAt)}</span>
+                            </a>
+                          )}
+                          {featuredVideo.name && (
+                            <p className="text-sm font-semibold text-white">{featuredVideo.name}</p>
+                          )}
+                          {videos.length > 1 && (
+                            <p className="text-xs text-[#92adc9]">
+                              {videos.length - 1} more video{videos.length > 2 ? 's' : ''} available in Videos tab
+                            </p>
                           )}
                         </div>
-                        <p className="text-xs uppercase tracking-wide text-[#92adc9]">Achievement</p>
-                        {achievement.url && (
-                          <a
-                            href={achievement.url}
-                            target="_blank"
-                            rel="noreferrer"
-                            className="inline-flex h-9 items-center justify-center rounded-lg border border-[#324d67] px-4 text-xs font-semibold text-[#56a7ff] transition hover:border-[#1172d4] hover:text-[#1172d4]"
-                          >
-                            View
-                          </a>
-                        )}
-                      </div>
-                    </div>
-                  </article>
-                );
-              })}
+                      );
+                    })()}
             </div>
           </section>
         )}
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );
 }
-

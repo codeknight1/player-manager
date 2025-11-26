@@ -5,7 +5,7 @@ import { useSession } from "next-auth/react";
 import { motion } from "framer-motion";
 import { CollapsibleSidebar } from "@/components/layout/collapsible-sidebar";
 import { Modal } from "@/components/ui/modal";
-import { HouseIcon, UserIcon, UsersThreeIcon, ChatIcon, BellIcon, ShareIcon, HandshakeIcon, TrophyIcon } from "@/components/icons";
+import { HouseIcon, UserIcon, UsersThreeIcon, ChatIcon, BellIcon, ShareIcon } from "@/components/icons";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { apiGet, apiPost, apiPut, apiDelete } from "@/app/lib/api";
@@ -33,26 +33,6 @@ const sidebarItems = [
     href: "/player/messages",
     icon: <ChatIcon size={24} />,
   },
-  {
-    label: "Notifications",
-    href: "/notifications",
-    icon: <BellIcon size={24} />,
-  },
-  {
-    label: "For Players",
-    href: "/for-players",
-    icon: <UserIcon size={24} />,
-  },
-  {
-    label: "For Clubs/Agents",
-    href: "/for-clubs",
-    icon: <HandshakeIcon size={24} />,
-  },
-  {
-    label: "For Partners",
-    href: "/for-partners",
-    icon: <TrophyIcon size={24} />,
-  },
 ];
 
 export default function PlayerProfilePage() {
@@ -67,6 +47,15 @@ export default function PlayerProfilePage() {
     phone: "",
     bio: "",
     avatar: "",
+    transferMarketLink: "",
+    placeOfBirth: "",
+    height: "",
+    weight: "",
+    discipline: "",
+    spotKick: "",
+    clubDebut: "",
+    previousClub: "",
+    presentClub: "",
     stats: {
       goals: 0,
       assists: 0,
@@ -84,6 +73,15 @@ export default function PlayerProfilePage() {
     phone: "",
     bio: "",
     avatar: "",
+    transferMarketLink: "",
+    placeOfBirth: "",
+    height: "",
+    weight: "",
+    discipline: "",
+    spotKick: "",
+    clubDebut: "",
+    previousClub: "",
+    presentClub: "",
     stats: {
       goals: 0,
       assists: 0,
@@ -249,6 +247,15 @@ export default function PlayerProfilePage() {
       phone: profileSource.phone ?? "",
       bio: profileSource.bio ?? "",
       avatar: profileSource.avatar ?? "",
+      transferMarketLink: profileSource.transferMarketLink ?? "",
+      placeOfBirth: profileSource.placeOfBirth ?? "",
+      height: profileSource.height ?? "",
+      weight: profileSource.weight ?? "",
+      discipline: profileSource.discipline ?? "",
+      spotKick: profileSource.spotKick ?? "",
+      clubDebut: profileSource.clubDebut ?? "",
+      previousClub: profileSource.previousClub ?? "",
+      presentClub: profileSource.presentClub ?? "",
       stats,
       uploads,
     };
@@ -622,6 +629,15 @@ export default function PlayerProfilePage() {
         bio: editProfile.bio,
         email: editProfile.email,
         avatar: editProfile.avatar,
+        transferMarketLink: editProfile.transferMarketLink,
+        placeOfBirth: editProfile.placeOfBirth,
+        height: editProfile.height,
+        weight: editProfile.weight,
+        discipline: editProfile.discipline,
+        spotKick: editProfile.spotKick,
+        clubDebut: editProfile.clubDebut,
+        previousClub: editProfile.previousClub,
+        presentClub: editProfile.presentClub,
         stats: editProfile.stats,
       };
       const uploadsPayload = editProfile.uploads.map((upload) => ({
@@ -859,6 +875,69 @@ export default function PlayerProfilePage() {
                 <div>
                   <p className="text-[#92adc9] text-sm mb-1">Phone</p>
                   <p className="text-white text-base">{profile.phone ? profile.phone : "—"}</p>
+                </div>
+                {profile.transferMarketLink && (
+                  <div>
+                    <p className="text-[#92adc9] text-sm mb-1">Transfer Market Link</p>
+                    <a
+                      href={profile.transferMarketLink}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="text-white text-base underline hover:text-[#1172d4]"
+                    >
+                      {profile.transferMarketLink}
+                    </a>
+                  </div>
+                )}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {profile.placeOfBirth && (
+                    <div>
+                      <p className="text-[#92adc9] text-sm mb-1">Place of Birth</p>
+                      <p className="text-white text-base">{profile.placeOfBirth}</p>
+                    </div>
+                  )}
+                  {profile.height && (
+                    <div>
+                      <p className="text-[#92adc9] text-sm mb-1">Height</p>
+                      <p className="text-white text-base">{profile.height}</p>
+                    </div>
+                  )}
+                  {profile.weight && (
+                    <div>
+                      <p className="text-[#92adc9] text-sm mb-1">Weight</p>
+                      <p className="text-white text-base">{profile.weight}</p>
+                    </div>
+                  )}
+                  {profile.discipline && (
+                    <div>
+                      <p className="text-[#92adc9] text-sm mb-1">Discipline</p>
+                      <p className="text-white text-base">{profile.discipline}</p>
+                    </div>
+                  )}
+                  {profile.spotKick && (
+                    <div>
+                      <p className="text-[#92adc9] text-sm mb-1">Spot Kick</p>
+                      <p className="text-white text-base">{profile.spotKick}</p>
+                    </div>
+                  )}
+                  {profile.clubDebut && (
+                    <div>
+                      <p className="text-[#92adc9] text-sm mb-1">Club Debut</p>
+                      <p className="text-white text-base">{profile.clubDebut}</p>
+                    </div>
+                  )}
+                  {profile.previousClub && (
+                    <div>
+                      <p className="text-[#92adc9] text-sm mb-1">Previous Club</p>
+                      <p className="text-white text-base">{profile.previousClub}</p>
+                    </div>
+                  )}
+                  {profile.presentClub && (
+                    <div>
+                      <p className="text-[#92adc9] text-sm mb-1">Present Club</p>
+                      <p className="text-white text-base">{profile.presentClub}</p>
+                    </div>
+                  )}
                 </div>
                 {profile.bio && (
                   <div>
@@ -1189,6 +1268,107 @@ export default function PlayerProfilePage() {
                 label="Phone"
                 value={editProfile.phone}
                 onChange={(e) => setEditProfile((p) => ({ ...p, phone: e.target.value }))}
+                className="border-[#324d67] bg-[#192633]"
+              />
+              <Input
+                type="url"
+                label="Transfer Market Link"
+                value={editProfile.transferMarketLink}
+                onChange={(e) => setEditProfile((p) => ({ ...p, transferMarketLink: e.target.value }))}
+                placeholder="https://www.transfermarkt.com/..."
+                className="border-[#324d67] bg-[#192633]"
+              />
+              <Input
+                type="text"
+                label="Place of Birth"
+                value={editProfile.placeOfBirth}
+                onChange={(e) => setEditProfile((p) => ({ ...p, placeOfBirth: e.target.value }))}
+                placeholder="City, Country"
+                className="border-[#324d67] bg-[#192633]"
+              />
+              <Input
+                type="text"
+                label="Height"
+                value={editProfile.height}
+                onChange={(e) => setEditProfile((p) => ({ ...p, height: e.target.value }))}
+                placeholder="e.g., 183cm"
+                className="border-[#324d67] bg-[#192633]"
+              />
+              <Input
+                type="text"
+                label="Weight"
+                value={editProfile.weight}
+                onChange={(e) => setEditProfile((p) => ({ ...p, weight: e.target.value }))}
+                placeholder="e.g., 69kg"
+                className="border-[#324d67] bg-[#192633]"
+              />
+              <Input
+                type="text"
+                label="Discipline"
+                value={editProfile.discipline}
+                onChange={(e) => setEditProfile((p) => ({ ...p, discipline: e.target.value }))}
+                placeholder="e.g., 5 fouls against"
+                className="border-[#324d67] bg-[#192633]"
+              />
+              <Input
+                type="text"
+                label="Spot Kick"
+                value={editProfile.spotKick}
+                onChange={(e) => setEditProfile((p) => ({ ...p, spotKick: e.target.value }))}
+                placeholder="e.g., 18 Free Kick"
+                className="border-[#324d67] bg-[#192633]"
+              />
+              <div className="flex flex-col">
+                <label className="text-white text-base font-medium mb-2">Club Debut</label>
+                <input
+                  type="date"
+                  value={editProfile.clubDebut ? (() => {
+                    // Try to parse the existing date format and convert to YYYY-MM-DD
+                    try {
+                      const date = new Date(editProfile.clubDebut);
+                      if (!isNaN(date.getTime())) {
+                        return date.toISOString().split('T')[0];
+                      }
+                    } catch {}
+                    // If it's already in YYYY-MM-DD format, return as is
+                    if (/^\d{4}-\d{2}-\d{2}$/.test(editProfile.clubDebut)) {
+                      return editProfile.clubDebut;
+                    }
+                    return '';
+                  })() : ''}
+                  onChange={(e) => {
+                    const dateValue = e.target.value;
+                    if (dateValue) {
+                      const date = new Date(dateValue);
+                      const day = date.getDate();
+                      const month = date.toLocaleString('en-US', { month: 'long' });
+                      const year = date.getFullYear();
+                      const daySuffix = day === 1 || day === 21 || day === 31 ? 'st' : 
+                                       day === 2 || day === 22 ? 'nd' : 
+                                       day === 3 || day === 23 ? 'rd' : 'th';
+                      const formatted = `${day}${daySuffix} ${month} ${year}`;
+                      setEditProfile((p) => ({ ...p, clubDebut: formatted }));
+                    } else {
+                      setEditProfile((p) => ({ ...p, clubDebut: '' }));
+                    }
+                  }}
+                  className="bg-[#192633] border border-[#324d67] rounded-lg px-4 py-3 text-white placeholder:text-[#92adc9] focus:outline-none focus:border-[#1172d4]"
+                />
+              </div>
+              <Input
+                type="text"
+                label="Previous Club"
+                value={editProfile.previousClub}
+                onChange={(e) => setEditProfile((p) => ({ ...p, previousClub: e.target.value }))}
+                placeholder="e.g., Real Sociedad"
+                className="border-[#324d67] bg-[#192633]"
+              />
+              <Input
+                type="text"
+                label="Present Club"
+                value={editProfile.presentClub}
+                onChange={(e) => setEditProfile((p) => ({ ...p, presentClub: e.target.value }))}
+                placeholder="e.g., Man City"
                 className="border-[#324d67] bg-[#192633]"
               />
               <div className="flex flex-col">

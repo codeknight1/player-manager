@@ -12,6 +12,7 @@ export async function middleware(request: NextRequest) {
     path === "/" ||
     path.startsWith("/for-") ||
     path.startsWith("/explore-opportunities") ||
+    path.startsWith("/portfolio") ||
     path.includes("/login") ||
     path.includes("/register") ||
     path.includes("/password-reset")

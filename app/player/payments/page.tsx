@@ -14,7 +14,6 @@ const sidebarItems = [
   { label: "Trials", href: "/explore-opportunities", icon: <EyeIcon size={24} /> },
   { label: "Network", href: "/player/network", icon: <UsersThreeIcon size={24} /> },
   { label: "Messages", href: "/player/messages", icon: <ChatIcon size={24} /> },
-  { label: "Notifications", href: "/notifications", icon: <BellIcon size={24} /> },
   { label: "Payments", href: "/player/payments", icon: <CreditCardIcon size={24} /> },
 ];
 
