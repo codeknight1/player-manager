@@ -5,8 +5,8 @@
 :root {
   --background: #140a26; /* deep purple background */
   --foreground: #ffffff;
-  --brand-purple: #4B0082; /* primary */
-  --brand-orange: #FF6600; /* accent */
+  --brand-purple: #4D148C;
+  --brand-orange: #FFCC00;
 }
 
 body {

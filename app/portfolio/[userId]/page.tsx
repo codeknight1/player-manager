@@ -89,25 +89,6 @@ async function getPortfolioData(userId: string): Promise<PortfolioData | null> {
   }
 }
 
-function extractYouTubeId(url: string) {
-  try {
-    const parsed = new URL(url);
-    if (parsed.hostname.includes("youtu.be")) {
-      return parsed.pathname.slice(1) || null;
-    }
-    if (parsed.searchParams.get("v")) {
-      return parsed.searchParams.get("v");
-    }
-    const parts = parsed.pathname.split("/").filter(Boolean);
-    if (parts[0] === "shorts" && parts[1]) {
-      return parts[1];
-    }
-    return null;
-  } catch {
-    return null;
-  }
-}
-
 function formatDateOfBirth(age: number): string | null {
   if (age <= 0) return null;
   const currentYear = new Date().getFullYear();
@@ -151,41 +132,28 @@ export default async function PortfolioPage({ params }: PortfolioPageProps) {
   return (
     <div className="min-h-screen w-full bg-[#111a22] text-white" style={{ fontFamily: 'Manrope, "Noto Sans", sans-serif' }}>
       <div className="mx-auto w-full max-w-7xl">
-        <div className="relative bg-gradient-to-b from-[#192633] to-[#111a22] pb-12 pt-8">
+        <div className="relative bg-gradient-to-b from-[#192633] to-[#111a22] pb-8 pt-8">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <div className="flex flex-col items-center gap-8 md:flex-row md:items-start md:gap-12">
-              <div className="relative shrink-0">
-                <div
-                  className="bg-center bg-no-repeat bg-cover rounded-2xl border-4 border-white/20 shadow-2xl"
-            style={{
-                    width: "280px",
-                    height: "350px",
-              backgroundImage: profile.avatar ? `url("${profile.avatar}")` : undefined,
-                    backgroundColor: profile.avatar ? undefined : "#192633",
-                  }}
-                />
-              </div>
-              <div className="flex-1 text-center md:text-left">
-                <h1 className="text-4xl font-bold leading-tight md:text-5xl lg:text-6xl mb-4">
-                  {playerName}
-                </h1>
-                {fullName !== playerName && (
-                  <h2 className="text-2xl font-semibold text-[#92adc9] mb-6 md:text-3xl">
-                    {fullName}
-                  </h2>
+            <div className="text-center">
+              <h1 className="text-4xl font-bold leading-tight md:text-5xl lg:text-6xl mb-4">
+                {playerName}
+              </h1>
+              {fullName !== playerName && (
+                <h2 className="text-2xl font-semibold text-[#92adc9] mb-4 md:text-3xl">
+                  {fullName}
+                </h2>
+              )}
+              <div className="flex flex-col items-center justify-center gap-3 md:flex-row md:items-center md:gap-6">
+                {profile.position && (
+                  <div className="flex items-center gap-2">
+                    <span className="text-lg font-medium text-white">{profile.position}</span>
+                  </div>
                 )}
-                <div className="flex flex-col items-center gap-3 md:flex-row md:items-center md:gap-6">
-                  {profile.position && (
-                    <div className="flex items-center gap-2">
-                      <span className="text-lg font-medium text-white">{profile.position}</span>
-                    </div>
-                  )}
-                  {profile.nationality && (
-                    <div className="flex items-center gap-2">
-                      <span className="text-lg text-[#92adc9]">{profile.nationality}</span>
-                    </div>
-                  )}
-                </div>
+                {profile.nationality && (
+                  <div className="flex items-center gap-2">
+                    <span className="text-lg text-[#92adc9]">{profile.nationality}</span>
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -193,92 +161,18 @@ export default async function PortfolioPage({ params }: PortfolioPageProps) {
 
         <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
-            <div className="lg:col-span-2">
-              <PortfolioTabs
-                profile={profile}
-                videos={videos}
-                images={images}
-                achievements={achievements}
-                certificates={certificates}
-              />
-            </div>
-
             <div className="space-y-6">
-              <section className="rounded-xl border border-[#233648] bg-[#192633] overflow-hidden">
-                <div className="bg-[#233648] px-6 py-4 border-b border-[#324d67]">
-                  <h3 className="text-lg font-bold text-white">Player Profile</h3>
-                        </div>
-                <div className="p-6">
-                  <table className="w-full">
-                    <tbody className="space-y-4">
-                      {profile.age > 0 && (
-                        <tr className="border-b border-[#233648]">
-                          <td className="py-3 text-sm font-medium text-[#92adc9]">Date of Birth</td>
-                          <td className="py-3 text-sm text-white text-right">{formatDateOfBirth(profile.age) || `Age ${profile.age}`}</td>
-                        </tr>
-                      )}
-                      {profile.nationality && (
-                        <tr className="border-b border-[#233648]">
-                          <td className="py-3 text-sm font-medium text-[#92adc9]">Citizenship</td>
-                          <td className="py-3 text-sm text-white text-right">{profile.nationality}</td>
-                        </tr>
-                      )}
-                      {profile.position && (
-                        <tr className="border-b border-[#233648]">
-                          <td className="py-3 text-sm font-medium text-[#92adc9]">Position</td>
-                          <td className="py-3 text-sm text-white text-right">{profile.position}</td>
-                        </tr>
-                      )}
-                      {profile.email && (
-                        <tr className="border-b border-[#233648]">
-                          <td className="py-3 text-sm font-medium text-[#92adc9]">Email</td>
-                          <td className="py-3 text-sm text-white text-right break-all">{profile.email}</td>
-                        </tr>
-                      )}
-                      {profile.phone && (
-                        <tr className="border-b border-[#233648]">
-                          <td className="py-3 text-sm font-medium text-[#92adc9]">Phone</td>
-                          <td className="py-3 text-sm text-white text-right">{profile.phone}</td>
-                        </tr>
-                      )}
-                      {profile.transferMarketLink && (
-                        <tr className="border-b border-[#233648]">
-                          <td className="py-3 text-sm font-medium text-[#92adc9]">Transfer Market</td>
-                          <td className="py-3 text-sm text-right">
-                            <a
-                              href={profile.transferMarketLink}
-                        target="_blank"
-                        rel="noreferrer"
-                              className="text-[#1172d4] hover:underline break-all"
-                            >
-                              View Profile
-                            </a>
-                          </td>
-                        </tr>
-                      )}
-                      {profile.placeOfBirth && (
-                        <tr className="border-b border-[#233648]">
-                          <td className="py-3 text-sm font-medium text-[#92adc9]">Place of Birth</td>
-                          <td className="py-3 text-sm text-white text-right">{profile.placeOfBirth}</td>
-                        </tr>
-                      )}
-                      {profile.height && (
-                        <tr className="border-b border-[#233648]">
-                          <td className="py-3 text-sm font-medium text-[#92adc9]">Height</td>
-                          <td className="py-3 text-sm text-white text-right">{profile.height}</td>
-                        </tr>
-                      )}
-                      {profile.weight && (
-                        <tr>
-                          <td className="py-3 text-sm font-medium text-[#92adc9]">Weight</td>
-                          <td className="py-3 text-sm text-white text-right">{profile.weight}</td>
-                        </tr>
-                      )}
-                    </tbody>
-                  </table>
-          </div>
-        </section>
-
+              <div className="relative shrink-0 w-full flex justify-center lg:justify-start">
+                <div
+                  className="bg-center bg-no-repeat bg-cover rounded-2xl border-4 border-white/20 shadow-2xl"
+                  style={{
+                    width: "280px",
+                    height: "350px",
+                    backgroundImage: profile.avatar ? `url("${profile.avatar}")` : undefined,
+                    backgroundColor: profile.avatar ? undefined : "#192633",
+                  }}
+                />
+              </div>
               <section className="rounded-xl border border-[#233648] bg-[#192633] overflow-hidden">
                 <div className="bg-[#233648] px-6 py-4 border-b border-[#324d67]">
                   <h3 className="text-lg font-bold text-white">Career Information</h3>
@@ -344,82 +238,91 @@ export default async function PortfolioPage({ params }: PortfolioPageProps) {
                   </table>
           </div>
         </section>
-
-              {videos.length > 0 && (
-                <section className="rounded-xl border border-[#233648] bg-[#192633] overflow-hidden">
-                  <div className="bg-[#233648] px-6 py-4 border-b border-[#324d67]">
-                    <h3 className="text-lg font-bold text-white">Featured Video</h3>
-                  </div>
-                  <div className="p-6">
-                    {(() => {
-                      const featuredVideo = videos[0];
-                      const videoId = featuredVideo ? extractYouTubeId(featuredVideo.url || "") : null;
-                      return (
-                        <div className="space-y-4">
-                          {videoId ? (
-                            <div className="aspect-video w-full overflow-hidden rounded-lg border border-[#233648] bg-black">
-                              <iframe
-                                src={`https://www.youtube.com/embed/${videoId}`}
-                                title={featuredVideo.name || "Featured video"}
-                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                                allowFullScreen
-                                className="h-full w-full"
-                              />
-                    </div>
-                          ) : (
-                      <a
-                              href={featuredVideo.url}
-                        target="_blank"
-                        rel="noreferrer"
-                              className="block aspect-video w-full overflow-hidden rounded-lg border border-[#233648] bg-[#0c141b] relative group"
-                            >
-                              {featuredVideo.thumbnail ? (
-                                <>
-                          <div
-                            className="h-full w-full bg-cover bg-center"
-                                    style={{ backgroundImage: `url('${featuredVideo.thumbnail}')` }}
-                                  />
-                                  <div className="absolute inset-0 flex items-center justify-center bg-black/30 group-hover:bg-black/50 transition-colors">
-                                    <div className="w-16 h-16 rounded-full bg-[#1172d4] flex items-center justify-center">
-                                      <svg
-                                        className="w-8 h-8 text-white ml-1"
-                                        fill="currentColor"
-                                        viewBox="0 0 24 24"
-                                      >
-                                        <path d="M8 5v14l11-7z" />
-                                      </svg>
-                                    </div>
-                                  </div>
-                                </>
-                              ) : (
-                                <div className="flex h-full w-full items-center justify-center text-[#92adc9]">
-                                  <div className="w-16 h-16 rounded-full bg-[#1172d4] flex items-center justify-center">
-                                    <svg
-                                      className="w-8 h-8 text-white ml-1"
-                                      fill="currentColor"
-                                      viewBox="0 0 24 24"
-                                    >
-                                      <path d="M8 5v14l11-7z" />
-                                    </svg>
-                                  </div>
-                        </div>
-                      )}
-                            </a>
-                          )}
-                          {featuredVideo.name && (
-                            <p className="text-sm font-semibold text-white">{featuredVideo.name}</p>
-                          )}
-                          {videos.length > 1 && (
-                            <p className="text-xs text-[#92adc9]">
-                              {videos.length - 1} more video{videos.length > 2 ? 's' : ''} available in Videos tab
-                            </p>
-                          )}
-                        </div>
-                      );
-                    })()}
             </div>
-          </section>
-        )}
+
+            <div className="lg:col-span-2 space-y-6">
+              <section className="rounded-xl border border-[#233648] bg-[#192633] overflow-hidden">
+                <div className="bg-[#233648] px-6 py-4 border-b border-[#324d67]">
+                  <h3 className="text-lg font-bold text-white">Player Profile</h3>
+                </div>
+                <div className="p-6">
+                  <table className="w-full">
+                    <tbody className="space-y-4">
+                      {profile.age > 0 && (
+                        <tr className="border-b border-[#233648]">
+                          <td className="py-3 text-sm font-medium text-[#92adc9]">Date of Birth</td>
+                          <td className="py-3 text-sm text-white text-right">{formatDateOfBirth(profile.age) || `Age ${profile.age}`}</td>
+                        </tr>
+                      )}
+                      {profile.nationality && (
+                        <tr className="border-b border-[#233648]">
+                          <td className="py-3 text-sm font-medium text-[#92adc9]">Citizenship</td>
+                          <td className="py-3 text-sm text-white text-right">{profile.nationality}</td>
+                        </tr>
+                      )}
+                      {profile.position && (
+                        <tr className="border-b border-[#233648]">
+                          <td className="py-3 text-sm font-medium text-[#92adc9]">Position</td>
+                          <td className="py-3 text-sm text-white text-right">{profile.position}</td>
+                        </tr>
+                      )}
+                      {profile.email && (
+                        <tr className="border-b border-[#233648]">
+                          <td className="py-3 text-sm font-medium text-[#92adc9]">Email</td>
+                          <td className="py-3 text-sm text-white text-right break-all">{profile.email}</td>
+                        </tr>
+                      )}
+                      {profile.phone && (
+                        <tr className="border-b border-[#233648]">
+                          <td className="py-3 text-sm font-medium text-[#92adc9]">Phone</td>
+                          <td className="py-3 text-sm text-white text-right">{profile.phone}</td>
+                        </tr>
+                      )}
+                      {profile.transferMarketLink && (
+                        <tr className="border-b border-[#233648]">
+                          <td className="py-3 text-sm font-medium text-[#92adc9]">Transfer Market</td>
+                          <td className="py-3 text-sm text-right">
+                            <a
+                              href={profile.transferMarketLink}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="text-[#1172d4] hover:underline break-all"
+                            >
+                              View Profile
+                            </a>
+                          </td>
+                        </tr>
+                      )}
+                      {profile.placeOfBirth && (
+                        <tr className="border-b border-[#233648]">
+                          <td className="py-3 text-sm font-medium text-[#92adc9]">Place of Birth</td>
+                          <td className="py-3 text-sm text-white text-right">{profile.placeOfBirth}</td>
+                        </tr>
+                      )}
+                      {profile.height && (
+                        <tr className="border-b border-[#233648]">
+                          <td className="py-3 text-sm font-medium text-[#92adc9]">Height</td>
+                          <td className="py-3 text-sm text-white text-right">{profile.height}</td>
+                        </tr>
+                      )}
+                      {profile.weight && (
+                        <tr>
+                          <td className="py-3 text-sm font-medium text-[#92adc9]">Weight</td>
+                          <td className="py-3 text-sm text-white text-right">{profile.weight}</td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </section>
+
+              <PortfolioTabs
+                profile={profile}
+                videos={videos}
+                images={images}
+                achievements={achievements}
+                certificates={certificates}
+              />
             </div>
           </div>
         </div>
