@@ -58,7 +58,7 @@ export default function AgentDashboard() {
   ];
 
   return (
-    <div className="relative flex h-auto min-h-screen w-full flex-col bg-[#111a22] overflow-x-hidden" style={{ fontFamily: 'Manrope, "Noto Sans", sans-serif' }}>
+    <div className="relative flex h-auto min-h-screen w-full flex-col bg-white dark:bg-[#111a22] overflow-x-hidden transition-colors" style={{ fontFamily: 'Manrope, "Noto Sans", sans-serif' }}>
       <div className="layout-container flex h-full grow flex-col">
         <div className="gap-1 px-6 flex flex-1 justify-center py-5">
           <Sidebar
@@ -70,17 +70,17 @@ export default function AgentDashboard() {
             <div className="px-4 py-3">
               <label className="flex flex-col min-w-40 h-12 w-full">
                 <div className="flex w-full flex-1 items-stretch rounded-lg h-full">
-                  <div className="text-[#92adc9] flex border-none bg-[#233648] items-center justify-center pl-4 rounded-l-lg border-r-0">
+                  <div className="text-gray-600 dark:text-[#92adc9] flex border-none bg-gray-100 dark:bg-[#233648] items-center justify-center pl-4 rounded-l-lg border-r-0 transition-colors">
                     <MagnifyingGlassIcon size={24} />
                   </div>
                   <input
                     placeholder="Search for players"
-                    className="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-white focus:outline-0 focus:ring-0 border-none bg-[#233648] focus:border-none h-full placeholder:text-[#92adc9] px-4 rounded-l-none border-l-0 pl-2 text-base font-normal leading-normal"
+                    className="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-gray-900 dark:text-white focus:outline-0 focus:ring-0 border-none bg-gray-100 dark:bg-[#233648] focus:border-none h-full placeholder:text-gray-500 dark:placeholder:text-[#92adc9] px-4 rounded-l-none border-l-0 pl-2 text-base font-normal leading-normal transition-colors"
                   />
                 </div>
               </label>
             </div>
-            <h2 className="text-white text-[22px] font-bold leading-tight tracking-[-0.015em] px-4 pb-3 pt-5">
+            <h2 className="text-gray-900 dark:text-white text-[22px] font-bold leading-tight tracking-[-0.015em] px-4 pb-3 pt-5">
               Suggested Players
             </h2>
             <div className="flex overflow-y-auto [-ms-scrollbar-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
@@ -118,7 +118,7 @@ export default function AgentDashboard() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: idx * 0.1 }}
-                className="flex items-center gap-4 bg-[#111a22] px-4 min-h-[72px] py-2"
+                className="flex items-center gap-4 bg-white dark:bg-[#111a22] px-4 min-h-[72px] py-2 transition-colors"
               >
                 <div
                   className="bg-center bg-no-repeat aspect-square bg-cover rounded-full h-14 w-fit"

@@ -40,14 +40,14 @@ export function PortfolioTabs({ profile, videos, images, achievements, certifica
   const [activeTab, setActiveTab] = useState<"overview" | "gallery" | "videos">("overview");
 
   const tabs = [
-    { id: "overview" as const, label: "Player Overview" },
-    { id: "gallery" as const, label: "Player Gallery" },
-    { id: "videos" as const, label: "Player Videos" },
+    { id: "overview" as const, label: "Overview" },
+    { id: "videos" as const, label: "Videos" },
+    { id: "gallery" as const, label: "Gallery" },
   ];
 
   return (
-    <div className="rounded-xl border border-[#233648] bg-[#192633] overflow-hidden" data-portfolio-tabs>
-      <div className="border-b border-[#233648] bg-[#0c141b]">
+    <div className="rounded-xl border border-[#FFCC00] bg-white dark:bg-[#192633] overflow-hidden transition-colors" data-portfolio-tabs>
+      <div className="border-b border-[#FFCC00] bg-[#4D148C] transition-colors">
         <div className="flex overflow-x-auto">
           {tabs.map((tab) => (
             <button
@@ -56,8 +56,8 @@ export function PortfolioTabs({ profile, videos, images, achievements, certifica
               onClick={() => setActiveTab(tab.id)}
               className={`px-6 py-4 text-sm font-semibold transition-colors whitespace-nowrap ${
                 activeTab === tab.id
-                  ? "text-white border-b-2 border-[#1172d4] bg-[#192633]"
-                  : "text-[#92adc9] hover:text-white hover:bg-[#192633]"
+                  ? "text-white border-b-2 border-[#FFCC00] bg-[#4D148C]"
+                  : "text-white/80 hover:text-white hover:bg-[#4D148C]/80"
               }`}
             >
               {tab.label}
@@ -70,13 +70,15 @@ export function PortfolioTabs({ profile, videos, images, achievements, certifica
         {activeTab === "overview" && (
           <div className="space-y-4">
             {profile.bio ? (
-              <p className="text-[#92adc9] leading-relaxed">{profile.bio}</p>
+              <p className="text-gray-700 dark:text-[#92adc9] leading-relaxed">
+                {profile.bio.length > 1000 ? `${profile.bio.substring(0, 1000)}...` : profile.bio}
+              </p>
             ) : (
-              <p className="text-[#92adc9] italic">No overview available yet.</p>
+              <p className="text-gray-500 dark:text-[#92adc9] italic">No overview available yet.</p>
             )}
             {achievements.length > 0 && (
               <div className="mt-8">
-                <h4 className="text-lg font-bold text-white mb-4">Achievements</h4>
+                <h4 className="text-lg font-bold text-[#4D148C] dark:text-white mb-4">Achievements</h4>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {achievements.map((achievement: any) => {
                     const imagePreview = isImageSource(achievement.thumbnail || achievement.url || "")
@@ -85,7 +87,7 @@ export function PortfolioTabs({ profile, videos, images, achievements, certifica
                     return (
                       <div
                         key={achievement.id}
-                        className="rounded-lg border border-[#233648] bg-[#0c141b] p-4"
+                        className="rounded-lg border border-[#FFCC00] bg-gray-50 dark:bg-[#0c141b] p-4 transition-colors"
                       >
                         {imagePreview && (
                           <div
@@ -93,7 +95,7 @@ export function PortfolioTabs({ profile, videos, images, achievements, certifica
                             style={{ backgroundImage: `url('${imagePreview}')` }}
                           />
                         )}
-                        <p className="text-sm font-semibold text-white">{achievement.name || "Achievement"}</p>
+                        <p className="text-sm font-semibold text-gray-900 dark:text-white">{achievement.name || "Achievement"}</p>
                       </div>
                     );
                   })}
@@ -102,19 +104,19 @@ export function PortfolioTabs({ profile, videos, images, achievements, certifica
             )}
             {certificates.length > 0 && (
               <div className="mt-8">
-                <h4 className="text-lg font-bold text-white mb-4">Certificates</h4>
+                <h4 className="text-lg font-bold text-[#4D148C] dark:text-white mb-4">Certificates</h4>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {certificates.map((certificate: any) => (
                     <div
                       key={certificate.id}
-                      className="rounded-lg border border-[#233648] bg-[#0c141b] p-4"
+                        className="rounded-lg border border-[#FFCC00] bg-gray-50 dark:bg-[#0c141b] p-4 transition-colors"
                     >
                       <div className="flex items-center gap-3">
-                        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg border border-dashed border-[#324d67] bg-[#192633] text-xs font-semibold uppercase text-[#92adc9]">
+                        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg border border-dashed border-[#FFCC00] bg-white dark:bg-[#192633] text-xs font-semibold uppercase text-gray-600 dark:text-[#92adc9]">
                           PDF
                         </div>
                         <div className="flex-1 min-w-0">
-                          <p className="text-sm font-semibold text-white truncate">
+                          <p className="text-sm font-semibold text-gray-900 dark:text-white truncate">
                             {certificate.name || "Certificate"}
                           </p>
                           {certificate.url && (
@@ -122,7 +124,7 @@ export function PortfolioTabs({ profile, videos, images, achievements, certifica
                               href={certificate.url}
                               target="_blank"
                               rel="noreferrer"
-                              className="text-xs text-[#1172d4] hover:underline mt-1 inline-block"
+                              className="text-xs text-blue-600 dark:text-[#1172d4] hover:underline mt-1 inline-block"
                             >
                               View PDF
                             </a>
@@ -149,7 +151,7 @@ export function PortfolioTabs({ profile, videos, images, achievements, certifica
                       href={image.url || imageUrl}
                       target="_blank"
                       rel="noreferrer"
-                      className="block aspect-square overflow-hidden rounded-lg border border-[#233648] bg-[#0c141b] hover:border-[#1172d4] transition-colors"
+                      className="block aspect-square overflow-hidden rounded-lg border border-[#FFCC00] bg-gray-50 dark:bg-[#0c141b] hover:border-[#FFCC00] transition-colors"
                     >
                       <div
                         className="h-full w-full bg-cover bg-center"
@@ -160,7 +162,7 @@ export function PortfolioTabs({ profile, videos, images, achievements, certifica
                 })}
               </div>
             ) : (
-              <p className="text-center text-[#92adc9] py-12">No gallery images available yet.</p>
+              <p className="text-center text-gray-500 dark:text-[#92adc9] py-12">No gallery images available yet.</p>
             )}
           </div>
         )}
@@ -174,7 +176,7 @@ export function PortfolioTabs({ profile, videos, images, achievements, certifica
                   return (
                     <div key={video.id} className="space-y-3">
                       {videoId ? (
-                        <div className="aspect-video w-full overflow-hidden rounded-lg border border-[#233648] bg-black">
+                        <div className="aspect-video w-full overflow-hidden rounded-lg border border-[#FFCC00] bg-black">
                           <iframe
                             src={`https://www.youtube.com/embed/${videoId}`}
                             title={video.name || "Video"}
@@ -188,7 +190,7 @@ export function PortfolioTabs({ profile, videos, images, achievements, certifica
                           href={video.url}
                           target="_blank"
                           rel="noreferrer"
-                          className="block aspect-video w-full overflow-hidden rounded-lg border border-[#233648] bg-[#0c141b]"
+                          className="block aspect-video w-full overflow-hidden rounded-lg border border-[#FFCC00] bg-gray-50 dark:bg-[#0c141b] transition-colors"
                         >
                           {video.thumbnail ? (
                             <div
@@ -196,21 +198,21 @@ export function PortfolioTabs({ profile, videos, images, achievements, certifica
                               style={{ backgroundImage: `url('${video.thumbnail}')` }}
                             />
                           ) : (
-                            <div className="flex h-full w-full items-center justify-center text-[#92adc9]">
+                            <div className="flex h-full w-full items-center justify-center text-gray-500 dark:text-[#92adc9]">
                               Video
                             </div>
                           )}
                         </a>
                       )}
                       {video.name && (
-                        <p className="text-sm font-semibold text-white">{video.name}</p>
+                        <p className="text-sm font-semibold text-gray-900 dark:text-white">{video.name}</p>
                       )}
                     </div>
                   );
                 })}
               </div>
             ) : (
-              <p className="text-center text-[#92adc9] py-12">No videos available yet.</p>
+              <p className="text-center text-gray-500 dark:text-[#92adc9] py-12">No videos available yet.</p>
             )}
           </div>
         )}

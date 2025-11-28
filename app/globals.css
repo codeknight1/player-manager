@@ -3,16 +3,55 @@
 @tailwind utilities;
 
 :root {
-  --background: #140a26; /* deep purple background */
+  --background: #140a26;
   --foreground: #ffffff;
   --brand-purple: #4D148C;
   --brand-orange: #FFCC00;
+  --card-bg: #192633;
+  --card-border: #FFCC00;
+  --card-header: #4D148C;
+  --card-header-border: #FFCC00;
+  --text-primary: #ffffff;
+  --text-secondary: #92adc9;
+  --sidebar-bg: #111a22;
+  --input-bg: #233648;
+}
+
+:root.light {
+  --background: #ffffff;
+  --foreground: #1a1a1a;
+  --brand-purple: #4D148C;
+  --brand-orange: #FFCC00;
+  --card-bg: #f8f9fa;
+  --card-border: #FFCC00;
+  --card-header: #4D148C;
+  --card-header-border: #FFCC00;
+  --text-primary: #1a1a1a;
+  --text-secondary: #4a5568;
+  --sidebar-bg: #f5f5f5;
+  --input-bg: #ffffff;
+}
+
+:root.dark {
+  --background: #140a26;
+  --foreground: #ffffff;
+  --brand-purple: #4D148C;
+  --brand-orange: #FFCC00;
+  --card-bg: #192633;
+  --card-border: #FFCC00;
+  --card-header: #4D148C;
+  --card-header-border: #FFCC00;
+  --text-primary: #ffffff;
+  --text-secondary: #92adc9;
+  --sidebar-bg: #111a22;
+  --input-bg: #233648;
 }
 
 body {
   color: var(--foreground);
   background: var(--background);
   font-family: 'Space Grotesk', 'Noto Sans', sans-serif;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 @layer utilities {

@@ -36,13 +36,27 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function() {
+                try {
+                  const theme = localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+                  document.documentElement.classList.add(theme);
+                } catch (e) {}
+              })();
+            `,
+          }}
+        />
+      </head>
       <body className="antialiased">
         <Providers>
           <ErrorBoundary>
             <div className="layout-container flex h-full min-h-screen flex-col">
               <ConditionalHeader />
-              <main className="flex-1 bg-[#111a22]">
+              <main className="flex-1 bg-white dark:bg-[#111a22] transition-colors">
                 {children}
               </main>
             </div>

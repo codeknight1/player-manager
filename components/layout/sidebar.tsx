@@ -26,7 +26,7 @@ export function Sidebar({ title, subtitle, items, user }: SidebarProps) {
 
   return (
     <div className="layout-content-container hidden lg:flex flex-col w-80">
-      <div className="flex h-full min-h-[700px] flex-col justify-between bg-[#111a22] p-4">
+      <div className="flex h-full min-h-[700px] flex-col justify-between bg-white dark:bg-[#111a22] p-4 transition-colors border-r border-[#FFCC00]">
         <div className="flex flex-col gap-4">
           {user && (
             <div className="flex gap-3">
@@ -39,10 +39,10 @@ export function Sidebar({ title, subtitle, items, user }: SidebarProps) {
                 }
               ></div>
               <div className="flex flex-col">
-                <h1 className="text-white text-base font-medium leading-normal">
+                <h1 className="text-gray-900 dark:text-white text-base font-medium leading-normal">
                   {user.name}
                 </h1>
-                <p className="text-[#92adc9] text-sm font-normal leading-normal">
+                <p className="text-gray-600 dark:text-[#92adc9] text-sm font-normal leading-normal">
                   {user.role}
                 </p>
               </div>
@@ -50,11 +50,11 @@ export function Sidebar({ title, subtitle, items, user }: SidebarProps) {
           )}
           {title && (
             <div className="flex flex-col">
-              <h1 className="text-white text-base font-medium leading-normal">
+              <h1 className="text-gray-900 dark:text-white text-base font-medium leading-normal">
                 {title}
               </h1>
               {subtitle && (
-                <p className="text-[#92adc9] text-sm font-normal leading-normal">
+                <p className="text-gray-600 dark:text-[#92adc9] text-sm font-normal leading-normal">
                   {subtitle}
                 </p>
               )}
@@ -70,12 +70,12 @@ export function Sidebar({ title, subtitle, items, user }: SidebarProps) {
                   className={clsx(
                     "flex items-center gap-3 px-3 py-2 rounded-lg transition-colors",
                     isActive
-                      ? "bg-[#233648]"
-                      : "hover:bg-[#192633]"
+                      ? "bg-[#4D148C]/10 dark:bg-[#233648] border-l-4 border-[#4D148C]"
+                      : "hover:bg-gray-100 dark:hover:bg-[#192633]"
                   )}
                 >
-                  <div className="text-white">{item.icon}</div>
-                  <p className="text-white text-sm font-medium leading-normal">
+                  <div className="text-gray-700 dark:text-white">{item.icon}</div>
+                  <p className="text-gray-900 dark:text-white text-sm font-medium leading-normal">
                     {item.label}
                   </p>
                 </Link>

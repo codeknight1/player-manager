@@ -48,7 +48,7 @@ export function MobileMenu({ navItems }: MobileMenuProps) {
     <div className="relative md:hidden" ref={menuRef}>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center justify-center rounded-lg p-2 text-white hover:bg-[#192633] transition-colors"
+        className="flex items-center justify-center rounded-lg p-2 text-white hover:bg-white/20 dark:hover:bg-[#192633] transition-colors"
         aria-label="Menu"
       >
         <svg
@@ -83,10 +83,10 @@ export function MobileMenu({ navItems }: MobileMenuProps) {
               animate={{ x: 0 }}
               exit={{ x: "-100%" }}
               transition={{ type: "spring", damping: 25, stiffness: 200 }}
-              className="fixed left-0 top-0 bottom-0 w-80 max-w-[85vw] bg-[#111a22] z-50 md:hidden shadow-2xl overflow-y-auto border-r border-[#233648]"
+              className="fixed left-0 top-0 bottom-0 w-80 max-w-[85vw] bg-[#111a22] z-50 md:hidden shadow-2xl overflow-y-auto border-r border-[#FFCC00]"
             >
               <div className="flex flex-col h-full">
-                <div className="flex items-center justify-between p-4 border-b border-[#233648]">
+                <div className="flex items-center justify-between p-4 border-b border-[#FFCC00] bg-[#4D148C]">
                   <h2 className="text-white text-lg font-bold">Menu</h2>
                   <button
                     onClick={() => setIsOpen(false)}
@@ -120,8 +120,8 @@ export function MobileMenu({ navItems }: MobileMenuProps) {
                           onClick={() => setIsOpen(false)}
                           className={`px-4 py-3 rounded-lg transition-colors ${
                             isActive
-                              ? "bg-[#233648] text-white font-medium"
-                              : "text-[#92adc9] hover:bg-[#192633] hover:text-white"
+                              ? "bg-[#233648] text-[#FFCC00] font-medium dark:text-white"
+                              : "text-[#FFCC00] hover:bg-[#192633] hover:text-white dark:text-[#92adc9] dark:hover:text-white"
                           }`}
                         >
                           {item.label}
@@ -131,7 +131,7 @@ export function MobileMenu({ navItems }: MobileMenuProps) {
                   </div>
                 </nav>
                 {isPlayerPage && session && (
-                  <div className="p-4 border-t border-[#233648]">
+                  <div className="p-4 border-t border-[#FFCC00]">
                     <LogoutButton />
                   </div>
                 )}

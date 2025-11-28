@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { NotificationDropdown } from "@/components/notifications/notification-dropdown";
 import { MobileMenu } from "./mobile-menu";
+import { ThemeToggle } from "@/components/theme/theme-toggle";
 
 interface HeaderProps {
   title?: string;
@@ -36,7 +37,7 @@ export function Header({
   const showMobileMenu = mobileNavItems.length > 0;
 
   return (
-    <header className="flex items-center justify-between whitespace-nowrap border-b border-solid px-4 sm:px-6 md:px-10 py-3" style={{ borderBottomColor: "var(--brand-orange)" }}>
+    <header className="flex items-center justify-between whitespace-nowrap border-b border-solid px-4 sm:px-6 md:px-10 py-3 bg-[#4D148C] dark:bg-[#111a22] border-transparent dark:border-transparent transition-colors" style={{ borderBottomColor: "var(--brand-orange)" }}>
       <div className="flex items-center gap-4 text-white">
         {logo || (
           <div className="size-4">
@@ -59,7 +60,7 @@ export function Header({
               <Link
                 key={item.href}
                 href={item.href}
-                className="text-white text-sm font-medium leading-normal hover:text-[#1172d4] transition-colors"
+                className="text-[#FFCC00] text-sm font-medium leading-normal hover:text-white transition-colors"
               >
                 {item.label}
               </Link>
@@ -68,6 +69,7 @@ export function Header({
         )}
         <div className="flex items-center gap-1">
           {showMobileMenu && <MobileMenu navItems={mobileNavItems} />}
+          <ThemeToggle />
           <NotificationDropdown />
         </div>
         {rightAction}

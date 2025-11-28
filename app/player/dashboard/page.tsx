@@ -184,7 +184,7 @@ export default function PlayerDashboard() {
   const sidebarItems = useSidebarItems();
 
   return (
-    <div className="relative flex h-auto min-h-screen w-full flex-col bg-[#111a22] overflow-x-hidden">
+    <div className="relative flex h-auto min-h-screen w-full flex-col bg-white dark:bg-[#111a22] overflow-x-hidden transition-colors">
       <div className="layout-container flex h-full grow flex-col">
         <div className="flex flex-1 flex-col lg:flex-row gap-6 px-4 md:px-6 py-5">
           <Sidebar
@@ -198,14 +198,14 @@ export default function PlayerDashboard() {
           />
           <div className="layout-content-container flex w-full flex-col flex-1 max-w-[960px]">
             <div className="flex flex-col gap-4 p-4 md:flex-row md:items-center md:justify-between">
-              <p className="text-white tracking-light text-[32px] font-bold leading-tight">
+              <p className="text-gray-900 dark:text-white tracking-light text-[32px] font-bold leading-tight">
                 Home
               </p>
               <div className="flex items-center justify-end">
                 <LogoutButton />
               </div>
             </div>
-            <h3 className="text-white text-lg font-bold leading-tight tracking-[-0.015em] px-4 pb-2 pt-4">
+            <h3 className="text-[#4D148C] dark:text-white text-lg font-bold leading-tight tracking-[-0.015em] px-4 pb-2 pt-4">
               My Profile
             </h3>
             <div className="flex flex-col gap-4 p-4 sm:flex-row sm:items-center sm:justify-between">
@@ -218,23 +218,23 @@ export default function PlayerDashboard() {
                   }}
                 ></div>
                 <div className="flex flex-col justify-center">
-                  <p className="text-white text-[22px] font-bold leading-tight tracking-[-0.015em]">
+                  <p className="text-gray-900 dark:text-white text-[22px] font-bold leading-tight tracking-[-0.015em]">
                     {loading ? "Loading..." : displayName}
                   </p>
-                  <p className="text-[#92adc9] text-base font-normal leading-normal">
+                  <p className="text-gray-600 dark:text-[#92adc9] text-base font-normal leading-normal">
                     {loading ? "Loading profile..." : displayInfo}
                   </p>
                 </div>
               </div>
             </div>
             {/* Recent Activity removed: will rely on real notifications/messages elsewhere */}
-            <h3 className="text-white text-lg font-bold leading-tight tracking-[-0.015em] px-4 pb-2 pt-4">
+            <h3 className="text-[#4D148C] dark:text-white text-lg font-bold leading-tight tracking-[-0.015em] px-4 pb-2 pt-4">
               Notifications
             </h3>
             {loading ? (
-              <div className="px-4 text-[#92adc9]">Loading notifications...</div>
+              <div className="px-4 text-gray-600 dark:text-[#92adc9]">Loading notifications...</div>
             ) : notifications.length === 0 ? (
-              <div className="px-4 text-[#92adc9]">No notifications yet</div>
+              <div className="px-4 text-gray-600 dark:text-[#92adc9]">No notifications yet</div>
             ) : (
               notifications.slice(0, 2).map((notification, idx) => (
                 <motion.div
@@ -249,7 +249,7 @@ export default function PlayerDashboard() {
                     <BellIcon size={24} />
                   </div>
                   <div className="flex flex-col justify-center">
-                    <p className={`text-base font-medium leading-normal line-clamp-1 ${notification.read ? "text-[#92adc9]" : "text-white"}`}>
+                    <p className={`text-base font-medium leading-normal line-clamp-1 ${notification.read ? "text-gray-600 dark:text-[#92adc9]" : "text-gray-900 dark:text-white"}`}>
                       {notification.title}
                     </p>
                     <p className="text-[#92adc9] text-sm font-normal leading-normal line-clamp-2">
@@ -259,7 +259,7 @@ export default function PlayerDashboard() {
                 </motion.div>
               ))
             )}
-            <h3 className="text-white text-lg font-bold leading-tight tracking-[-0.015em] px-4 pb-2 pt-4">
+            <h3 className="text-[#4D148C] dark:text-white text-lg font-bold leading-tight tracking-[-0.015em] px-4 pb-2 pt-4">
               Key Performance Widgets
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4">
@@ -267,12 +267,12 @@ export default function PlayerDashboard() {
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ delay: 0.2 }}
-                className="flex flex-col gap-2 rounded-lg p-6 border border-[#324d67]"
+                className="flex flex-col gap-2 rounded-lg p-6 border border-[#FFCC00] bg-white dark:bg-[#192633] transition-colors"
               >
-                <p className="text-white text-base font-medium leading-normal">
+                <p className="text-gray-900 dark:text-white text-base font-medium leading-normal">
                   Goals Scored
                 </p>
-                <p className="text-white tracking-light text-2xl font-bold leading-tight">
+                <p className="text-[#4D148C] dark:text-white tracking-light text-2xl font-bold leading-tight">
                   {loading ? "..." : stats.goals || 0}
                 </p>
               </motion.div>
@@ -280,12 +280,12 @@ export default function PlayerDashboard() {
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ delay: 0.3 }}
-                className="flex flex-col gap-2 rounded-lg p-6 border border-[#324d67]"
+                className="flex flex-col gap-2 rounded-lg p-6 border border-[#FFCC00] bg-white dark:bg-[#192633] transition-colors"
               >
-                <p className="text-white text-base font-medium leading-normal">
+                <p className="text-gray-900 dark:text-white text-base font-medium leading-normal">
                   Assists
                 </p>
-                <p className="text-white tracking-light text-2xl font-bold leading-tight">
+                <p className="text-[#4D148C] dark:text-white tracking-light text-2xl font-bold leading-tight">
                   {loading ? "..." : stats.assists || 0}
                 </p>
               </motion.div>
@@ -293,12 +293,12 @@ export default function PlayerDashboard() {
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ delay: 0.4 }}
-                className="flex flex-col gap-2 rounded-lg p-6 border border-[#324d67]"
+                className="flex flex-col gap-2 rounded-lg p-6 border border-[#FFCC00] bg-white dark:bg-[#192633] transition-colors"
               >
-                <p className="text-white text-base font-medium leading-normal">
+                <p className="text-gray-900 dark:text-white text-base font-medium leading-normal">
                   Matches Played
                 </p>
-                <p className="text-white tracking-light text-2xl font-bold leading-tight">
+                <p className="text-[#4D148C] dark:text-white tracking-light text-2xl font-bold leading-tight">
                   {loading ? "..." : stats.matches || 0}
                 </p>
               </motion.div>

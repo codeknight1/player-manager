@@ -130,30 +130,30 @@ export default async function PortfolioPage({ params }: PortfolioPageProps) {
   const fullName = profile.lastName ? `${profile.firstName} ${profile.lastName}`.trim() : playerName;
 
   return (
-    <div className="min-h-screen w-full bg-[#111a22] text-white" style={{ fontFamily: 'Manrope, "Noto Sans", sans-serif' }}>
+    <div className="min-h-screen w-full bg-white dark:bg-[#111a22] text-gray-900 dark:text-white transition-colors" style={{ fontFamily: 'Manrope, "Noto Sans", sans-serif' }}>
       <div className="mx-auto w-full max-w-7xl">
-        <div className="relative bg-gradient-to-b from-[#192633] to-[#111a22] pb-8 pt-8">
+        <div className="relative bg-gradient-to-b from-gray-50 to-white dark:from-[#192633] dark:to-[#111a22] pb-8 pt-8 transition-colors">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div className="text-center">
-              <h1 className="text-4xl font-bold leading-tight md:text-5xl lg:text-6xl mb-4">
-                {playerName}
-              </h1>
-              {fullName !== playerName && (
-                <h2 className="text-2xl font-semibold text-[#92adc9] mb-4 md:text-3xl">
-                  {fullName}
-                </h2>
-              )}
+              <h1 className="text-4xl font-bold leading-tight md:text-5xl lg:text-6xl mb-4 text-gray-900 dark:text-white">
+                  {playerName}
+                </h1>
+                {fullName !== playerName && (
+                <h2 className="text-2xl font-semibold text-gray-600 dark:text-[#92adc9] mb-4 md:text-3xl">
+                    {fullName}
+                  </h2>
+                )}
               <div className="flex flex-col items-center justify-center gap-3 md:flex-row md:items-center md:gap-6">
-                {profile.position && (
-                  <div className="flex items-center gap-2">
-                    <span className="text-lg font-medium text-white">{profile.position}</span>
-                  </div>
-                )}
-                {profile.nationality && (
-                  <div className="flex items-center gap-2">
-                    <span className="text-lg text-[#92adc9]">{profile.nationality}</span>
-                  </div>
-                )}
+                  {profile.position && (
+                    <div className="flex items-center gap-2">
+                    <span className="text-lg font-medium text-gray-900 dark:text-white">{profile.position}</span>
+                    </div>
+                  )}
+                  {profile.nationality && (
+                    <div className="flex items-center gap-2">
+                    <span className="text-lg text-gray-600 dark:text-[#92adc9]">{profile.nationality}</span>
+                    </div>
+                  )}
               </div>
             </div>
           </div>
@@ -162,76 +162,74 @@ export default async function PortfolioPage({ params }: PortfolioPageProps) {
         <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
             <div className="space-y-6">
-              <div className="relative shrink-0 w-full flex justify-center lg:justify-start">
+              <div className="relative w-full">
                 <div
-                  className="bg-center bg-no-repeat bg-cover rounded-2xl border-4 border-white/20 shadow-2xl"
+                  className="bg-center bg-no-repeat bg-cover rounded-xl border border-[#FFCC00] bg-gray-100 dark:bg-[#192633] shadow-lg w-full aspect-[3/4] transition-colors"
                   style={{
-                    width: "280px",
-                    height: "350px",
                     backgroundImage: profile.avatar ? `url("${profile.avatar}")` : undefined,
                     backgroundColor: profile.avatar ? undefined : "#192633",
                   }}
                 />
               </div>
-              <section className="rounded-xl border border-[#233648] bg-[#192633] overflow-hidden">
-                <div className="bg-[#233648] px-6 py-4 border-b border-[#324d67]">
+              <section className="rounded-xl border border-[#FFCC00] bg-white dark:bg-[#192633] overflow-hidden transition-colors">
+                <div className="bg-[#4D148C] px-6 py-4 border-b border-[#FFCC00] transition-colors">
                   <h3 className="text-lg font-bold text-white">Career Information</h3>
             </div>
                 <div className="p-6">
                   <table className="w-full">
                     <tbody>
                       <tr className="border-b border-[#233648]">
-                        <td className="py-3 text-sm font-medium text-[#92adc9]">Matches</td>
-                        <td className="py-3 text-sm text-white text-right">{profile.stats.matches || 0} matches</td>
+                        <td className="py-3 text-sm font-medium text-gray-600 dark:text-[#92adc9]">Matches</td>
+                        <td className="py-3 text-sm text-gray-900 dark:text-white text-right">{profile.stats.matches || 0} matches</td>
                       </tr>
-                      <tr className="border-b border-[#233648]">
-                        <td className="py-3 text-sm font-medium text-[#92adc9]">Goals</td>
-                        <td className="py-3 text-sm text-white text-right">{profile.stats.goals || 0} goals</td>
+                      <tr className="border-b border-[#FFCC00]">
+                        <td className="py-3 text-sm font-medium text-gray-600 dark:text-[#92adc9]">Goals</td>
+                        <td className="py-3 text-sm text-gray-900 dark:text-white text-right">{profile.stats.goals || 0} goals</td>
                       </tr>
-                      <tr className="border-b border-[#233648]">
-                        <td className="py-3 text-sm font-medium text-[#92adc9]">Assists</td>
-                        <td className="py-3 text-sm text-white text-right">{profile.stats.assists || 0} assists</td>
+                      <tr className="border-b border-[#FFCC00]">
+                        <td className="py-3 text-sm font-medium text-gray-600 dark:text-[#92adc9]">Assists</td>
+                        <td className="py-3 text-sm text-gray-900 dark:text-white text-right">{profile.stats.assists || 0} assists</td>
                       </tr>
                       {certificates.length > 0 && (
-                        <tr className="border-b border-[#233648]">
-                          <td className="py-3 text-sm font-medium text-[#92adc9]">Certificates</td>
-                          <td className="py-3 text-sm text-white text-right">{certificates.length}</td>
+                        <tr className="border-b border-[#FFCC00]">
+                          <td className="py-3 text-sm font-medium text-gray-600 dark:text-[#92adc9]">Certificates</td>
+                          <td className="py-3 text-sm text-gray-900 dark:text-white text-right">{certificates.length}</td>
                         </tr>
                       )}
                       {achievements.length > 0 && (
-                        <tr className="border-b border-[#233648]">
-                          <td className="py-3 text-sm font-medium text-[#92adc9]">Achievements</td>
-                          <td className="py-3 text-sm text-white text-right">{achievements.length}</td>
+                        <tr className="border-b border-[#FFCC00]">
+                          <td className="py-3 text-sm font-medium text-gray-600 dark:text-[#92adc9]">Achievements</td>
+                          <td className="py-3 text-sm text-gray-900 dark:text-white text-right">{achievements.length}</td>
                         </tr>
                       )}
                       {profile.discipline && (
-                        <tr className="border-b border-[#233648]">
-                          <td className="py-3 text-sm font-medium text-[#92adc9]">Discipline</td>
-                          <td className="py-3 text-sm text-white text-right">{profile.discipline}</td>
+                        <tr className="border-b border-[#FFCC00]">
+                          <td className="py-3 text-sm font-medium text-gray-600 dark:text-[#92adc9]">Discipline</td>
+                          <td className="py-3 text-sm text-gray-900 dark:text-white text-right">{profile.discipline}</td>
                         </tr>
                       )}
                       {profile.spotKick && (
-                        <tr className="border-b border-[#233648]">
-                          <td className="py-3 text-sm font-medium text-[#92adc9]">Spot Kick</td>
-                          <td className="py-3 text-sm text-white text-right">{profile.spotKick}</td>
+                        <tr className="border-b border-[#FFCC00]">
+                          <td className="py-3 text-sm font-medium text-gray-600 dark:text-[#92adc9]">Spot Kick</td>
+                          <td className="py-3 text-sm text-gray-900 dark:text-white text-right">{profile.spotKick}</td>
                         </tr>
                       )}
                       {profile.clubDebut && (
-                        <tr className="border-b border-[#233648]">
-                          <td className="py-3 text-sm font-medium text-[#92adc9]">Club Debut</td>
-                          <td className="py-3 text-sm text-white text-right">{profile.clubDebut}</td>
+                        <tr className="border-b border-[#FFCC00]">
+                          <td className="py-3 text-sm font-medium text-gray-600 dark:text-[#92adc9]">Club Debut</td>
+                          <td className="py-3 text-sm text-gray-900 dark:text-white text-right">{profile.clubDebut}</td>
                         </tr>
                       )}
                       {profile.previousClub && (
-                        <tr className="border-b border-[#233648]">
-                          <td className="py-3 text-sm font-medium text-[#92adc9]">Previous Club</td>
-                          <td className="py-3 text-sm text-white text-right">{profile.previousClub}</td>
+                        <tr className="border-b border-[#FFCC00]">
+                          <td className="py-3 text-sm font-medium text-gray-600 dark:text-[#92adc9]">Previous Club</td>
+                          <td className="py-3 text-sm text-gray-900 dark:text-white text-right">{profile.previousClub}</td>
                         </tr>
                       )}
                       {profile.presentClub && (
                         <tr>
-                          <td className="py-3 text-sm font-medium text-[#92adc9]">Present Club</td>
-                          <td className="py-3 text-sm text-white text-right">{profile.presentClub}</td>
+                          <td className="py-3 text-sm font-medium text-gray-600 dark:text-[#92adc9]">Present Club</td>
+                          <td className="py-3 text-sm text-gray-900 dark:text-white text-right">{profile.presentClub}</td>
                         </tr>
                       )}
                     </tbody>
@@ -241,52 +239,52 @@ export default async function PortfolioPage({ params }: PortfolioPageProps) {
             </div>
 
             <div className="lg:col-span-2 space-y-6">
-              <section className="rounded-xl border border-[#233648] bg-[#192633] overflow-hidden">
-                <div className="bg-[#233648] px-6 py-4 border-b border-[#324d67]">
+              <section className="rounded-xl border border-[#FFCC00] bg-white dark:bg-[#192633] overflow-hidden transition-colors">
+                <div className="bg-[#4D148C] px-6 py-4 border-b border-[#FFCC00] transition-colors">
                   <h3 className="text-lg font-bold text-white">Player Profile</h3>
-                </div>
+                        </div>
                 <div className="p-6">
                   <table className="w-full">
                     <tbody className="space-y-4">
                       {profile.age > 0 && (
-                        <tr className="border-b border-[#233648]">
-                          <td className="py-3 text-sm font-medium text-[#92adc9]">Date of Birth</td>
-                          <td className="py-3 text-sm text-white text-right">{formatDateOfBirth(profile.age) || `Age ${profile.age}`}</td>
+                        <tr className="border-b border-[#FFCC00]">
+                          <td className="py-3 text-sm font-medium text-gray-600 dark:text-[#92adc9]">Date of Birth</td>
+                          <td className="py-3 text-sm text-gray-900 dark:text-white text-right">{formatDateOfBirth(profile.age) || `Age ${profile.age}`}</td>
                         </tr>
                       )}
                       {profile.nationality && (
-                        <tr className="border-b border-[#233648]">
-                          <td className="py-3 text-sm font-medium text-[#92adc9]">Citizenship</td>
-                          <td className="py-3 text-sm text-white text-right">{profile.nationality}</td>
+                        <tr className="border-b border-[#FFCC00]">
+                          <td className="py-3 text-sm font-medium text-gray-600 dark:text-[#92adc9]">Citizenship</td>
+                          <td className="py-3 text-sm text-gray-900 dark:text-white text-right">{profile.nationality}</td>
                         </tr>
                       )}
                       {profile.position && (
-                        <tr className="border-b border-[#233648]">
-                          <td className="py-3 text-sm font-medium text-[#92adc9]">Position</td>
-                          <td className="py-3 text-sm text-white text-right">{profile.position}</td>
+                        <tr className="border-b border-[#FFCC00]">
+                          <td className="py-3 text-sm font-medium text-gray-600 dark:text-[#92adc9]">Position</td>
+                          <td className="py-3 text-sm text-gray-900 dark:text-white text-right">{profile.position}</td>
                         </tr>
                       )}
                       {profile.email && (
-                        <tr className="border-b border-[#233648]">
-                          <td className="py-3 text-sm font-medium text-[#92adc9]">Email</td>
-                          <td className="py-3 text-sm text-white text-right break-all">{profile.email}</td>
+                        <tr className="border-b border-[#FFCC00]">
+                          <td className="py-3 text-sm font-medium text-gray-600 dark:text-[#92adc9]">Email</td>
+                          <td className="py-3 text-sm text-gray-900 dark:text-white text-right break-all">{profile.email}</td>
                         </tr>
                       )}
                       {profile.phone && (
-                        <tr className="border-b border-[#233648]">
-                          <td className="py-3 text-sm font-medium text-[#92adc9]">Phone</td>
-                          <td className="py-3 text-sm text-white text-right">{profile.phone}</td>
+                        <tr className="border-b border-[#FFCC00]">
+                          <td className="py-3 text-sm font-medium text-gray-600 dark:text-[#92adc9]">Phone</td>
+                          <td className="py-3 text-sm text-gray-900 dark:text-white text-right">{profile.phone}</td>
                         </tr>
                       )}
                       {profile.transferMarketLink && (
-                        <tr className="border-b border-[#233648]">
-                          <td className="py-3 text-sm font-medium text-[#92adc9]">Transfer Market</td>
+                        <tr className="border-b border-[#FFCC00]">
+                          <td className="py-3 text-sm font-medium text-gray-600 dark:text-[#92adc9]">Transfer Market</td>
                           <td className="py-3 text-sm text-right">
                             <a
                               href={profile.transferMarketLink}
-                              target="_blank"
-                              rel="noreferrer"
-                              className="text-[#1172d4] hover:underline break-all"
+                        target="_blank"
+                        rel="noreferrer"
+                              className="text-blue-600 dark:text-[#1172d4] hover:underline break-all"
                             >
                               View Profile
                             </a>
@@ -294,27 +292,27 @@ export default async function PortfolioPage({ params }: PortfolioPageProps) {
                         </tr>
                       )}
                       {profile.placeOfBirth && (
-                        <tr className="border-b border-[#233648]">
-                          <td className="py-3 text-sm font-medium text-[#92adc9]">Place of Birth</td>
-                          <td className="py-3 text-sm text-white text-right">{profile.placeOfBirth}</td>
+                        <tr className="border-b border-[#FFCC00]">
+                          <td className="py-3 text-sm font-medium text-gray-600 dark:text-[#92adc9]">Place of Birth</td>
+                          <td className="py-3 text-sm text-gray-900 dark:text-white text-right">{profile.placeOfBirth}</td>
                         </tr>
                       )}
                       {profile.height && (
-                        <tr className="border-b border-[#233648]">
-                          <td className="py-3 text-sm font-medium text-[#92adc9]">Height</td>
-                          <td className="py-3 text-sm text-white text-right">{profile.height}</td>
+                        <tr className="border-b border-[#FFCC00]">
+                          <td className="py-3 text-sm font-medium text-gray-600 dark:text-[#92adc9]">Height</td>
+                          <td className="py-3 text-sm text-gray-900 dark:text-white text-right">{profile.height}</td>
                         </tr>
                       )}
                       {profile.weight && (
                         <tr>
-                          <td className="py-3 text-sm font-medium text-[#92adc9]">Weight</td>
-                          <td className="py-3 text-sm text-white text-right">{profile.weight}</td>
+                          <td className="py-3 text-sm font-medium text-gray-600 dark:text-[#92adc9]">Weight</td>
+                          <td className="py-3 text-sm text-gray-900 dark:text-white text-right">{profile.weight}</td>
                         </tr>
                       )}
                     </tbody>
                   </table>
-                </div>
-              </section>
+          </div>
+        </section>
 
               <PortfolioTabs
                 profile={profile}

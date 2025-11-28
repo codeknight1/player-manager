@@ -43,12 +43,12 @@ export function CollapsibleSidebar({
   const sidebarWidth = isCollapsed ? "w-16 sm:w-20" : "w-full sm:w-80";
 
   const sidebarContent = (
-    <div className="flex h-full min-h-[700px] flex-col justify-between bg-[#111a22] p-4">
+    <div className="flex h-full min-h-[700px] flex-col justify-between bg-white dark:bg-[#111a22] p-4 transition-colors border-r border-[#FFCC00]">
       <div className="flex flex-col gap-3">
         {showToggle && (
           <button
             onClick={toggleCollapse}
-            className="flex items-center justify-center rounded-xl border border-[#233648] bg-[#192633] p-3 text-white hover:border-[#1172d4] hover:bg-[#1f2c3a] transition-colors"
+            className="flex items-center justify-center rounded-xl border border-[#FFCC00] bg-white dark:bg-[#192633] p-3 text-gray-700 dark:text-white hover:border-[#FFCC00] hover:bg-gray-100 dark:hover:bg-[#1f2c3a] transition-colors"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -82,10 +82,10 @@ export function CollapsibleSidebar({
               }
             />
             <div className="flex flex-col overflow-hidden">
-              <h1 className="text-white text-base font-medium leading-normal truncate">
+              <h1 className="text-gray-900 dark:text-white text-base font-medium leading-normal truncate">
                 {user.name}
               </h1>
-              <p className="text-[#92adc9] text-sm font-normal leading-normal truncate">
+              <p className="text-gray-600 dark:text-[#92adc9] text-sm font-normal leading-normal truncate">
                 {user.role}
               </p>
             </div>
@@ -94,11 +94,11 @@ export function CollapsibleSidebar({
 
         {title && !isCollapsed && (
           <div className="flex flex-col overflow-hidden">
-            <h1 className="text-white text-base font-medium leading-normal">
+            <h1 className="text-gray-900 dark:text-white text-base font-medium leading-normal">
               {title}
             </h1>
             {subtitle && (
-              <p className="text-[#92adc9] text-sm font-normal leading-normal">
+              <p className="text-gray-600 dark:text-[#92adc9] text-sm font-normal leading-normal">
                 {subtitle}
               </p>
             )}
@@ -115,12 +115,12 @@ export function CollapsibleSidebar({
                 className={clsx(
                   "flex items-center gap-3 px-3 py-2 rounded-lg transition-colors",
                   isActive
-                    ? "bg-[#233648]"
-                    : "hover:bg-[#192633]"
+                    ? "bg-[#4D148C]/10 dark:bg-[#233648] border-l-4 border-[#4D148C]"
+                    : "hover:bg-gray-100 dark:hover:bg-[#192633]"
                 )}
                 title={isCollapsed ? item.label : undefined}
               >
-                <div className="text-white shrink-0">{item.icon}</div>
+                <div className="text-gray-700 dark:text-white shrink-0">{item.icon}</div>
                 <AnimatePresence>
                   {!isCollapsed && (
                     <motion.p
@@ -128,7 +128,7 @@ export function CollapsibleSidebar({
                       animate={{ opacity: 1, width: "auto" }}
                       exit={{ opacity: 0, width: 0 }}
                       transition={{ duration: 0.2 }}
-                      className="text-white text-sm font-medium leading-normal truncate"
+                      className="text-gray-900 dark:text-white text-sm font-medium leading-normal truncate"
                     >
                       {item.label}
                     </motion.p>
@@ -144,7 +144,7 @@ export function CollapsibleSidebar({
         <div className="flex items-center justify-center">
           <button
             onClick={toggleCollapse}
-            className="flex items-center justify-center w-12 h-12 rounded-full bg-[#192633] hover:bg-[#233648] transition-colors text-white border-0 focus:outline-none focus:ring-0"
+            className="flex items-center justify-center w-12 h-12 rounded-full bg-white dark:bg-[#192633] hover:bg-gray-100 dark:hover:bg-[#233648] transition-colors text-gray-700 dark:text-white border-0 focus:outline-none focus:ring-0"
             aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
           >
             <svg

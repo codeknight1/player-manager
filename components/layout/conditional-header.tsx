@@ -29,7 +29,7 @@ export function ConditionalHeader() {
         !session ? (
           <a
             href="/player/login"
-            className="flex min-w-[84px] items-center justify-center rounded-lg h-10 px-4 bg-[#233648] text-white text-sm font-bold leading-normal tracking-[0.015em]"
+            className="flex min-w-[84px] items-center justify-center rounded-lg h-10 px-4 bg-[#FFCC00] text-[#4D148C] text-sm font-bold leading-normal tracking-[0.015em] hover:brightness-110 transition-colors"
           >
             Log In
           </a>
