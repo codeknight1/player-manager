@@ -160,160 +160,159 @@ export default async function PortfolioPage({ params }: PortfolioPageProps) {
         </div>
 
         <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
-            <div className="space-y-6">
-              <div className="relative w-full">
-                <div
-                  className="bg-center bg-no-repeat bg-cover rounded-xl border border-[#FFCC00] bg-gray-100 dark:bg-[#192633] shadow-lg w-full aspect-[3/4] transition-colors"
-                  style={{
-                    backgroundImage: profile.avatar ? `url("${profile.avatar}")` : undefined,
-                    backgroundColor: profile.avatar ? undefined : "#192633",
-                  }}
-                />
+          <div className="flex flex-col gap-8 lg:grid lg:grid-cols-3">
+            <div className="relative w-full order-1 lg:order-1">
+              <div
+                className="bg-center bg-no-repeat bg-cover rounded-xl border border-[#FFCC00] bg-gray-100 dark:bg-[#192633] shadow-lg w-full aspect-[3/4] transition-colors"
+                style={{
+                  backgroundImage: profile.avatar ? `url("${profile.avatar}")` : undefined,
+                  backgroundColor: profile.avatar ? undefined : "#192633",
+                }}
+              />
+            </div>
+
+            <section className="rounded-xl border border-[#FFCC00] bg-white dark:bg-[#192633] overflow-hidden transition-colors order-2 lg:col-span-2 lg:order-2">
+              <div className="bg-[#4D148C] px-6 py-4 border-b border-[#FFCC00] transition-colors">
+                <h3 className="text-lg font-bold text-white">Player Profile</h3>
               </div>
-              <section className="rounded-xl border border-[#FFCC00] bg-white dark:bg-[#192633] overflow-hidden transition-colors">
-                <div className="bg-[#4D148C] px-6 py-4 border-b border-[#FFCC00] transition-colors">
-                  <h3 className="text-lg font-bold text-white">Career Information</h3>
-            </div>
-                <div className="p-6">
-                  <table className="w-full">
-                    <tbody>
-                      <tr className="border-b border-[#233648]">
-                        <td className="py-3 text-sm font-medium text-gray-600 dark:text-[#92adc9]">Matches</td>
-                        <td className="py-3 text-sm text-gray-900 dark:text-white text-right">{profile.stats.matches || 0} matches</td>
-                      </tr>
+              <div className="p-6">
+                <table className="w-full">
+                  <tbody className="space-y-4">
+                    {profile.age > 0 && (
                       <tr className="border-b border-[#FFCC00]">
-                        <td className="py-3 text-sm font-medium text-gray-600 dark:text-[#92adc9]">Goals</td>
-                        <td className="py-3 text-sm text-gray-900 dark:text-white text-right">{profile.stats.goals || 0} goals</td>
+                        <td className="py-3 text-sm font-medium text-gray-600 dark:text-[#92adc9]">Date of Birth</td>
+                        <td className="py-3 text-sm text-gray-900 dark:text-white text-right">{formatDateOfBirth(profile.age) || `Age ${profile.age}`}</td>
                       </tr>
+                    )}
+                    {profile.nationality && (
                       <tr className="border-b border-[#FFCC00]">
-                        <td className="py-3 text-sm font-medium text-gray-600 dark:text-[#92adc9]">Assists</td>
-                        <td className="py-3 text-sm text-gray-900 dark:text-white text-right">{profile.stats.assists || 0} assists</td>
+                        <td className="py-3 text-sm font-medium text-gray-600 dark:text-[#92adc9]">Citizenship</td>
+                        <td className="py-3 text-sm text-gray-900 dark:text-white text-right">{profile.nationality}</td>
                       </tr>
-                      {certificates.length > 0 && (
-                        <tr className="border-b border-[#FFCC00]">
-                          <td className="py-3 text-sm font-medium text-gray-600 dark:text-[#92adc9]">Certificates</td>
-                          <td className="py-3 text-sm text-gray-900 dark:text-white text-right">{certificates.length}</td>
-                        </tr>
-                      )}
-                      {achievements.length > 0 && (
-                        <tr className="border-b border-[#FFCC00]">
-                          <td className="py-3 text-sm font-medium text-gray-600 dark:text-[#92adc9]">Achievements</td>
-                          <td className="py-3 text-sm text-gray-900 dark:text-white text-right">{achievements.length}</td>
-                        </tr>
-                      )}
-                      {profile.discipline && (
-                        <tr className="border-b border-[#FFCC00]">
-                          <td className="py-3 text-sm font-medium text-gray-600 dark:text-[#92adc9]">Discipline</td>
-                          <td className="py-3 text-sm text-gray-900 dark:text-white text-right">{profile.discipline}</td>
-                        </tr>
-                      )}
-                      {profile.spotKick && (
-                        <tr className="border-b border-[#FFCC00]">
-                          <td className="py-3 text-sm font-medium text-gray-600 dark:text-[#92adc9]">Spot Kick</td>
-                          <td className="py-3 text-sm text-gray-900 dark:text-white text-right">{profile.spotKick}</td>
-                        </tr>
-                      )}
-                      {profile.clubDebut && (
-                        <tr className="border-b border-[#FFCC00]">
-                          <td className="py-3 text-sm font-medium text-gray-600 dark:text-[#92adc9]">Club Debut</td>
-                          <td className="py-3 text-sm text-gray-900 dark:text-white text-right">{profile.clubDebut}</td>
-                        </tr>
-                      )}
-                      {profile.previousClub && (
-                        <tr className="border-b border-[#FFCC00]">
-                          <td className="py-3 text-sm font-medium text-gray-600 dark:text-[#92adc9]">Previous Club</td>
-                          <td className="py-3 text-sm text-gray-900 dark:text-white text-right">{profile.previousClub}</td>
-                        </tr>
-                      )}
-                      {profile.presentClub && (
-                        <tr>
-                          <td className="py-3 text-sm font-medium text-gray-600 dark:text-[#92adc9]">Present Club</td>
-                          <td className="py-3 text-sm text-gray-900 dark:text-white text-right">{profile.presentClub}</td>
-                        </tr>
-                      )}
-                    </tbody>
-                  </table>
-          </div>
-        </section>
-            </div>
+                    )}
+                    {profile.position && (
+                      <tr className="border-b border-[#FFCC00]">
+                        <td className="py-3 text-sm font-medium text-gray-600 dark:text-[#92adc9]">Position</td>
+                        <td className="py-3 text-sm text-gray-900 dark:text-white text-right">{profile.position}</td>
+                      </tr>
+                    )}
+                    {profile.email && (
+                      <tr className="border-b border-[#FFCC00]">
+                        <td className="py-3 text-sm font-medium text-gray-600 dark:text-[#92adc9]">Email</td>
+                        <td className="py-3 text-sm text-gray-900 dark:text-white text-right break-all">{profile.email}</td>
+                      </tr>
+                    )}
+                    {profile.phone && (
+                      <tr className="border-b border-[#FFCC00]">
+                        <td className="py-3 text-sm font-medium text-gray-600 dark:text-[#92adc9]">Phone</td>
+                        <td className="py-3 text-sm text-gray-900 dark:text-white text-right">{profile.phone}</td>
+                      </tr>
+                    )}
+                    {profile.transferMarketLink && (
+                      <tr className="border-b border-[#FFCC00]">
+                        <td className="py-3 text-sm font-medium text-gray-600 dark:text-[#92adc9]">Transfer Market</td>
+                        <td className="py-3 text-sm text-right">
+                          <a
+                            href={profile.transferMarketLink}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="text-blue-600 dark:text-[#1172d4] hover:underline break-all"
+                          >
+                            View Profile
+                          </a>
+                        </td>
+                      </tr>
+                    )}
+                    {profile.placeOfBirth && (
+                      <tr className="border-b border-[#FFCC00]">
+                        <td className="py-3 text-sm font-medium text-gray-600 dark:text-[#92adc9]">Place of Birth</td>
+                        <td className="py-3 text-sm text-gray-900 dark:text-white text-right">{profile.placeOfBirth}</td>
+                      </tr>
+                    )}
+                    {profile.height && (
+                      <tr className="border-b border-[#FFCC00]">
+                        <td className="py-3 text-sm font-medium text-gray-600 dark:text-[#92adc9]">Height</td>
+                        <td className="py-3 text-sm text-gray-900 dark:text-white text-right">{profile.height}</td>
+                      </tr>
+                    )}
+                    {profile.weight && (
+                      <tr>
+                        <td className="py-3 text-sm font-medium text-gray-600 dark:text-[#92adc9]">Weight</td>
+                        <td className="py-3 text-sm text-gray-900 dark:text-white text-right">{profile.weight}</td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </section>
 
-            <div className="lg:col-span-2 space-y-6">
-              <section className="rounded-xl border border-[#FFCC00] bg-white dark:bg-[#192633] overflow-hidden transition-colors">
-                <div className="bg-[#4D148C] px-6 py-4 border-b border-[#FFCC00] transition-colors">
-                  <h3 className="text-lg font-bold text-white">Player Profile</h3>
-                        </div>
-                <div className="p-6">
-                  <table className="w-full">
-                    <tbody className="space-y-4">
-                      {profile.age > 0 && (
-                        <tr className="border-b border-[#FFCC00]">
-                          <td className="py-3 text-sm font-medium text-gray-600 dark:text-[#92adc9]">Date of Birth</td>
-                          <td className="py-3 text-sm text-gray-900 dark:text-white text-right">{formatDateOfBirth(profile.age) || `Age ${profile.age}`}</td>
-                        </tr>
-                      )}
-                      {profile.nationality && (
-                        <tr className="border-b border-[#FFCC00]">
-                          <td className="py-3 text-sm font-medium text-gray-600 dark:text-[#92adc9]">Citizenship</td>
-                          <td className="py-3 text-sm text-gray-900 dark:text-white text-right">{profile.nationality}</td>
-                        </tr>
-                      )}
-                      {profile.position && (
-                        <tr className="border-b border-[#FFCC00]">
-                          <td className="py-3 text-sm font-medium text-gray-600 dark:text-[#92adc9]">Position</td>
-                          <td className="py-3 text-sm text-gray-900 dark:text-white text-right">{profile.position}</td>
-                        </tr>
-                      )}
-                      {profile.email && (
-                        <tr className="border-b border-[#FFCC00]">
-                          <td className="py-3 text-sm font-medium text-gray-600 dark:text-[#92adc9]">Email</td>
-                          <td className="py-3 text-sm text-gray-900 dark:text-white text-right break-all">{profile.email}</td>
-                        </tr>
-                      )}
-                      {profile.phone && (
-                        <tr className="border-b border-[#FFCC00]">
-                          <td className="py-3 text-sm font-medium text-gray-600 dark:text-[#92adc9]">Phone</td>
-                          <td className="py-3 text-sm text-gray-900 dark:text-white text-right">{profile.phone}</td>
-                        </tr>
-                      )}
-                      {profile.transferMarketLink && (
-                        <tr className="border-b border-[#FFCC00]">
-                          <td className="py-3 text-sm font-medium text-gray-600 dark:text-[#92adc9]">Transfer Market</td>
-                          <td className="py-3 text-sm text-right">
-                            <a
-                              href={profile.transferMarketLink}
-                        target="_blank"
-                        rel="noreferrer"
-                              className="text-blue-600 dark:text-[#1172d4] hover:underline break-all"
-                            >
-                              View Profile
-                            </a>
-                          </td>
-                        </tr>
-                      )}
-                      {profile.placeOfBirth && (
-                        <tr className="border-b border-[#FFCC00]">
-                          <td className="py-3 text-sm font-medium text-gray-600 dark:text-[#92adc9]">Place of Birth</td>
-                          <td className="py-3 text-sm text-gray-900 dark:text-white text-right">{profile.placeOfBirth}</td>
-                        </tr>
-                      )}
-                      {profile.height && (
-                        <tr className="border-b border-[#FFCC00]">
-                          <td className="py-3 text-sm font-medium text-gray-600 dark:text-[#92adc9]">Height</td>
-                          <td className="py-3 text-sm text-gray-900 dark:text-white text-right">{profile.height}</td>
-                        </tr>
-                      )}
-                      {profile.weight && (
-                        <tr>
-                          <td className="py-3 text-sm font-medium text-gray-600 dark:text-[#92adc9]">Weight</td>
-                          <td className="py-3 text-sm text-gray-900 dark:text-white text-right">{profile.weight}</td>
-                        </tr>
-                      )}
-                    </tbody>
-                  </table>
-          </div>
-        </section>
+            <section className="rounded-xl border border-[#FFCC00] bg-white dark:bg-[#192633] overflow-hidden transition-colors order-3 lg:order-3">
+              <div className="bg-[#4D148C] px-6 py-4 border-b border-[#FFCC00] transition-colors">
+                <h3 className="text-lg font-bold text-white">Career Information</h3>
+              </div>
+              <div className="p-6">
+                <table className="w-full">
+                  <tbody>
+                    <tr className="border-b border-[#233648]">
+                      <td className="py-3 text-sm font-medium text-gray-600 dark:text-[#92adc9]">Matches</td>
+                      <td className="py-3 text-sm text-gray-900 dark:text-white text-right">{profile.stats.matches || 0} matches</td>
+                    </tr>
+                    <tr className="border-b border-[#FFCC00]">
+                      <td className="py-3 text-sm font-medium text-gray-600 dark:text-[#92adc9]">Goals</td>
+                      <td className="py-3 text-sm text-gray-900 dark:text-white text-right">{profile.stats.goals || 0} goals</td>
+                    </tr>
+                    <tr className="border-b border-[#FFCC00]">
+                      <td className="py-3 text-sm font-medium text-gray-600 dark:text-[#92adc9]">Assists</td>
+                      <td className="py-3 text-sm text-gray-900 dark:text-white text-right">{profile.stats.assists || 0} assists</td>
+                    </tr>
+                    {certificates.length > 0 && (
+                      <tr className="border-b border-[#FFCC00]">
+                        <td className="py-3 text-sm font-medium text-gray-600 dark:text-[#92adc9]">Certificates</td>
+                        <td className="py-3 text-sm text-gray-900 dark:text-white text-right">{certificates.length}</td>
+                      </tr>
+                    )}
+                    {achievements.length > 0 && (
+                      <tr className="border-b border-[#FFCC00]">
+                        <td className="py-3 text-sm font-medium text-gray-600 dark:text-[#92adc9]">Achievements</td>
+                        <td className="py-3 text-sm text-gray-900 dark:text-white text-right">{achievements.length}</td>
+                      </tr>
+                    )}
+                    {profile.discipline && (
+                      <tr className="border-b border-[#FFCC00]">
+                        <td className="py-3 text-sm font-medium text-gray-600 dark:text-[#92adc9]">Discipline</td>
+                        <td className="py-3 text-sm text-gray-900 dark:text-white text-right">{profile.discipline}</td>
+                      </tr>
+                    )}
+                    {profile.spotKick && (
+                      <tr className="border-b border-[#FFCC00]">
+                        <td className="py-3 text-sm font-medium text-gray-600 dark:text-[#92adc9]">Spot Kick</td>
+                        <td className="py-3 text-sm text-gray-900 dark:text-white text-right">{profile.spotKick}</td>
+                      </tr>
+                    )}
+                    {profile.clubDebut && (
+                      <tr className="border-b border-[#FFCC00]">
+                        <td className="py-3 text-sm font-medium text-gray-600 dark:text-[#92adc9]">Club Debut</td>
+                        <td className="py-3 text-sm text-gray-900 dark:text-white text-right">{profile.clubDebut}</td>
+                      </tr>
+                    )}
+                    {profile.previousClub && (
+                      <tr className="border-b border-[#FFCC00]">
+                        <td className="py-3 text-sm font-medium text-gray-600 dark:text-[#92adc9]">Previous Club</td>
+                        <td className="py-3 text-sm text-gray-900 dark:text-white text-right">{profile.previousClub}</td>
+                      </tr>
+                    )}
+                    {profile.presentClub && (
+                      <tr>
+                        <td className="py-3 text-sm font-medium text-gray-600 dark:text-[#92adc9]">Present Club</td>
+                        <td className="py-3 text-sm text-gray-900 dark:text-white text-right">{profile.presentClub}</td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </section>
 
+            <div className="order-4 lg:col-span-2 lg:order-4">
               <PortfolioTabs
                 profile={profile}
                 videos={videos}
