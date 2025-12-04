@@ -67,7 +67,7 @@ export default function Home() {
           >
             <div className="relative h-64 w-full overflow-hidden">
               <Image
-                src="/p.jpg"
+                src="/AGENT.png"
                 alt="Agent"
                 fill
                 className="object-cover object-center"
@@ -94,7 +94,7 @@ export default function Home() {
           >
             <div className="relative h-64 w-full overflow-hidden">
               <Image
-                src="/p.jpg"
+                src="/academy.png"
                 alt="Academy"
                 fill
                 className="object-cover object-center"
