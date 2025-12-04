@@ -2187,7 +2187,7 @@ export default function PlayerProfilePage() {
                   <ShareIcon size={18} />
                   <span className="hidden sm:inline">Share</span>
                 </Button>
-                <Button onClick={openEditModal} className="gap-2 bg-primary hover:bg-primary/90">
+                <Button onClick={openEditModal} className="gap-2 bg-primary hover:bg-primary/90 text-white">
                   Edit Profile
                 </Button>
                 <LogoutButton />
