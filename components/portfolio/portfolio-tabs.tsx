@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 
 type PortfolioTabsProps = {
   profile: any;
@@ -38,6 +39,25 @@ function isImageSource(value?: string) {
 
 export function PortfolioTabs({ profile, videos, images, achievements, certificates }: PortfolioTabsProps) {
   const [activeTab, setActiveTab] = useState<"overview" | "gallery" | "videos">("overview");
+  const [selectedImage, setSelectedImage] = useState<{ url: string; name?: string } | null>(null);
+
+  useEffect(() => {
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && selectedImage) {
+        setSelectedImage(null);
+      }
+    };
+    if (selectedImage) {
+      document.body.style.overflow = "hidden";
+      window.addEventListener("keydown", handleEscape);
+    } else {
+      document.body.style.overflow = "unset";
+    }
+    return () => {
+      document.body.style.overflow = "unset";
+      window.removeEventListener("keydown", handleEscape);
+    };
+  }, [selectedImage]);
 
   const tabs = [
     { id: "overview" as const, label: "Overview" },
@@ -46,27 +66,28 @@ export function PortfolioTabs({ profile, videos, images, achievements, certifica
   ];
 
   return (
-    <div className="rounded-xl border border-[#FFCC00] bg-white dark:bg-[#192633] overflow-hidden transition-colors" data-portfolio-tabs>
-      <div className="border-b border-[#FFCC00] bg-[#4D148C] transition-colors">
-        <div className="flex overflow-x-auto">
-          {tabs.map((tab) => (
-            <button
-              key={tab.id}
-              data-tab={tab.id}
-              onClick={() => setActiveTab(tab.id)}
-              className={`px-6 py-4 text-sm font-semibold transition-colors whitespace-nowrap ${
-                activeTab === tab.id
-                  ? "text-white border-b-2 border-[#FFCC00] bg-[#4D148C]"
-                  : "text-white/80 hover:text-white hover:bg-[#4D148C]/80"
-              }`}
-            >
-              {tab.label}
-            </button>
-          ))}
+    <>
+      <div className="rounded-xl border border-[#FFCC00] bg-white dark:bg-[#192633] overflow-hidden transition-colors" data-portfolio-tabs>
+        <div className="border-b border-[#FFCC00] bg-[#4D148C] transition-colors">
+          <div className="flex overflow-x-auto">
+            {tabs.map((tab) => (
+              <button
+                key={tab.id}
+                data-tab={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`px-6 py-4 text-sm font-semibold transition-colors whitespace-nowrap ${
+                  activeTab === tab.id
+                    ? "text-white border-b-2 border-[#FFCC00] bg-[#4D148C]"
+                    : "text-white/80 hover:text-white hover:bg-[#4D148C]/80"
+                }`}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
         </div>
-      </div>
 
-      <div className="p-6">
+        <div className="p-6">
         {activeTab === "overview" && (
           <div className="space-y-4">
             {profile.bio ? (
@@ -145,19 +166,18 @@ export function PortfolioTabs({ profile, videos, images, achievements, certifica
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                 {images.map((image: any) => {
                   const imageUrl = image.thumbnail || image.url || "";
+                  const fullImageUrl = image.url || imageUrl;
                   return (
-                    <a
+                    <button
                       key={image.id}
-                      href={image.url || imageUrl}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="block aspect-square overflow-hidden rounded-lg border border-[#FFCC00] bg-gray-50 dark:bg-[#0c141b] hover:border-[#FFCC00] transition-colors"
+                      onClick={() => setSelectedImage({ url: fullImageUrl, name: image.name })}
+                      className="block aspect-square overflow-hidden rounded-lg border border-[#FFCC00] bg-gray-50 dark:bg-[#0c141b] hover:border-[#FFCC00] transition-colors cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#FFCC00] focus:ring-offset-2"
                     >
                       <div
                         className="h-full w-full bg-cover bg-center"
                         style={{ backgroundImage: `url('${imageUrl}')` }}
                       />
-                    </a>
+                    </button>
                   );
                 })}
               </div>
@@ -216,8 +236,63 @@ export function PortfolioTabs({ profile, videos, images, achievements, certifica
             )}
           </div>
         )}
+        </div>
       </div>
-    </div>
+
+      <AnimatePresence>
+        {selectedImage && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 bg-black/90 z-50"
+              onClick={() => setSelectedImage(null)}
+            />
+            <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+              <motion.div
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.9 }}
+                className="relative max-w-7xl w-full max-h-[95vh] flex items-center justify-center"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <button
+                  onClick={() => setSelectedImage(null)}
+                  className="absolute top-4 right-4 z-10 text-white hover:text-[#FFCC00] transition-colors bg-black/50 rounded-full p-2"
+                  aria-label="Close image"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <path d="M18 6L6 18" />
+                    <path d="M6 6l12 12" />
+                  </svg>
+                </button>
+                <img
+                  src={selectedImage.url}
+                  alt={selectedImage.name || "Gallery image"}
+                  className="max-w-full max-h-[95vh] object-contain rounded-lg"
+                />
+                {selectedImage.name && (
+                  <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-black/70 text-white px-4 py-2 rounded-lg">
+                    <p className="text-sm font-medium">{selectedImage.name}</p>
+                  </div>
+                )}
+              </motion.div>
+            </div>
+          </>
+        )}
+      </AnimatePresence>
+    </>
   );
 }
 
