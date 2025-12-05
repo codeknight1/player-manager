@@ -10,7 +10,8 @@ import {
   UserIcon,
   UsersThreeIcon,
   ChatIcon,
-  EyeIcon
+  EyeIcon,
+  BellIcon
 } from "@/components/icons";
 import { apiGet } from "@/app/lib/api";
 
