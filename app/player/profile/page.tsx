@@ -1556,12 +1556,11 @@ import { useSession } from "next-auth/react"
 import { motion } from "framer-motion"
 import { CollapsibleSidebar } from "@/components/layout/collapsible-sidebar"
 import { Modal } from "@/components/ui/modal"
-import { HouseIcon, UserIcon, UsersThreeIcon, ChatIcon, ShareIcon } from "@/components/icons"
+import { HouseIcon, UserIcon, UsersThreeIcon, ChatIcon } from "@/components/icons"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { apiGet, apiPost, apiPut, apiDelete } from "@/app/lib/api"
 import { toast } from "sonner"
-import { LogoutButton } from "@/components/auth/logout-button"
 
 const sidebarItems = [
   { label: "Home", href: "/player/dashboard", icon: <HouseIcon size={24} weight="fill" /> },
@@ -1609,8 +1608,6 @@ export default function PlayerProfilePage() {
   const [uploading, setUploading] = useState(false)
   const [saving, setSaving] = useState(false)
   const [youtubeUrl, setYoutubeUrl] = useState("")
-  const [isShareModalOpen, setIsShareModalOpen] = useState(false)
-  const [shareLink, setShareLink] = useState("")
 
   const fileInputRef = useRef<HTMLInputElement>(null)
   const fileInputsRef = useRef<Record<string, HTMLInputElement | null>>({})
@@ -2098,17 +2095,6 @@ export default function PlayerProfilePage() {
     }
   }
 
-  function shareProfile() {
-    const id = (session?.user as any)?.id
-    if (!id) {
-      toast.error("Please log in")
-      return
-    }
-    if (typeof window === "undefined") return
-    const shareUrl = `${window.location.origin}/portfolio/${id}`
-    setShareLink(shareUrl)
-    setIsShareModalOpen(true)
-  }
 
   const strength = (() => {
     let s = 0
@@ -2183,14 +2169,9 @@ export default function PlayerProfilePage() {
                 </span>
               </div>
               <div className="flex gap-2">
-                <Button onClick={shareProfile} variant="outline" className="gap-2 border-border bg-transparent">
-                  <ShareIcon size={18} />
-                  <span className="hidden sm:inline">Share</span>
-                </Button>
                 <Button onClick={openEditModal} className="gap-2 bg-primary hover:bg-primary/90 text-white">
                   Edit Profile
                 </Button>
-                <LogoutButton />
               </div>
             </div>
           </div>
@@ -2386,81 +2367,6 @@ export default function PlayerProfilePage() {
         onChange={handleNewAchievementFiles}
       />
 
-      {/* Share Modal */}
-      <Modal
-        isOpen={isShareModalOpen}
-        onClose={() => setIsShareModalOpen(false)}
-        title="Share Profile"
-        footer={
-          <div className="flex justify-end gap-3">
-            <Button variant="secondary" onClick={() => setIsShareModalOpen(false)}>
-              Close
-            </Button>
-          </div>
-        }
-      >
-        <div className="flex flex-col gap-4">
-          <div className="flex gap-3">
-            <Input value={shareLink} readOnly className="h-10" />
-            <Button
-              onClick={async () => {
-                if (!shareLink) return
-                try {
-                  if (navigator.clipboard && typeof navigator.clipboard.writeText === "function") {
-                    await navigator.clipboard.writeText(shareLink)
-                  } else {
-                    const input = document.createElement("input")
-                    input.value = shareLink
-                    document.body.appendChild(input)
-                    input.select()
-                    document.execCommand("copy")
-                    document.body.removeChild(input)
-                  }
-                  toast.success("Link copied!")
-                } catch {
-                  toast.error("Unable to copy link")
-                }
-              }}
-            >
-              Copy
-            </Button>
-          </div>
-          <div className="grid grid-cols-2 gap-2">
-            {[
-              { key: "twitter", label: "Twitter" },
-              { key: "linkedin", label: "LinkedIn" },
-              { key: "facebook", label: "Facebook" },
-              { key: "whatsapp", label: "WhatsApp" },
-            ].map((platform) => (
-              <Button
-                key={platform.key}
-                variant="secondary"
-                size="sm"
-                onClick={() => {
-                  if (typeof window === "undefined" || !shareLink) return
-                  const profileName = `${profile.firstName} ${profile.lastName}`.trim() || "Player profile"
-                  const text = `Check out ${profileName} on TalentVerse`
-                  const encodedLink = encodeURIComponent(shareLink)
-                  const encodedText = encodeURIComponent(text)
-                  let targetUrl = ""
-                  if (platform.key === "twitter") {
-                    targetUrl = `https://twitter.com/intent/tweet?url=${encodedLink}&text=${encodedText}`
-                  } else if (platform.key === "linkedin") {
-                    targetUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodedLink}`
-                  } else if (platform.key === "facebook") {
-                    targetUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodedLink}`
-                  } else if (platform.key === "whatsapp") {
-                    targetUrl = `https://api.whatsapp.com/send?text=${encodedText}%20${encodedLink}`
-                  }
-                  if (targetUrl) window.open(targetUrl, "_blank", "noopener,noreferrer")
-                }}
-              >
-                {platform.label}
-              </Button>
-            ))}
-          </div>
-        </div>
-      </Modal>
 
       {/* Edit Modal */}
       <Modal

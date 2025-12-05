@@ -10,11 +10,9 @@ import {
   UserIcon,
   UsersThreeIcon,
   ChatIcon,
-  BellIcon,
   EyeIcon
 } from "@/components/icons";
 import { apiGet } from "@/app/lib/api";
-import { LogoutButton } from "@/components/auth/logout-button";
 
 function useSidebarItems() {
   return useMemo(
@@ -201,9 +199,6 @@ export default function PlayerDashboard() {
               <p className="text-gray-900 dark:text-white tracking-light text-[32px] font-bold leading-tight">
                 Home
               </p>
-              <div className="flex items-center justify-end">
-                <LogoutButton />
-              </div>
             </div>
             <h3 className="text-[#4D148C] dark:text-white text-lg font-bold leading-tight tracking-[-0.015em] px-4 pb-2 pt-4">
               My Profile

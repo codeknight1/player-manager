@@ -9,9 +9,21 @@ export function ConditionalHeader() {
   const pathname = usePathname();
   const { data: session } = useSession();
   const isHomePage = pathname === "/";
+  const isPlayerPage = pathname.startsWith("/player") && session;
 
   if (isHomePage) {
     return null;
+  }
+
+  if (isPlayerPage) {
+    return (
+      <Header
+        title=""
+        logo={
+          <Image src="/PPM LOGO.png" alt="PPM" width={120} height={28} priority />
+        }
+      />
+    );
   }
 
   return (
