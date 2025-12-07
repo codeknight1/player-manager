@@ -317,6 +317,14 @@ export default function AgentPlayersPage() {
                     <Button 
                       variant="secondary" 
                       size="sm" 
+                      className="flex-1"
+                      onClick={() => router.push(`/agent/messages?userId=${player.id}`)}
+                    >
+                      Message
+                    </Button>
+                    <Button 
+                      variant="secondary" 
+                      size="sm" 
                       className="flex-1" 
                       onClick={() => toggleShortlist(player.id)}
                     >

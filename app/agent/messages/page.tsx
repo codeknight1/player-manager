@@ -2,10 +2,12 @@
 
 import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
 import { Sidebar } from "@/components/layout/sidebar";
 import { HouseIcon, UserIcon, MagnifyingGlassIcon, ChatIcon, GearIcon, TrophyIcon, ShieldCheckIcon, ListChecksIcon } from "@/components/icons";
 import { Button } from "@/components/ui/button";
+import { Modal } from "@/components/ui/modal";
 import { apiGet, apiPost } from "@/app/lib/api";
 
 function formatTime(date: Date) {
@@ -89,17 +91,39 @@ const conversations = [
 ];
 
 export default function AgentMessagesPage() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const { data: session } = useSession();
   const [conversations, setConversations] = useState<any[]>([]);
   const [selectedConversation, setSelectedConversation] = useState<string | null>(null);
   const [messages, setMessages] = useState<any[]>([]);
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(true);
+  const [availableUsers, setAvailableUsers] = useState<any[]>([]);
+  const [showNewMessage, setShowNewMessage] = useState(false);
+  const [selectedUserInfo, setSelectedUserInfo] = useState<any>(null);
+
+  useEffect(() => {
+    const userIdFromUrl = searchParams.get("userId");
+    if (userIdFromUrl && userIdFromUrl !== selectedConversation) {
+      setSelectedConversation(userIdFromUrl);
+      getUserInfo(userIdFromUrl).then((info) => {
+        if (info) {
+          setSelectedUserInfo(info);
+          setMessages([]);
+        }
+      });
+      const newUrl = new URL(window.location.href);
+      newUrl.searchParams.delete("userId");
+      router.replace(newUrl.pathname + newUrl.search);
+    }
+  }, [searchParams, router]);
 
   useEffect(() => {
     const userId = (session?.user as any)?.id;
     if (!userId) return;
     loadMessages();
+    loadAvailableUsers();
     const interval = setInterval(loadMessages, 5000);
     return () => clearInterval(interval);
   }, [session, selectedConversation]);
@@ -108,6 +132,23 @@ export default function AgentMessagesPage() {
     if (!selectedConversation) return;
     loadConversationMessages();
   }, [selectedConversation]);
+
+  async function loadAvailableUsers() {
+    const userId = (session?.user as any)?.id;
+    if (!userId) return;
+    try {
+      const users = await apiGet("users?role=PLAYER");
+      const mapped = users.map((u: any) => ({
+        id: u.id,
+        name: u.name || "Unknown Player",
+        email: u.email,
+        avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(u.name || "P")}&background=1172d4&color=fff`,
+      }));
+      setAvailableUsers(mapped);
+    } catch (err) {
+      console.error(err);
+    }
+  }
 
   async function loadMessages() {
     const userId = (session?.user as any)?.id;
@@ -129,9 +170,14 @@ export default function AgentMessagesPage() {
           });
         }
       });
-      setConversations(Array.from(map.values()));
-      if (!selectedConversation && map.size > 0) {
-        setSelectedConversation(Array.from(map.values())[0].id);
+      const conversationsList = Array.from(map.values());
+      setConversations(conversationsList);
+      
+      const userIdFromUrl = searchParams.get("userId");
+      if (userIdFromUrl) {
+        setSelectedConversation(userIdFromUrl);
+      } else if (!selectedConversation && conversationsList.length > 0) {
+        setSelectedConversation(conversationsList[0].id);
       }
     } catch (err) {
       console.error(err);
@@ -153,6 +199,35 @@ export default function AgentMessagesPage() {
       setMessages(filtered.sort((a: any, b: any) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()));
     } catch (err) {
       console.error(err);
+    }
+  }
+
+  async function getUserInfo(userId: string) {
+    try {
+      const users = await apiGet("users");
+      const userData = users.find((u: any) => u.id === userId);
+      if (userData) {
+        const profile = userData.profileData ? (typeof userData.profileData === "string" ? JSON.parse(userData.profileData) : userData.profileData) : {};
+        return {
+          id: userData.id,
+          name: userData.name || "Unknown",
+          email: userData.email,
+          avatar: profile.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(userData.name || "U")}&background=1172d4&color=fff`,
+        };
+      }
+    } catch (err) {
+      console.error(err);
+    }
+    return null;
+  }
+
+  async function handleStartConversation(userId: string) {
+    const userInfo = await getUserInfo(userId);
+    if (userInfo) {
+      setSelectedConversation(userId);
+      setSelectedUserInfo(userInfo);
+      setShowNewMessage(false);
+      setMessages([]);
     }
   }
 
@@ -192,6 +267,7 @@ export default function AgentMessagesPage() {
                   Communicate with players, agents, and scouts
                 </p>
               </div>
+              <Button onClick={() => setShowNewMessage(true)}>New Message</Button>
             </div>
 
             <div className="flex flex-1 gap-4 p-4 min-h-0">
@@ -257,12 +333,12 @@ export default function AgentMessagesPage() {
                         <div
                           className="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-10"
                           style={{
-                            backgroundImage: `url("${conversations.find((c) => c.id === selectedConversation)?.avatar}")`,
+                            backgroundImage: `url("${conversations.find((c) => c.id === selectedConversation)?.avatar || selectedUserInfo?.avatar || `https://ui-avatars.com/api/?name=U&background=1172d4&color=fff`}")`,
                           }}
                         />
                         <div>
                           <p className="text-white text-base font-bold">
-                            {conversations.find((c) => c.id === selectedConversation)?.name}
+                            {conversations.find((c) => c.id === selectedConversation)?.name || selectedUserInfo?.name || "Unknown User"}
                           </p>
                           <p className="text-[#92adc9] text-xs">Online</p>
                         </div>
@@ -315,9 +391,53 @@ export default function AgentMessagesPage() {
           </div>
         </div>
       </div>
+
+      {showNewMessage && (
+        <Modal
+          isOpen={showNewMessage}
+          onClose={() => setShowNewMessage(false)}
+          title="Start New Conversation"
+          footer={
+            <div className="flex justify-end gap-3">
+              <Button variant="secondary" onClick={() => setShowNewMessage(false)}>
+                Cancel
+              </Button>
+            </div>
+          }
+        >
+          <div className="flex flex-col gap-4 max-h-[400px] overflow-y-auto">
+            <div className="flex items-center gap-2 mb-2">
+              <MagnifyingGlassIcon size={20} className="text-[#92adc9]" />
+              <input
+                type="text"
+                placeholder="Search players..."
+                className="flex-1 bg-[#192633] border border-[#324d67] rounded-lg px-3 py-2 text-white text-sm placeholder:text-[#92adc9] focus:outline-none focus:border-[#1172d4]"
+              />
+            </div>
+            {availableUsers.length === 0 ? (
+              <div className="text-[#92adc9] text-sm p-4">Loading players...</div>
+            ) : (
+              availableUsers.map((user) => (
+                <button
+                  key={user.id}
+                  onClick={() => handleStartConversation(user.id)}
+                  className="flex items-center gap-3 p-3 rounded-lg hover:bg-[#192633] transition-colors text-left"
+                >
+                  <div
+                    className="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-10"
+                    style={{ backgroundImage: `url("${user.avatar}")` }}
+                  />
+                  <div className="flex-1">
+                    <p className="text-white text-sm font-medium">{user.name}</p>
+                    <p className="text-[#92adc9] text-xs">{user.email}</p>
+                  </div>
+                </button>
+              ))
+            )}
+          </div>
+        </Modal>
+      )}
     </div>
   );
 }
-
-
 
