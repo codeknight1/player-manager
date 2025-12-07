@@ -58,6 +58,7 @@ export default function PlayerLogin() {
               initial={{ opacity: 0, x: -30 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.6, delay: 0.2 }}
+              className="bg-[#111a22]/80 backdrop-blur-sm rounded-xl p-8 border border-[#324d67]/30"
             >
               <h1 className="text-5xl font-bold mb-4 leading-tight">
                 Welcome to Your

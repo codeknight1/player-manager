@@ -6,8 +6,8 @@ import { Sidebar } from "@/components/layout/sidebar";
 import { HouseIcon, UserIcon, MagnifyingGlassIcon, ChatIcon, GearIcon, TrophyIcon, ShieldCheckIcon, ListChecksIcon } from "@/components/icons";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { MagnifyingGlassIcon as SearchIcon } from "@/components/icons";
 import { apiGet } from "@/app/lib/api";
+import { useRouter } from "next/navigation";
 
 const sidebarItems = [
   {
@@ -100,6 +100,7 @@ const players = [
 ];
 
 export default function AgentPlayersPage() {
+  const router = useRouter();
   const [query, setQuery] = useState("");
   const [position, setPosition] = useState("");
   const [contract, setContract] = useState("");
@@ -107,6 +108,7 @@ export default function AgentPlayersPage() {
   const [shortlist, setShortlist] = useState<string[]>([]);
   const [allPlayers, setAllPlayers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [displayLimit, setDisplayLimit] = useState(12);
 
   useEffect(() => {
     loadPlayers();
@@ -118,21 +120,33 @@ export default function AgentPlayersPage() {
     localStorage.setItem("agent_shortlist", JSON.stringify(shortlist));
   }, [shortlist]);
 
+  function calculateRating(stats: any) {
+    if (!stats) return 4.0;
+    let score = 4.0;
+    if (stats.goals) score += Math.min(stats.goals / 50, 0.5);
+    if (stats.assists) score += Math.min(stats.assists / 30, 0.3);
+    if (stats.cleanSheets) score += Math.min(stats.cleanSheets / 20, 0.2);
+    return Math.min(Math.round(score * 10) / 10, 5.0);
+  }
+
   async function loadPlayers() {
     try {
       const users = await apiGet("users?role=PLAYER");
       const playersWithProfiles = users.map((u: any) => {
         const profile = u.profileData ? JSON.parse(u.profileData) : {};
+        const club = profile.presentClub || profile.club || "Free Agent";
+        const hasContract = club !== "Free Agent" && !profile.previousClub;
+        
         return {
           id: u.id,
           name: u.name || "Unknown Player",
           age: profile.age || 0,
           position: profile.position || "N/A",
-          club: profile.club || "Free Agent",
-          rating: 4.5, // Mock for now
+          club: club,
+          rating: calculateRating(profile.stats || {}),
           stats: profile.stats || { goals: 0, assists: 0 },
-          avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(u.name || "P")}&background=1172d4&color=fff`,
-          status: contract === "Under Contract" ? "Under Contract" : "Available",
+          avatar: profile.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(u.name || "P")}&background=1172d4&color=fff`,
+          status: hasContract ? "Under Contract" : "Available",
         };
       });
       setAllPlayers(playersWithProfiles);
@@ -155,6 +169,9 @@ export default function AgentPlayersPage() {
     });
   }, [query, position, contract, ageMax, allPlayers]);
 
+  const displayedPlayers = filtered.slice(0, displayLimit);
+  const hasMore = filtered.length > displayLimit;
+
   function toggleShortlist(id: string) {
     setShortlist((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
   }
@@ -162,72 +179,72 @@ export default function AgentPlayersPage() {
   return (
     <div className="relative flex h-auto min-h-screen w-full flex-col bg-[#111a22] overflow-x-hidden" style={{ fontFamily: 'Manrope, "Noto Sans", sans-serif' }}>
       <div className="layout-container flex h-full grow flex-col">
-        <div className="gap-1 px-6 flex flex-1 justify-center py-5">
+        <div className="gap-1 px-2 sm:px-4 lg:px-6 flex flex-1 justify-center py-3 sm:py-5">
           <Sidebar
             title="ScoutHub"
             subtitle="Club"
             items={sidebarItems}
           />
-          <div className="layout-content-container flex flex-col max-w-[960px] flex-1">
-            <div className="flex flex-wrap justify-between gap-3 p-4">
-              <div className="flex min-w-72 flex-col gap-3">
-                <p className="text-white tracking-light text-[32px] font-bold leading-tight">
-                  Player Database
-                </p>
-                <p className="text-[#92adc9] text-sm font-normal leading-normal">
-                  Search and discover talented players
-                </p>
-              </div>
+          <div className="layout-content-container flex flex-col max-w-[960px] flex-1 w-full">
+            <div className="flex flex-col gap-2 sm:gap-3 p-2 sm:p-4">
+              <p className="text-white tracking-light text-2xl sm:text-[28px] lg:text-[32px] font-bold leading-tight">
+                Player Database
+              </p>
+              <p className="text-[#92adc9] text-xs sm:text-sm font-normal leading-normal">
+                Search and discover talented players
+              </p>
             </div>
 
-            <div className="px-4 py-3 flex gap-3 flex-wrap">
-              <div className="flex flex-1 min-w-64 items-center rounded-lg border border-[#324d67] bg-[#192633] px-4">
-                <span className="text-[#92adc9] mr-3"><SearchIcon size={20} /></span>
+            <div className="px-2 sm:px-4 py-2 sm:py-3 flex flex-col sm:flex-row gap-2 sm:gap-3">
+              <div className="flex flex-1 items-center rounded-lg border border-[#324d67] bg-[#192633] px-3 sm:px-4">
+                <span className="text-[#92adc9] mr-2 sm:mr-3 shrink-0"><MagnifyingGlassIcon size={18} /></span>
                 <input
                   type="text"
-                  placeholder="Search players by name, position, club..."
+                  placeholder="Search players..."
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
-                  className="flex-1 bg-transparent text-white placeholder:text-[#92adc9] focus:outline-none"
+                  className="flex-1 min-w-0 bg-transparent text-white text-sm sm:text-base placeholder:text-[#92adc9] focus:outline-none"
                 />
               </div>
-              <select
-                className="h-10 px-3 rounded-lg border border-[#324d67] bg-[#192633] text-white"
-                value={position}
-                onChange={(e) => setPosition(e.target.value)}
-              >
-                <option value="">All Positions</option>
-                <option>Forward</option>
-                <option>Midfielder</option>
-                <option>Defender</option>
-                <option>Goalkeeper</option>
-              </select>
-              <select
-                className="h-10 px-3 rounded-lg border border-[#324d67] bg-[#192633] text-white"
-                value={contract}
-                onChange={(e) => setContract(e.target.value)}
-              >
-                <option value="">Any Status</option>
-                <option>Available</option>
-                <option>Under Contract</option>
-              </select>
-              <input
-                type="number"
-                placeholder="Max Age"
-                value={ageMax as any}
-                onChange={(e) => setAgeMax(e.target.value ? Number(e.target.value) : "")}
-                className="h-10 w-28 px-3 rounded-lg border border-[#324d67] bg-[#192633] text-white placeholder:text-[#92adc9]"
-              />
-              <Button variant="secondary" onClick={() => { setQuery(""); setPosition(""); setContract(""); setAgeMax(""); }}>Reset</Button>
+              <div className="grid grid-cols-2 sm:flex gap-2 sm:gap-3">
+                <select
+                  className="h-10 px-2 sm:px-3 text-xs sm:text-sm rounded-lg border border-[#324d67] bg-[#192633] text-white"
+                  value={position}
+                  onChange={(e) => setPosition(e.target.value)}
+                >
+                  <option value="">All Positions</option>
+                  <option>Forward</option>
+                  <option>Midfielder</option>
+                  <option>Defender</option>
+                  <option>Goalkeeper</option>
+                </select>
+                <select
+                  className="h-10 px-2 sm:px-3 text-xs sm:text-sm rounded-lg border border-[#324d67] bg-[#192633] text-white"
+                  value={contract}
+                  onChange={(e) => setContract(e.target.value)}
+                >
+                  <option value="">Any Status</option>
+                  <option>Available</option>
+                  <option>Under Contract</option>
+                </select>
+                <input
+                  type="number"
+                  placeholder="Max Age"
+                  value={ageMax as any}
+                  onChange={(e) => setAgeMax(e.target.value ? Number(e.target.value) : "")}
+                  className="h-10 w-full sm:w-28 px-2 sm:px-3 text-xs sm:text-sm rounded-lg border border-[#324d67] bg-[#192633] text-white placeholder:text-[#92adc9]"
+                />
+                <Button variant="secondary" size="sm" className="text-xs sm:text-sm" onClick={() => { setQuery(""); setPosition(""); setContract(""); setAgeMax(""); }}>Reset</Button>
+              </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 p-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 p-2 sm:p-4">
               {loading ? (
-                <div className="col-span-full text-[#92adc9]">Loading players...</div>
+                <div className="col-span-full text-[#92adc9] text-sm">Loading players...</div>
               ) : filtered.length === 0 ? (
-                <div className="col-span-full text-[#92adc9]">No players found</div>
+                <div className="col-span-full text-[#92adc9] text-sm">No players found. Try adjusting your filters.</div>
               ) : (
-                filtered.map((player, idx) => (
+                displayedPlayers.map((player, idx) => (
                 <motion.div
                   key={player.id}
                   initial={{ opacity: 0, y: 20 }}
@@ -289,10 +306,20 @@ export default function AgentPlayersPage() {
                     </span>
                   </div>
                   <div className="flex gap-2">
-                    <Button variant="secondary" size="sm" className="flex-1">
+                    <Button 
+                      variant="secondary" 
+                      size="sm" 
+                      className="flex-1"
+                      onClick={() => router.push(`/portfolio/${player.id}`)}
+                    >
                       View Profile
                     </Button>
-                    <Button variant="secondary" size="sm" className="flex-1" onClick={() => toggleShortlist(player.id)}>
+                    <Button 
+                      variant="secondary" 
+                      size="sm" 
+                      className="flex-1" 
+                      onClick={() => toggleShortlist(player.id)}
+                    >
                       {shortlist.includes(player.id) ? "Remove" : "Shortlist"}
                     </Button>
                   </div>
@@ -301,9 +328,20 @@ export default function AgentPlayersPage() {
               )}
             </div>
 
-            <div className="px-4 py-3 flex justify-between items-center">
-              <Button variant="secondary">Load More Players</Button>
-              <div className="text-[#92adc9] text-sm">Shortlisted: <span className="text-white font-semibold">{shortlist.length}</span></div>
+            <div className="px-2 sm:px-4 py-2 sm:py-3 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 sm:gap-0">
+              {hasMore && (
+                <Button 
+                  variant="secondary" 
+                  size="sm" 
+                  className="text-xs sm:text-sm"
+                  onClick={() => setDisplayLimit(prev => prev + 12)}
+                >
+                  Load More Players ({filtered.length - displayLimit} remaining)
+                </Button>
+              )}
+              <div className="text-[#92adc9] text-xs sm:text-sm">
+                Showing {displayedPlayers.length} of {filtered.length} players • Shortlisted: <span className="text-white font-semibold">{shortlist.length}</span>
+              </div>
             </div>
           </div>
         </div>

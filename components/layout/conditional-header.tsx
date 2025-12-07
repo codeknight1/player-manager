@@ -10,12 +10,39 @@ export function ConditionalHeader() {
   const { data: session } = useSession();
   const isHomePage = pathname === "/";
   const isPlayerPage = pathname.startsWith("/player") && session;
+  const isAgentPage = pathname.startsWith("/agent");
+  const isAdminPage = pathname.startsWith("/admin");
+  const isAcademyPage = pathname.startsWith("/academy");
+  const isAuthenticatedPage = isPlayerPage || isAgentPage || isAdminPage || isAcademyPage;
 
   if (isHomePage) {
     return null;
   }
 
   if (isPlayerPage) {
+    return (
+      <Header
+        title=""
+        logo={
+          <Image src="/PPM LOGO.png" alt="PPM" width={120} height={28} priority />
+        }
+      />
+    );
+  }
+
+  if (isAgentPage && session) {
+    return (
+      <Header
+        title=""
+        logo={
+          <Image src="/PPM LOGO.png" alt="PPM" width={120} height={28} priority />
+        }
+      />
+    );
+  }
+
+  // Don't show nav items for authenticated pages (admin, academy)
+  if (isAuthenticatedPage) {
     return (
       <Header
         title=""
@@ -37,16 +64,6 @@ export function ConditionalHeader() {
         { label: "For Clubs/Agents", href: "/for-clubs" },
         { label: "For Partners/Academies", href: "/for-partners" },
       ]}
-      rightAction={
-        !session ? (
-          <a
-            href="/player/login"
-            className="flex min-w-[84px] items-center justify-center rounded-lg h-10 px-4 bg-[#FFCC00] text-[#4D148C] text-sm font-bold leading-normal tracking-[0.015em] hover:brightness-110 transition-colors"
-          >
-            Log In
-          </a>
-        ) : null
-      }
     />
   );
 }
