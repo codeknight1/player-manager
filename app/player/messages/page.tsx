@@ -50,6 +50,7 @@ export default function PlayerMessagesPage() {
   const [messages, setMessages] = useState<any[]>([]);
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(true);
+  const [showChatView, setShowChatView] = useState(false);
 
   useEffect(() => {
     const userId = (session?.user as any)?.id;
@@ -142,12 +143,12 @@ export default function PlayerMessagesPage() {
             items={sidebarItems}
           />
           <div className="layout-content-container flex flex-col w-full max-w-[960px] flex-1">
-            <div className="flex flex-col gap-4 p-4 md:flex-row md:items-center md:justify-between">
-              <div className="flex flex-col gap-3">
-                <p className="text-white tracking-light text-[32px] font-bold leading-tight">
+            <div className="flex flex-col gap-3 sm:gap-4 p-2 sm:p-4 sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex flex-col gap-2 sm:gap-3 min-w-0">
+                <p className="text-white tracking-light text-xl sm:text-2xl lg:text-[32px] font-bold leading-tight">
                   Messages
                 </p>
-                <p className="text-[#92adc9] text-sm font-normal leading-normal">
+                <p className="text-[#92adc9] text-xs sm:text-sm font-normal leading-normal">
                   Communicate with clubs, agents, and scouts
                 </p>
               </div>
@@ -156,58 +157,61 @@ export default function PlayerMessagesPage() {
               </div>
             </div>
 
-            <div className="flex flex-1 flex-col lg:flex-row gap-4 p-4 min-h-0">
+            <div className="flex flex-1 flex-col lg:flex-row gap-3 sm:gap-4 p-2 sm:p-4 min-h-0">
               {/* Conversations List */}
-              <div className="flex flex-col w-full lg:w-80 border border-[#324d67] rounded-lg overflow-hidden">
-                <div className="p-4 border-b border-[#324d67] bg-[#192633]">
-                  <div className="flex items-center gap-2 mb-3">
-                    <MagnifyingGlassIcon size={20} className="text-[#92adc9]" />
+              <div className={`flex flex-col w-full lg:w-80 border border-[#324d67] rounded-lg overflow-hidden ${showChatView && selectedConversation ? "hidden lg:flex" : "flex"}`}>
+                <div className="p-3 sm:p-4 border-b border-[#324d67] bg-[#192633]">
+                  <div className="flex items-center gap-2 mb-2 sm:mb-3">
+                    <MagnifyingGlassIcon size={18} className="text-[#92adc9] sm:w-5 sm:h-5" />
                     <input
                       type="text"
                       placeholder="Search conversations..."
-                      className="flex-1 bg-[#111a22] border border-[#324d67] rounded px-3 py-2 text-white text-sm placeholder:text-[#92adc9] focus:outline-none focus:border-[#1172d4]"
+                      className="flex-1 bg-[#111a22] border border-[#324d67] rounded px-2 sm:px-3 py-1.5 sm:py-2 text-white text-xs sm:text-sm placeholder:text-[#92adc9] focus:outline-none focus:border-[#1172d4]"
                     />
                   </div>
-                  <h3 className="text-white text-base font-bold">Conversations</h3>
+                  <h3 className="text-white text-sm sm:text-base font-bold">Conversations</h3>
                 </div>
                 <div className="flex-1 overflow-y-auto">
                   {loading ? (
-                    <div className="p-4 text-[#92adc9] text-sm">Loading...</div>
+                    <div className="p-3 sm:p-4 text-[#92adc9] text-xs sm:text-sm">Loading...</div>
                   ) : conversations.length === 0 ? (
-                    <div className="p-4 text-[#92adc9] text-sm">No conversations yet</div>
+                    <div className="p-3 sm:p-4 text-[#92adc9] text-xs sm:text-sm">No conversations yet</div>
                   ) : (
                     conversations.map((conversation) => (
                       <motion.div
                         key={conversation.id}
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
-                        onClick={() => setSelectedConversation(conversation.id)}
-                        className={`p-4 border-b border-[#324d67] cursor-pointer transition-colors ${
+                        onClick={() => {
+                          setSelectedConversation(conversation.id);
+                          setShowChatView(true);
+                        }}
+                        className={`p-3 sm:p-4 border-b border-[#324d67] cursor-pointer transition-colors ${
                           selectedConversation === conversation.id
                             ? "bg-[#233648]"
                             : "hover:bg-[#192633]"
                         }`}
                       >
-                        <div className="flex gap-3">
+                        <div className="flex gap-2 sm:gap-3">
                           <div
-                            className="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-12 flex-shrink-0"
+                            className="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-10 sm:size-12 flex-shrink-0"
                             style={{ backgroundImage: `url("${conversation.avatar}")` }}
                           />
                           <div className="flex-1 min-w-0">
                             <div className="flex justify-between items-start mb-1">
-                              <p className="text-white text-sm font-medium truncate">
+                              <p className="text-white text-xs sm:text-sm font-medium truncate">
                                 {conversation.name}
                               </p>
                               {conversation.unread > 0 && (
-                                <span className="bg-[#1172d4] text-white text-xs font-bold px-2 py-0.5 rounded-full">
+                                <span className="bg-[#1172d4] text-white text-[10px] sm:text-xs font-bold px-1.5 sm:px-2 py-0.5 rounded-full">
                                   {conversation.unread}
                                 </span>
                               )}
                             </div>
-                            <p className="text-[#92adc9] text-xs truncate">
+                            <p className="text-[#92adc9] text-[10px] sm:text-xs truncate">
                               {conversation.lastMessage}
                             </p>
-                            <p className="text-[#92adc9] text-xs mt-1">
+                            <p className="text-[#92adc9] text-[10px] sm:text-xs mt-1">
                               {conversation.time}
                             </p>
                           </div>
@@ -219,41 +223,64 @@ export default function PlayerMessagesPage() {
               </div>
 
               {/* Chat Area */}
-              <div className="flex-1 flex flex-col border border-[#324d67] rounded-lg overflow-hidden">
+              <div className={`flex-1 flex flex-col border border-[#324d67] rounded-lg overflow-hidden ${!showChatView || !selectedConversation ? "hidden lg:flex" : "flex"}`}>
                 {selectedConversation ? (
                   <>
-                    <div className="p-4 border-b border-[#324d67] bg-[#192633]">
-                      <div className="flex items-center gap-3">
+                    <div className="p-3 sm:p-4 border-b border-[#324d67] bg-[#192633]">
+                      <div className="flex items-center gap-2 sm:gap-3">
+                        <button
+                          onClick={() => {
+                            setShowChatView(false);
+                            setSelectedConversation(null);
+                          }}
+                          className="lg:hidden flex items-center justify-center p-1 text-gray-400 hover:text-white transition-colors"
+                          aria-label="Back to conversations"
+                        >
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="20"
+                            height="20"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          >
+                            <path d="m12 19-7-7 7-7" />
+                            <path d="M19 12H5" />
+                          </svg>
+                        </button>
                         <div
-                          className="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-10"
+                          className="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-8 sm:size-10"
                           style={{
                             backgroundImage: `url("${conversations.find((c) => c.id === selectedConversation)?.avatar}")`,
                           }}
                         />
-                        <div>
-                          <p className="text-white text-base font-bold">
+                        <div className="flex-1 min-w-0">
+                          <p className="text-white text-sm sm:text-base font-bold truncate">
                             {conversations.find((c) => c.id === selectedConversation)?.name}
                           </p>
                           <p className="text-[#92adc9] text-xs">Online</p>
                         </div>
                       </div>
                     </div>
-                    <div className="flex-1 p-4 overflow-y-auto bg-[#111a22]">
-                      <div className="flex flex-col gap-4">
+                    <div className="flex-1 p-3 sm:p-4 overflow-y-auto bg-[#111a22]">
+                      <div className="flex flex-col gap-3 sm:gap-4">
                         {messages.length === 0 ? (
-                          <div className="text-[#92adc9] text-sm">No messages yet. Start the conversation!</div>
+                          <div className="text-[#92adc9] text-xs sm:text-sm">No messages yet. Start the conversation!</div>
                         ) : (
                           messages.map((msg: any) => {
                             const isOwn = msg.fromId === (session?.user as any)?.id;
                             return (
                               <div key={msg.id} className={`flex ${isOwn ? "justify-end" : "justify-start"}`}>
                                 <div
-                                  className={`max-w-[70%] p-3 rounded-lg ${
+                                  className={`max-w-[85%] sm:max-w-[70%] p-2 sm:p-3 rounded-lg ${
                                     isOwn ? "bg-[#1172d4] text-white" : "bg-[#192633] text-white"
                                   }`}
                                 >
-                                  <p className="text-sm">{msg.content}</p>
-                                  <p className="text-xs opacity-70 mt-1">{formatTime(msg.createdAt)}</p>
+                                  <p className="text-xs sm:text-sm break-words">{msg.content}</p>
+                                  <p className="text-[10px] sm:text-xs opacity-70 mt-1">{formatTime(msg.createdAt)}</p>
                                 </div>
                               </div>
                             );
@@ -261,7 +288,7 @@ export default function PlayerMessagesPage() {
                         )}
                       </div>
                     </div>
-                    <div className="p-4 border-t border-[#324d67] bg-[#192633]">
+                    <div className="p-3 sm:p-4 border-t border-[#324d67] bg-[#192633]">
                       <div className="flex gap-2">
                         <input
                           type="text"
@@ -269,9 +296,9 @@ export default function PlayerMessagesPage() {
                           value={message}
                           onChange={(e) => setMessage(e.target.value)}
                           onKeyPress={(e) => e.key === "Enter" && handleSend()}
-                          className="flex-1 bg-[#111a22] border border-[#324d67] rounded-lg px-4 py-2 text-white placeholder:text-[#92adc9] focus:outline-none focus:border-[#1172d4]"
+                          className="flex-1 bg-[#111a22] border border-[#324d67] rounded-lg px-3 sm:px-4 py-2 text-white text-sm placeholder:text-[#92adc9] focus:outline-none focus:border-[#1172d4]"
                         />
-                        <Button onClick={handleSend}>Send</Button>
+                        <Button onClick={handleSend} size="sm" className="text-xs sm:text-sm">Send</Button>
                       </div>
                     </div>
                   </>
