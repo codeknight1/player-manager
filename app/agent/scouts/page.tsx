@@ -123,7 +123,7 @@ export default function AgentScoutsPage() {
           region: s.region || "",
           experience: s.experience || "0 years",
           playersFound: s.playersFound || 0,
-          status: s.status || "Active",
+          status: (s.status === "Active" || s.status === "Inactive" ? s.status : "Active") as "Active" | "Inactive",
           avatar: s.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(s.name || "S")}&background=1172d4&color=fff`,
           email: s.email || "",
           phone: s.phone || "",
@@ -234,8 +234,8 @@ export default function AgentScoutsPage() {
     const userId = (session?.user as any)?.id;
     if (!userId) return;
 
-    const updatedScouts = scouts.map((s) =>
-      s.id === scoutId ? { ...s, status: s.status === "Active" ? "Inactive" : "Active" } : s
+    const updatedScouts: Scout[] = scouts.map((s) =>
+      s.id === scoutId ? { ...s, status: (s.status === "Active" ? "Inactive" : "Active") as "Active" | "Inactive" } : s
     );
     saveScouts(userId, updatedScouts);
   }
