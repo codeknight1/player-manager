@@ -16,6 +16,7 @@ const sidebarItems = [
   { label: "Users", href: "/admin/users", icon: <UserIcon size={24} /> },
   { label: "Agencies", href: "/admin/agencies", icon: <UsersThreeIcon size={24} /> },
   { label: "Verifications", href: "/admin/verifications", icon: <ShieldCheckIcon size={24} /> },
+  { label: "Trials", href: "/admin/trials", icon: <TrophyIcon size={24} /> },
   { label: "Tournaments", href: "/admin/tournaments", icon: <TrophyIcon size={24} /> },
   { label: "Analytics", href: "/admin/analytics", icon: <ChartBarIcon size={24} /> },
 ];
@@ -71,7 +72,7 @@ export default function AdminUsersPage() {
   return (
     <div className="relative flex h-auto min-h-screen w-full flex-col bg-[#111a22] overflow-x-hidden">
       <div className="layout-container flex h-full grow flex-col">
-        <div className="gap-1 px-6 flex flex-1 justify-center py-5">
+        <div className="gap-1 px-2 sm:px-4 lg:px-6 flex flex-1 justify-center py-3 sm:py-5">
           <Sidebar
             title="Admin"
             subtitle="User Management"
@@ -80,23 +81,23 @@ export default function AdminUsersPage() {
           />
           <div className="layout-content-container flex flex-col max-w-[1200px] flex-1">
             <div className="flex flex-wrap justify-between gap-3 p-4">
-              <p className="text-white tracking-light text-[32px] font-bold leading-tight min-w-72">
+              <p className="text-white tracking-light text-2xl sm:text-3xl lg:text-[32px] font-bold leading-tight">
                 User Management
               </p>
             </div>
 
-            <div className="px-4 py-3 flex gap-3 flex-wrap">
+            <div className="px-4 py-3 flex flex-col sm:flex-row gap-3">
               <Input
                 type="text"
                 placeholder="Search users..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="flex-1 min-w-64 border-[#324d67] bg-[#192633]"
+                className="flex-1 w-full sm:min-w-64 border-[#324d67] bg-[#192633] min-h-[44px]"
               />
               <select
                 value={roleFilter}
                 onChange={(e) => setRoleFilter(e.target.value)}
-                className="h-10 px-3 rounded-lg border border-[#324d67] bg-[#192633] text-white"
+                className="w-full sm:w-auto h-11 sm:h-10 px-3 rounded-lg border border-[#324d67] bg-[#192633] text-white min-h-[44px]"
               >
                 <option value="">All Roles</option>
                 <option value="PLAYER">Players</option>
@@ -104,21 +105,21 @@ export default function AdminUsersPage() {
                 <option value="ACADEMY">Academies</option>
                 <option value="ADMIN">Admins</option>
               </select>
-              <Button variant="secondary" onClick={loadUsers}>
+              <Button variant="secondary" onClick={loadUsers} className="w-full sm:w-auto min-h-[44px]">
                 Refresh
               </Button>
             </div>
 
             <div className="px-4 pb-4">
-              <div className="flex overflow-hidden rounded-lg border border-[#324d67] bg-[#111a22]">
-                <table className="flex-1">
+              <div className="overflow-x-auto rounded-lg border border-[#324d67] bg-[#111a22]">
+                <table className="w-full min-w-[600px]">
                   <thead>
                     <tr className="bg-[#192633]">
-                      <th className="px-4 py-3 text-left text-white text-sm font-medium">User</th>
-                      <th className="px-4 py-3 text-left text-white text-sm font-medium">Role</th>
-                      <th className="px-4 py-3 text-left text-white text-sm font-medium">Status</th>
-                      <th className="px-4 py-3 text-left text-white text-sm font-medium">Created</th>
-                      <th className="px-4 py-3 text-left text-white text-sm font-medium">Actions</th>
+                      <th className="px-2 sm:px-4 py-3 text-left text-white text-xs sm:text-sm font-medium">User</th>
+                      <th className="px-2 sm:px-4 py-3 text-left text-white text-xs sm:text-sm font-medium">Role</th>
+                      <th className="px-2 sm:px-4 py-3 text-left text-white text-xs sm:text-sm font-medium">Status</th>
+                      <th className="px-2 sm:px-4 py-3 text-left text-white text-xs sm:text-sm font-medium hidden sm:table-cell">Created</th>
+                      <th className="px-2 sm:px-4 py-3 text-left text-white text-xs sm:text-sm font-medium">Actions</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -143,18 +144,18 @@ export default function AdminUsersPage() {
                           transition={{ delay: idx * 0.05 }}
                           className="border-t border-t-[#324d67] hover:bg-[#192633] transition-colors"
                         >
-                          <td className="px-4 py-3">
+                          <td className="px-2 sm:px-4 py-3">
                             <div>
-                              <p className="text-white text-sm font-medium">{user.name || "No name"}</p>
+                              <p className="text-white text-xs sm:text-sm font-medium">{user.name || "No name"}</p>
                               <p className="text-[#92adc9] text-xs">{user.email}</p>
                             </div>
                           </td>
-                          <td className="px-4 py-3">
+                          <td className="px-2 sm:px-4 py-3">
                             <span className="px-2 py-1 rounded text-xs font-medium bg-[#324d67] text-[#92adc9]">
                               {user.role}
                             </span>
                           </td>
-                          <td className="px-4 py-3">
+                          <td className="px-2 sm:px-4 py-3">
                             <span
                               className={`px-2 py-1 rounded text-xs font-medium ${
                                 user.isActive !== false
@@ -165,18 +166,19 @@ export default function AdminUsersPage() {
                               {user.isActive !== false ? "Active" : "Inactive"}
                             </span>
                           </td>
-                          <td className="px-4 py-3 text-[#92adc9] text-sm">
+                          <td className="px-2 sm:px-4 py-3 text-[#92adc9] text-xs sm:text-sm hidden sm:table-cell">
                             {new Date(user.createdAt).toLocaleDateString()}
                           </td>
-                          <td className="px-4 py-3">
-                            <div className="flex gap-2">
-                              <Button variant="secondary" size="sm" onClick={() => setSelectedUser(user)}>
+                          <td className="px-2 sm:px-4 py-3">
+                            <div className="flex flex-col sm:flex-row gap-2">
+                              <Button variant="secondary" size="sm" onClick={() => setSelectedUser(user)} className="min-h-[36px] text-xs sm:text-sm">
                                 Edit
                               </Button>
                               <Button
                                 variant="outline"
                                 size="sm"
                                 onClick={() => updateUser(user.id, { isActive: !user.isActive })}
+                                className="min-h-[36px] text-xs sm:text-sm"
                               >
                                 {user.isActive !== false ? "Deactivate" : "Activate"}
                               </Button>
@@ -199,8 +201,14 @@ export default function AdminUsersPage() {
                 >
                   <h3 className="text-white text-xl font-bold mb-4">Edit User</h3>
                   <div className="flex flex-col gap-3">
-                    <Input label="Name" value={selectedUser.name || ""} disabled className="bg-[#111a22]" />
-                    <Input label="Email" value={selectedUser.email || ""} disabled className="bg-[#111a22]" />
+                    <div>
+                      <label className="text-white text-sm mb-2 block">Name</label>
+                      <Input value={selectedUser.name || ""} disabled className="bg-[#111a22]" />
+                    </div>
+                    <div>
+                      <label className="text-white text-sm mb-2 block">Email</label>
+                      <Input value={selectedUser.email || ""} disabled className="bg-[#111a22]" />
+                    </div>
                     <div>
                       <label className="text-white text-sm mb-2 block">Role</label>
                       <select
@@ -223,13 +231,13 @@ export default function AdminUsersPage() {
                       />
                       <label className="text-white text-sm">Active</label>
                     </div>
-                    <div className="flex gap-2 mt-4">
-                      <Button variant="secondary" onClick={() => setSelectedUser(null)} className="flex-1">
+                    <div className="flex flex-col sm:flex-row gap-2 mt-4">
+                      <Button variant="secondary" onClick={() => setSelectedUser(null)} className="flex-1 min-h-[44px]">
                         Cancel
                       </Button>
                       <Button
                         onClick={() => updateUser(selectedUser.id, { role: selectedUser.role, isActive: selectedUser.isActive })}
-                        className="flex-1"
+                        className="flex-1 min-h-[44px]"
                       >
                         Save
                       </Button>

@@ -13,6 +13,7 @@ const sidebarItems = [
   { label: "Users", href: "/admin/users", icon: <UserIcon size={24} /> },
   { label: "Agencies", href: "/admin/agencies", icon: <UsersThreeIcon size={24} /> },
   { label: "Verifications", href: "/admin/verifications", icon: <ShieldCheckIcon size={24} /> },
+  { label: "Trials", href: "/admin/trials", icon: <TrophyIcon size={24} /> },
   { label: "Tournaments", href: "/admin/tournaments", icon: <TrophyIcon size={24} /> },
   { label: "Analytics", href: "/admin/analytics", icon: <ChartBarIcon size={24} /> },
 ];
@@ -26,6 +27,7 @@ export default function AdminDashboard() {
     totalAgents: 0,
     totalAcademies: 0,
     totalTrials: 0,
+    totalTournaments: 0,
     totalApplications: 0,
     pendingVerifications: 0,
   });
@@ -67,7 +69,7 @@ export default function AdminDashboard() {
   return (
     <div className="relative flex h-auto min-h-screen w-full flex-col bg-[#111a22] overflow-x-hidden">
       <div className="layout-container flex h-full grow flex-col">
-        <div className="gap-1 px-6 flex flex-1 justify-center py-5">
+        <div className="gap-1 px-2 sm:px-4 lg:px-6 flex flex-1 justify-center py-3 sm:py-5">
           <Sidebar
             title="Admin"
             subtitle="Super Admin Control Panel"
@@ -76,18 +78,19 @@ export default function AdminDashboard() {
           />
           <div className="layout-content-container flex flex-col max-w-[1200px] flex-1">
             <div className="flex flex-wrap justify-between gap-3 p-4">
-              <p className="text-white tracking-light text-[32px] font-bold leading-tight min-w-72">
+              <p className="text-white tracking-light text-2xl sm:text-3xl lg:text-[32px] font-bold leading-tight">
                 Admin Dashboard
               </p>
             </div>
 
-            <div className="flex flex-wrap gap-4 p-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 p-4">
               {[
                 { label: "Total Users", value: stats.totalUsers, href: "/admin/users" },
                 { label: "Players", value: stats.totalPlayers, href: "/admin/users?role=PLAYER" },
                 { label: "Agents", value: stats.totalAgents, href: "/admin/users?role=AGENT" },
                 { label: "Academies", value: stats.totalAcademies, href: "/admin/users?role=ACADEMY" },
-                { label: "Trials", value: stats.totalTrials, href: "/admin/tournaments" },
+                { label: "Trials", value: stats.totalTrials, href: "/admin/trials" },
+                { label: "Tournaments", value: stats.totalTournaments, href: "/admin/tournaments" },
                 { label: "Applications", value: stats.totalApplications },
                 { label: "Pending Verifications", value: stats.pendingVerifications, href: "/admin/verifications", highlight: true },
               ].map((w, idx) => (
@@ -96,10 +99,10 @@ export default function AdminDashboard() {
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: idx * 0.1 }}
-                  className={`flex min-w-[200px] flex-1 flex-col gap-2 rounded-lg p-6 border ${w.highlight ? "border-[#ffa500] bg-[#ffa500]/10" : "border-[#324d67]"}`}
+                  className={`flex flex-col gap-2 rounded-lg p-4 sm:p-6 border ${w.highlight ? "border-[#ffa500] bg-[#ffa500]/10" : "border-[#324d67]"}`}
                 >
-                  <p className="text-[#92adc9] text-sm">{w.label}</p>
-                  <p className="text-white tracking-light text-2xl font-bold leading-tight">{w.value}</p>
+                  <p className="text-[#92adc9] text-xs sm:text-sm">{w.label}</p>
+                  <p className="text-white tracking-light text-xl sm:text-2xl font-bold leading-tight">{w.value}</p>
                   {w.href && (
                     <a href={w.href} className="text-[#1172d4] text-xs hover:underline mt-1">
                       View all →
@@ -112,27 +115,41 @@ export default function AdminDashboard() {
             <h3 className="text-white text-lg font-bold leading-tight tracking-[-0.015em] px-4 pb-2 pt-2">
               Quick Actions
             </h3>
-            <div className="p-4 flex flex-wrap gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-3 p-4">
+              <a
+                href="/admin/trials"
+                className="flex items-center justify-center gap-2 rounded-lg border border-[#324d67] bg-[#192633] px-3 sm:px-4 py-3 hover:border-[#1172d4] transition-colors min-h-[44px]"
+              >
+                <TrophyIcon size={20} />
+                <span className="text-white text-xs sm:text-sm">Create Trial</span>
+              </a>
+              <a
+                href="/admin/tournaments"
+                className="flex items-center justify-center gap-2 rounded-lg border border-[#324d67] bg-[#192633] px-3 sm:px-4 py-3 hover:border-[#1172d4] transition-colors min-h-[44px]"
+              >
+                <TrophyIcon size={20} />
+                <span className="text-white text-xs sm:text-sm">Create Tournament</span>
+              </a>
               <a
                 href="/admin/users"
-                className="flex items-center gap-2 rounded-lg border border-[#324d67] bg-[#192633] px-4 py-3 hover:border-[#1172d4] transition-colors"
+                className="flex items-center justify-center gap-2 rounded-lg border border-[#324d67] bg-[#192633] px-3 sm:px-4 py-3 hover:border-[#1172d4] transition-colors min-h-[44px]"
               >
                 <UserIcon size={20} />
-                <span className="text-white text-sm">Manage Users</span>
+                <span className="text-white text-xs sm:text-sm">Manage Users</span>
               </a>
               <a
                 href="/admin/verifications"
-                className="flex items-center gap-2 rounded-lg border border-[#324d67] bg-[#192633] px-4 py-3 hover:border-[#1172d4] transition-colors"
+                className="flex items-center justify-center gap-2 rounded-lg border border-[#324d67] bg-[#192633] px-3 sm:px-4 py-3 hover:border-[#1172d4] transition-colors min-h-[44px]"
               >
                 <ShieldCheckIcon size={20} />
-                <span className="text-white text-sm">Review Verifications</span>
+                <span className="text-white text-xs sm:text-sm">Review Verifications</span>
               </a>
               <a
                 href="/admin/analytics"
-                className="flex items-center gap-2 rounded-lg border border-[#324d67] bg-[#192633] px-4 py-3 hover:border-[#1172d4] transition-colors"
+                className="flex items-center justify-center gap-2 rounded-lg border border-[#324d67] bg-[#192633] px-3 sm:px-4 py-3 hover:border-[#1172d4] transition-colors min-h-[44px]"
               >
                 <ChartBarIcon size={20} />
-                <span className="text-white text-sm">View Analytics</span>
+                <span className="text-white text-xs sm:text-sm">View Analytics</span>
               </a>
             </div>
           </div>
